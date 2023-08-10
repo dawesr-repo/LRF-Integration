@@ -1,0 +1,65 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+makefile:30: warning: overriding recipe for target '.f90.o'
+makefile:23: warning: ignoring old recipe for target '.f90.o'
+makefile:32: warning: overriding recipe for target '.f.o'
+makefile:25: warning: ignoring old recipe for target '.f.o'
+
+make: Entering directory 'c:/Users/albpl/OneDrive/Escritorio/Programing/Fortran/Multipole_Matlab_Subroutines/Multipole_Subroutine_Spheric2'
+ 
+gfortran  -c -O3 -fbacktrace Multipoles.f90
+ 
+gfortran  -c -O3 -fbacktrace LongRangePotential.f90
+ 
+gfortran  -c -O3 -fbacktrace General_Coordinates_Format.f90
+ 
+gfortran  -c -O3 -fbacktrace Coordinate_Transformation.f90
+ 
+gfortran  -c -O3 -fbacktrace Index_Searcher.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_1_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_2_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_3_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_4_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_5_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_6_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_7_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Approx_8_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Induction_4_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Induction_5_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Induction_6_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Induction_7_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Induction_8_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace HyperPolarizability_6_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace HyperPolarizability_7_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Dispersion_6_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Dispersion_7_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace Dispersion_8_Sph2.f90
+ 
+gfortran  -c -O3 -fbacktrace T_lk.f90
+ 
+gfortran  -c -O3 -fbacktrace T_l0.f90
+ 
+gfortran  -c -O3 -fbacktrace T_ll.f90
+ 
+gfortran  -c -O3 -fbacktrace T_saved.f90
+gfortran  Multipoles.o LongRangePotential.o General_Coordinates_Format.o Coordinate_Transformation.o Index_Searcher.o Approx_1_Sph2.o Approx_2_Sph2.o Approx_3_Sph2.o Approx_4_Sph2.o Approx_5_Sph2.o Approx_6_Sph2.o Approx_7_Sph2.o Approx_8_Sph2.o Induction_4_Sph2.o  Induction_5_Sph2.o Induction_6_Sph2.o Induction_7_Sph2.o Induction_8_Sph2.o HyperPolarizability_6_Sph2.o HyperPolarizability_7_Sph2.o Dispersion_6_Sph2.o Dispersion_7_Sph2.o Dispersion_8_Sph2.o T_lk.o T_l0.o T_ll.o T_saved.o -o ejec.x
+ 
+make: Leaving directory 'c:/Users/albpl/OneDrive/Escritorio/Programing/Fortran/Multipole_Matlab_Subroutines/Multipole_Subroutine_Spheric2'
+ 

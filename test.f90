@@ -1,4 +1,95 @@
+module Testing
+
+        contains
+
+        Subroutine READ_DATASET(filename,ntest,XDim,DATASET_,coord_format,M_Fit ,D_Fit,I_Fit,H_Fit)
+                
+                IMPLICIT NONE
+                Character(len = *),Intent(IN) :: filename
+                Character(len = 20),Intent(out) :: coord_format
+                INTEGER ,Intent(out) :: XDim,ntest    
+                real*8, allocatable,INTENT(INOUT) ::DATASET_(:,:)
+                
+                Integer, dimension (8),  INTENT(INOUT) :: M_Fit      
+                Integer, dimension (3),  INTENT(INOUT) :: D_Fit     
+                Integer, dimension (5),  INTENT(INOUT) :: I_Fit     
+                Integer, dimension (2),  INTENT(INOUT) :: H_Fit     
+
+                integer:: i
+                Character(len = 40) :: row
+
+                Open( 100, file = filename )
+                Read( 100, *) row
+                Read( 100, *) row,row,row,ntest
+                Read( 100, *) row
+                Read( 100, *) row
+                Read( 100, *) row
+                Read( 100, *) row,row,row,coord_format
+                Read( 100, *) row,row,XDim
+                Read( 100, *) row
+
+
+                Read( 100, *) row
+
+                read(100, *)  M_Fit
+                read(100, *)  D_Fit
+                read(100, *)  I_Fit
+                read(100, *)  H_Fit
+
+                Read( 100, *) row
+                Read( 100, *) row
+                Read( 100, *) row
+                Read( 100, *) row
+
+                Allocate(DATASET_(ntest,29))
+          
+
+                do i=1,ntest
+                        Read( 100, *)DATASET_(i,:)
+                enddo
+
+                close(10) 
+        end Subroutine READ_DATASET
+
+        Subroutine Test_Dataset(coeff_filename, data_filename)
+                IMPLICIT NONE
+                Character(len = *),Intent(IN) :: coeff_filename, data_filename
+
+                real*8 :: E2,E1
+                real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
+                real*8, allocatable :: XDim_coord(:),dataset_(:,:)
+                Character(len = 20) :: coord_format
+                INTEGER :: XDIM,ntest
+                real*8 :: start, finish,pii
+                real*8 :: ind, R,cos_b1,cos_b2,phi, E0
+                Integer, dimension (8) :: M_Fit      
+                Integer, dimension (3) :: D_Fit     
+                Integer, dimension (5) :: I_Fit     
+                Integer, dimension (2) :: H_Fit   
+
+                integer:: i
+
+                pii=DAcos(-1d0)
+
+                Call READ_DATASET(data_filename,ntest,XDIM,dataset_,coord_format,M_Fit ,D_Fit,I_Fit,H_Fit)
+
+                Allocate(XDim_coord(XDIM))
+
+
+                do i=1,ntest
+
+                     dataset_(i,1)
+
+                enddo
+
+        end Subroutine Test_Dataset
+end module Testing
+
+
+
 PROGRAM main_subroutine
+
+    use Testing
     IMPLICIT NONE
 
     character(len=20) :: bufferc,bufferd
@@ -6,6 +97,7 @@ PROGRAM main_subroutine
     character(len = 22), parameter:: dirData = "./files/test/datasets/"
     character(len = 26), parameter:: dirCoeff="./files/test/coefficients/"
     INTEGER::indCoeff,indData
+
     
 
     
@@ -16,19 +108,28 @@ PROGRAM main_subroutine
 
             if (exist) then
 
-                    write(*,*) "File: '", trim(bufferc), "' found."
+                    !write(*,*) "File: '", trim(bufferc), "' found."
 
                     indData = 1
                     filedloop: do
                             write(bufferd,"(A,I3.3,A,I3.3,A)") "datatest_",indCoeff,"_", indData, ".txt"
                             inquire(file= dirData//bufferd, exist=exist)
 
+
+
                             if (exist) then
-                                    write(*,*) "     File: '", trim(bufferd), "' found."
+                                    !write(*,*) "     File: '", trim(bufferd), "' found."
+                                    call Test_Dataset(dirCoeff//bufferc, dirData//bufferd)
+                                    
+                                    
                                     indData = indData + 1
                             else 
                                    if (indData==1) then
-                                        write(*,*) "    No Dataset Found for coefficients: '", trim(bufferc)
+                                             write(*,*)
+                                             write(*,*) "******************************************************************"
+                                             write(*,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
+                                             write(*,*) "******************************************************************"
+                                             write(*,*)
                                    end if
                                     exit
                             end if
@@ -42,6 +143,8 @@ PROGRAM main_subroutine
     end do fileloop
     
 END PROGRAM main_subroutine
+
+
 
 
 SUBROUTINE test_subroutine(dir,filename)

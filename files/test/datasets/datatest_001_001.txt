@@ -1,9 +1,10 @@
 ########################################
-#  RANDOM DATASET
-#  App version : demo
-#  System Name : CFp H2
-#  Date : 10-Aug-2023 15:35:27
-#  Euler Convension : ZXZ
+#  DATA POINTS: 1000
+#  App version: demo
+#  System Name: CFp_H2
+#  Date: 10-Aug-2023 15:35:27
+#  Euler Convension: Euler_ZXZ
+#  Dimension: 4
 ########################################
 
 

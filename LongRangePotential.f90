@@ -5,36 +5,40 @@
 ! Arg 3 [TotalEnergy]   Total Energy calculated 
 
 
-! version 3.0.1
+! version 3.1.1
 
-SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy)
+SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     use Tensors_constant
     IMPLICIT NONE
 
     real*8, INTENT(INOUT)  ::  TotalEnergy
     real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
+    character(len = 200),optional:: filename
 
     real*8 , dimension(3):: Ar 
     real*8 , dimension(3):: Br
     real*8 , dimension(9):: C
  
     real*8 , dimension(11):: cal_coord
- 
+    character(len = 200):: fName
     
-   
 
-
-    Character(len = 200) ::  filename ='./files/coefficients.txt'
-
-   
-    Integer, dimension (8) :: M_Fit     !add this line   
-    Integer, dimension (3):: D_Fit     !add this line 
-    Integer, dimension (5):: I_Fit     !add this line 
-    Integer, dimension (2):: H_Fit     !add this line 
+    Integer, dimension (8) :: M_Fit     
+    Integer, dimension (3):: D_Fit     
+    Integer, dimension (5):: I_Fit     
+    Integer, dimension (2):: H_Fit     
     
     real*8 , dimension(1195):: coeff_arr
 
-    Real*8  ::   Zero            !add this line
+    Real*8  ::   Zero           
+
+
+    if (present(filename))then
+        fName = trim(filename)
+    else
+        fName = './files/coefficients.txt'
+
+    end if
 
    
     call init_Tensors() ! Initializing in zero the new vectors
@@ -42,15 +46,15 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy)
 
  
    
-    CALL Prep_Param(filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+    CALL Prep_Param(fName,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
   
 
 
    
 
 
-    if (coordenates(1)==0 .and. coordenates(2)==0 .and. coordenates(3)==0 .and. coordenates(4)==0 &
-            .and. coordenates(5)==0 .and. coordenates(6)==0) THEN
+    if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
+            .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
         TotalEnergy = Zero
     else
         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
@@ -180,7 +184,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
 
     cal_coord_temp = cal_coord
 
-   !real*8:: wM1,wM2,wM3,wM4,wM5,wM6,wM7,wM8,wD6,wD7,wI4,wI5,wI6,wI7
+
 
     A_Mult=coeff_arr(1:64)
     B_Mult=coeff_arr(65:128)
@@ -190,62 +194,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
     B_HPol=coeff_arr(283:322)
     Disp_AB=coeff_arr(323:1195)
    
-   !write(*,*)"cal_coord",cal_coord
-
-
-    ! Call Approx_1_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(1))
-    ! Call Approx_2_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(2))
-    ! Call Approx_3_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(3))
-    ! Call Approx_4_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(4))
-    ! Call Approx_5_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(5))
-    ! Call Approx_6_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(6))
-    ! Call Approx_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(7))
-    ! Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))
-
-    ! Call Induction_4_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol, Ind_Energ(1))
-    ! Call Induction_5_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol, Ind_Energ(2))
-    ! Call Induction_6_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol, Ind_Energ(3))
-    ! Call Induction_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol, Ind_Energ(4))
-    ! Call Induction_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol, Ind_Energ(5))
-
-    ! Call Dispersion_6_Sph2(cal_coord_temp,Ar,Br,C, Disp_AB ,Dispersion_Energies(1))
-    ! Call Dispersion_7_Sph2(cal_coord_temp,Ar,Br,C, Disp_AB ,Dispersion_Energies(2))
-    ! Call Dispersion_8_Sph2(cal_coord_temp,Ar,Br,C, Disp_AB ,Dispersion_Energies(3))
-
-    ! Call HyperPolarizability_6_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_HPol,B_HPol, Hyp_Energ(1))
-    ! Call HyperPolarizability_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult,A_HPol,B_HPol, Hyp_Energ(2))
-
-
-
-    !         wM1 = Const*(C1*C2**1)*Multipole_Energies(1)
-    !         wM2 =Const*(C1*C2**2)*Multipole_Energies(2)
-    !         wM3 =Const*(C1*C2**3)*Multipole_Energies(3)
-    !         wM4 =Const*(C1*C2**4)*Multipole_Energies(4)
-    !         wM5 =Const*(C1*C2**5)*Multipole_Energies(5)
-    !         wM6 =Const*(C1*C2**6)*Multipole_Energies(6)
-    !         wM7 =Const*(C1*C2**7)*Multipole_Energies(7)
-    !         wM8 =Const*(C1*C2**8)*Multipole_Energies(8)
-           
-    !         wD6 =349.75d0*(C1*C2**6)*Dispersion_Energies(1)
-    !         wD7 =349.75d0*(C1*C2**7)*Dispersion_Energies(2)
-    !         wD8 =349.75d0*(C1*C2**8)*Dispersion_Energies(3)
-
-    !         wI4 =Const*(C1*C2**4)*Ind_Energ(1)
-    !         wI5 =Const*(C1*C2**5)*Ind_Energ(2)
-    !         wI6 =Const*(C1*C2**6)*Ind_Energ(3)
-    !         wI7 =Const*(C1*C2**7)*Ind_Energ(4)
-    !         wI8 =Const*(C1*C2**8)*Ind_Energ(5)
-
-    !         wH6 =Const*(C1*C2**6)*Hyp_Energ(1)
-    !         wH7 =Const*(C1*C2**7)*Hyp_Energ(2)
-
-
-
-    ! write(*,*)wM1,wM2,wM3,wM4,wM5,wM6,wM7,wM8
-    ! write(*,*)wD6,wD7,wD8
-    ! write(*,*)wI4,wI5,wI6,wI7,wI8
-    ! write(*,*)wH6,wH7
-
+  
      Ene = 0.d0
      Multipole_Energies  = 0.d0
      ED  = 0.d0
@@ -395,12 +344,12 @@ SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
 
     Character(len = 200), INTENT(IN)   ::  Coeff_Address
 
-    Integer, dimension (8),  INTENT(INOUT) :: M_Fit     !add this line   
-    Integer, dimension (3),  INTENT(INOUT) :: D_Fit     !add this line 
-    Integer, dimension (5),  INTENT(INOUT) :: I_Fit     !add this line 
-    Integer, dimension (2),  INTENT(INOUT) :: H_Fit     !add this line
+    Integer, dimension (8),  INTENT(INOUT) :: M_Fit      
+    Integer, dimension (3),  INTENT(INOUT) :: D_Fit     
+    Integer, dimension (5),  INTENT(INOUT) :: I_Fit     
+    Integer, dimension (2),  INTENT(INOUT) :: H_Fit     
 
-    Real*8 , INTENT(out) :: Zero                            !add this line
+    Real*8 , INTENT(out) :: Zero                         
 
 
     Character(len = 20) :: row
@@ -408,8 +357,7 @@ SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
 
 
     Open( 10, file = Coeff_Address )
-    ! Read( 10, *) row
-    ! read(10, *) DataColumn
+
     Read( 10, *) row
     Read( 10, *) row
     Read( 10, *) row

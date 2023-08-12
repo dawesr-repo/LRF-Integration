@@ -15,8 +15,12 @@ all : $(OBJS)
 build-run-test : $(OBJS_Test)
 	$(F90) $(OBJS_Test) -o ejec_test.x
 	./ejec_test.x
-#	rm *.o 
-#	rm *.mod 
+
+clean:
+	del *.exe
+	del *.x
+	del *.o
+	del *.mod
 
 $(OBJS) :
 .f90.o:

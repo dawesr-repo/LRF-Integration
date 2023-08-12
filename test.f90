@@ -69,7 +69,7 @@ module Testing
                 Integer, dimension (2) :: H_Fit   
 
                 integer:: i,success_test,fOutputNum
-                real*8::testArr(5),errArr(5),maxErr,err_tol
+                real*8::testArr(52),errArr(52),maxErr,err_tol
 
                 if (present(fileOutputNumber))then
                         fOutputNum = fileOutputNumber
@@ -77,6 +77,7 @@ module Testing
                         fOutputNum = 0
                 end if
                 
+  
 
                 maxErr=0d0
                 err_tol = 1d-6
@@ -134,7 +135,7 @@ module Testing
                         else
                                 success_test =success_test+1
                         end if
-                        !write(*,*) "coordinates: ",coordinates
+                   
                         
                      end if 
 
@@ -205,10 +206,15 @@ module Testing
                 character(len = 26), parameter:: dirCoeff="./files/test/coefficients/"
                 INTEGER  ::indCoeff,indData
 
+                 
+                indCoeff = 1
 
                 fileloop: do
+                        
                         write(bufferc,"(A,I3.3,A)") "coefficients_", indCoeff, ".txt"
                         inquire(file= dirCoeff//bufferc, exist=exist)
+                        
+                       
 
                         if (exist) then
 
@@ -216,27 +222,27 @@ module Testing
 
                                 indData = 1
                                 filedloop: do
-                                        write(bufferd,"(A,I3.3,A,I3.3,A)") "datatest_",indCoeff,"_", indData, ".txt"
-                                        inquire(file= dirData//bufferd, exist=exist)
+                                write(bufferd,"(A,I3.3,A,I3.3,A)") "datatest_",indCoeff,"_", indData, ".txt"
+                                inquire(file= dirData//bufferd, exist=exist)
 
 
 
-                                        if (exist) then
-                                                !write(*,*) "     File: '", trim(bufferd), "' found."
-                                                call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber)
-                                                
-                                                
-                                                indData = indData + 1
-                                        else 
-                                                if (indData==1) then
-                                                        write(fileOutNumber,*)
-                                                        write(fileOutNumber,*) "******************************************************************"
-                                                        write(fileOutNumber,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
-                                                        write(fileOutNumber,*) "******************************************************************"
-                                                        write(fileOutNumber,*)
-                                                end if
-                                                exit
+                                if (exist) then
+                                        !write(*,*) "     File: '", trim(bufferd), "' found."
+                                        call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber)
+                                        
+                                        
+                                        indData = indData + 1
+                                else 
+                                        if (indData==1) then
+                                                write(fileOutNumber,*)
+                                                write(fileOutNumber,*) "*******************************************************"
+                                                write(fileOutNumber,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
+                                                write(fileOutNumber,*) "*******************************************************"
+                                                write(fileOutNumber,*)
                                         end if
+                                        exit
+                                end if
                                         
                                 end do filedloop
                                 indCoeff = indCoeff + 1
@@ -244,8 +250,8 @@ module Testing
                                 exit
                         end if
 
-                        close(fileOutNumber)
-                
+                       
+               
                 end do fileloop
         END SUBROUTINE Test_All
 
@@ -279,49 +285,8 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-    indCoeff = 1
-    fileloop: do
-            write(bufferc,"(A,I3.3,A)") "coefficients_", indCoeff, ".txt"
-            inquire(file= dirCoeff//bufferc, exist=exist)
-
-            if (exist) then
-
-                    !write(*,*) "File: '", trim(bufferc), "' found."
-
-                    indData = 1
-                    filedloop: do
-                            write(bufferd,"(A,I3.3,A,I3.3,A)") "datatest_",indCoeff,"_", indData, ".txt"
-                            inquire(file= dirData//bufferd, exist=exist)
-
-
-
-                            if (exist) then
-                                    !write(*,*) "     File: '", trim(bufferd), "' found."
-                                    call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber)
-                                    
-                                    
-                                    indData = indData + 1
-                            else 
-                                   if (indData==1) then
-                                             write(fileOutNumber,*)
-                                             write(fileOutNumber,*) "******************************************************************"
-                                             write(fileOutNumber,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
-                                             write(fileOutNumber,*) "******************************************************************"
-                                             write(fileOutNumber,*)
-                                   end if
-                                    exit
-                            end if
-                        
-                    end do filedloop
-                    indCoeff = indCoeff + 1
-            else
-                    exit
-            end if
-
-            close(fileOutNumber)
-        
-    end do fileloop
-    
+        call Test_All(fileOutNumber)
+        close(fileOutNumber)
 END PROGRAM main_subroutine
 
 

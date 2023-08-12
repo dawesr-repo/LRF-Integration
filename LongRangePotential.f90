@@ -257,6 +257,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
                 Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))         
             endif
             term = (C1*C2**n)*Multipole_Energies(n)
+            testErr(5 + n) = Const*term
             Elect_energy(1+n) = term
             Elect_energy(1) = Elect_energy(1)+term 
             Ene = Ene+term
@@ -278,6 +279,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             endif
 
             term = (C1*C2**n)*ED
+            testErr(20 + n - 5) = Const*term
             Dispe_energy(n-4) = term
             Dispe_energy(1) = Dispe_energy(1)+term
             Ene = Ene+term
@@ -303,6 +305,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             endif
 
             term = (C1*C2**n)*EI
+            testErr(30 + n-3) = Const*term
             Induc_energy(n-2) = term
             Induc_energy(1) = Induc_energy(1)+term
             Ene = Ene+term
@@ -322,6 +325,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
                 Call HyperPolarizability_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_HPol,B_HPol,EH)   
             endif
             term = (C1*C2**n)*EH
+            testErr(42 + n-5) = Const*term
             Hyper_energy(n-4) = term
             Hyper_energy(1) = Hyper_energy(1)+term
             Ene = Ene+term

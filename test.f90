@@ -51,16 +51,17 @@ module Testing
                 close(10) 
         end Subroutine READ_DATASET
 
-        Subroutine Test_Dataset(coeff_filename, data_filename,fileOutputNumber)
+        Subroutine Test_Dataset(coeff_filename, data_filename,fileOutputNumber,ntestMAX)
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: coeff_filename, data_filename
-                integer,optional:: fileOutputNumber
+                integer,optional:: fileOutputNumber,ntestMAX
 
                 real*8 :: E_fortran,E_fit
                 real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
                 real*8, allocatable :: XDim_coord(:),dataset_(:,:)
                 Character(len = 20) :: coord_format,systName
-                INTEGER :: XDIM,ntest
+                Character(len = 2) :: str
+                INTEGER :: XDIM,ntest,nMAX
                 real*8 :: start, finish,pii
                 real*8 :: ind, R,cos_b1,cos_b2,phi, E0
                 Integer, dimension (8) :: M_Fit      
@@ -68,8 +69,8 @@ module Testing
                 Integer, dimension (5) :: I_Fit     
                 Integer, dimension (2) :: H_Fit   
 
-                integer:: i,success_test,fOutputNum
-                real*8::testArr(52),errArr(52),maxErr,err_tol
+                integer:: i,success_test,fOutputNum,j
+                real*8::testArr(52),errArr(52),maxErr,err_tol,diff_comp(52)
 
                 if (present(fileOutputNumber))then
                         fOutputNum = fileOutputNumber
@@ -77,11 +78,12 @@ module Testing
                         fOutputNum = 0
                 end if
                 
-  
+                
 
                 maxErr=0d0
                 err_tol = 1d-6
                 pii=DAcos(-1d0)
+                diff_comp =0d0
 
                 Call READ_DATASET(data_filename,systName,ntest,XDIM,dataset_,coord_format,M_Fit ,D_Fit,I_Fit,H_Fit)
 
@@ -89,7 +91,13 @@ module Testing
 
                 success_test = 0
 
-                do i=1,ntest
+                if (present(ntestMAX))then
+                        nMAX = ntestMAX
+                else
+                        nMAX = ntest
+                end if
+
+                do i=1,nMAX
 
                      if (XDIM==3)Then
                         
@@ -101,36 +109,70 @@ module Testing
                         Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
                         CALL Long_Range_Potential(coordinates,E_fortran,coeff_filename,1,testArr)
 
-                        errArr(1) = DABS(E_fortran-E_fit)
-                        errArr(2) = DABS(dataset_(i,8)-testArr(2))
-                        errArr(3) = DABS(dataset_(i,10)-testArr(3))
-                        errArr(4) = DABS(dataset_(i,9)-testArr(4))
-                        errArr(5) = DABS(dataset_(i,11)-testArr(5))
+                        diff_comp(1) = DABS(E_fortran-E_fit)
+                        diff_comp(2) = DABS(dataset_(i,8)-testArr(2))
+                        diff_comp(3) = DABS(dataset_(i,10)-testArr(3))
+                        diff_comp(4) = DABS(dataset_(i,9)-testArr(4))
+                        diff_comp(5) = DABS(dataset_(i,11)-testArr(5))
 
-                        if(MAXVAL(errArr)>maxErr)then
-                            maxErr = MAXVAL(errArr)
+                        diff_comp(6:13) = DABS(dataset_(i,12:19)-testArr(6:13))  
+                        diff_comp(21:23) = DABS(dataset_(i,20:22)-testArr(21:23))  
+                        diff_comp(31:35) = DABS(dataset_(i,23:27)-testArr(31:35)) 
+                        diff_comp(43:44) = DABS(dataset_(i,28:29)-testArr(43:44)) 
+
+                        write(*,*)testArr(21),dataset_(i,20)
+
+                        if(MAXVAL(diff_comp)>maxErr)then
+                            maxErr = MAXVAL(diff_comp)
                         end if
 
-                        if(MAXVAL(errArr)>err_tol )then
+                        if(MAXVAL(diff_comp)>err_tol )then
                                 
                                 if ( fOutputNum < 0 )then
                                         write(*,*) 
+                                        write(*,*) "Row : ",i
                                         write(*,*) "Coordinates : ",XDim_coord
-                                        write(*,*) "Energy: ",E_fortran,E_fit,errArr(1)
-                                        write(*,*) "Elect. : ",dataset_(i,8),testArr(2), errArr(2)
-                                        write(*,*) "Dispe. : ",dataset_(i,10),testArr(3), errArr(3)
-                                        write(*,*) "Induc. : ",dataset_(i,9),testArr(4), errArr(4)
-                                        write(*,*) "Hyper. : ",dataset_(i,11),testArr(5), errArr(5)
+                                        write(*,*) "Energy: ",E_fortran,E_fit,diff_comp(1)
+                                        write(*,*) "Elect. : ",dataset_(i,8),testArr(2), diff_comp(2)
+                                        write(*,*) "Dispe. : ",dataset_(i,10),testArr(3),diff_comp(3)
+                                        write(*,*) "Induc. : ",dataset_(i,9),testArr(4), diff_comp(4)
+                                        write(*,*) "Hyper. : ",dataset_(i,11),testArr(5),diff_comp(5)
                                         write(*,*) 
+
+
                                 elseif ( fOutputNum > 0 )then
-                                        write(fOutputNum,*) 
-                                        write(fOutputNum,*) "Coordinates : ",XDim_coord
-                                        write(fOutputNum,*) "Energy: ",E_fortran,E_fit,errArr(1)
-                                        write(fOutputNum,*) "Elect. : ",dataset_(i,8),testArr(2), errArr(2)
-                                        write(fOutputNum,*) "Dispe. : ",dataset_(i,10),testArr(3), errArr(3)
-                                        write(fOutputNum,*) "Induc. : ",dataset_(i,9),testArr(4), errArr(4)
-                                        write(fOutputNum,*) "Hyper. : ",dataset_(i,11),testArr(5), errArr(5)
-                                        write(fOutputNum,*) 
+
+                                write(fOutputNum,*) 
+                                write(fOutputNum,*) "Row : ",i
+                                write(fOutputNum,*) "Coordinates : ",XDim_coord
+                                write(fOutputNum,*) "Energy: ",E_fortran,E_fit, diff_comp(1)
+                                write(fOutputNum,*) "Elect. : ",dataset_(i,8),testArr(2), diff_comp(2)
+                                write(fOutputNum,*) "Dispe. : ",dataset_(i,10),testArr(3), diff_comp(3)
+                                write(fOutputNum,*) "Induc. : ",dataset_(i,9),testArr(4),  diff_comp(4)
+                                write(fOutputNum,*) "Hyper. : ",dataset_(i,11),testArr(5), diff_comp(5)
+                                write(fOutputNum,*) 
+                                write(fOutputNum,*) "By Components: "
+
+                                do j=6,52
+                                        if (diff_comp(j) > err_tol )then
+
+                                                if (j>5 .and. j<21)then
+                                                        write(str,'(A,I1)')"M",j-5
+                                                elseif(j>20 .and. j<31)then
+                                                        write(str,'(A,I1)')"D",j-20+5
+                                                elseif(j>30 .and. j<43)then
+                                                        write(str,'(A,I1)')"I",j-30+3  
+                                                elseif(j>42)then
+                                                        write(str,'(A,I1)')"H",j-42+5               
+                                                end if
+                                                
+                                                
+                                                write(fOutputNum,'(A,E15.3 )') str,diff_comp(j)
+                                        end if 
+                                end do 
+                                write(fOutputNum,*) "*****************************************"
+                                
+
                                 end if 
                         else
                                 success_test =success_test+1
@@ -143,11 +185,11 @@ module Testing
 
                 enddo
 
-                Call Print_Test_Results(systName,maxErr,ntest,success_test)
+                Call Print_Test_Results(systName,maxErr,nMAX,success_test,fOutputNum)
 
         end Subroutine Test_Dataset
 
-        SUBROUTINE Print_Test_Results(testName,maxErr,ntest,success_test)
+        SUBROUTINE Print_Test_Results(testName,maxErr,ntest,success_test,fileOutputNumber)
 
                 IMPLICIT NONE
                 character(*),INTENT(IN) :: testName
@@ -156,7 +198,7 @@ module Testing
                 character (len =7) :: str,str1
                 integer::failed,ptg
                 real*8,INTENT(IN)::maxErr
-
+                integer,optional:: fileOutputNumber
 
                 f_res1 = achar(27)//'[32m TEST PASSED '//achar(27)//'[0m'
                 f_res2 = achar(27)//'[31m TEST FAILED :('//achar(27)//'[0m'
@@ -178,6 +220,24 @@ module Testing
                                                 ,success_test," / failed : ",failed
                 write(*,  '(A, F21.15)') "                                Error Max: ",maxErr                                 
                 write(*,  *)
+
+                if (present(fileOutputNumber))then
+                         
+
+                        ! write(*,  *)
+                        ! if (ntest > success_test)then
+                
+                        ! write(*, '(A, I5, A, I1, A, I5, A)') f_res2//"("//achar(27)//'[31m'//str1//achar(27)//'[0m)'//" ----  "&
+                        !         //achar(27)//'[35m'//testName//achar(27)//'[0m'
+                        ! else
+                        ! write(*,  *) f_res1//"("//achar(27)//'[32m 100% '//achar(27)//'[0m)'//" ----  "&
+                        ! //achar(27)//'[35m'//testName//achar(27)//'[0m)'                 
+                        ! end if
+                        ! write(*,  '(A, I8, A, I8, A, I8)') "                                Num. Test: ",ntest,"     ---> success: "&
+                        !                                 ,success_test," / failed : ",failed
+                        ! write(*,  '(A, F21.15)') "                                Error Max: ",maxErr                                 
+                        ! write(*,  *)
+                end if
 
         end SUBROUTINE Print_Test_Results
 
@@ -255,7 +315,15 @@ module Testing
                 end do fileloop
         END SUBROUTINE Test_All
 
+        SUBROUTINE Testing_TTensors()
+                IMPLICIT NONE
 
+
+                call init_Tensors() ! Initializing in zero the new vectors
+
+                 
+                
+        END SUBROUTINE Testing_TTensors 
 end module Testing
 
 
@@ -271,8 +339,6 @@ PROGRAM main_subroutine
     
         fileOutNumber=12
 
-
-
         CALL DATE_AND_TIME (BIG_BEN (1), BIG_BEN (2), &
         BIG_BEN (3), DATE_TIME)
 
@@ -285,7 +351,10 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        call Test_All(fileOutNumber)
+        !call Test_All(fileOutNumber)
+        call Test_Dataset("./files/test/coefficients/coefficients_002.txt", "./files/test/datasets/datatest_002_001.txt"&
+                        ,fileOutNumber,3)
+
         close(fileOutNumber)
 END PROGRAM main_subroutine
 

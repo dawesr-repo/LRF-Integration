@@ -7,13 +7,18 @@
 
 ! version 3.1.1
 
-SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
+SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
     use Tensors_constant
     IMPLICIT NONE
 
     real*8, INTENT(INOUT)  ::  TotalEnergy
     real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
     character(len = 200),optional:: filename
+    integer,optional::dotest
+    real*8,optional::testArr(5)
+    integer*8::doTesting
+    real*8::testErr(5)
+
 
     real*8 , dimension(3):: Ar 
     real*8 , dimension(3):: Br
@@ -29,9 +34,22 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     Integer, dimension (2):: H_Fit     
     
     real*8 , dimension(1195):: coeff_arr
+    Real*8  ::   Zero   
 
-    Real*8  ::   Zero           
+    ! integer :: initflag
+    ! save initflag
+    ! !character(len=25) :: i0Type ! it defines Internal0 coodinate system in the output(options: "BiSpherical","Autosurf")
+    ! data initflag /1/
+    ! save mass,mass0,natom1,natom2,ref1_0,ref2_0,Xdim_file
+        
 
+  
+
+      
+    !     IF(initflag==1)THEN! initialize 
+    !      Call Read_File(filePath,mass,mass0,natom1,natom2,ref1_0,ref2_0,Xdim_file)
+    !      initflag=2  
+    !     ENDIF
 
     if (present(filename))then
         fName = trim(filename)
@@ -40,12 +58,15 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
     end if
 
-   
-    call init_Tensors() ! Initializing in zero the new vectors
- 
+    if (present(dotest))then
+        doTesting = dotest
+    else
+        doTesting = 0
+    end if
 
- 
-   
+    
+    call init_Tensors() ! Initializing in zero the new vectors
+
     CALL Prep_Param(fName,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
   
 
@@ -60,11 +81,13 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
 
 
-        
-        call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy)
+        !Write(*,*)cal_coord
+        call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
 
        
-       
+       if (doTesting>0 .and. present(testArr)) then
+            testArr = testErr
+       endif
     end if     
 
 
@@ -152,9 +175,9 @@ End   SUBROUTINE Generate_Coordenates
 
 !new Subroutine
 
-SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy)
+SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
 
-    real*8, parameter ::  C1=627.5095d0,C2=0.529177249d0
+    real*8, parameter ::  C1=627.5095d0,C2=0.529177249d0,Const=349.757d0
     ! real*8 , dimension(8) :: Multipole_Energies!M1,M2,...M8
     ! real*8 , dimension(3) :: Dispersion_Energies !D6, D7
     ! real*8 , dimension(5) :: Ind_Energ !I4 I5 I6 I7 I8
@@ -171,6 +194,8 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
     real*8 , dimension(9), INTENT(IN):: C
 
     real*8  , INTENT(INOut) ::TotalEnergy
+    integer*8::doTesting
+    real*8::testErr(5)
     real*8   ::Ene,EM,ED,EH,EI,T10,T20,T30,T40,cal_coord_temp(11)
     Integer :: n ;
     real*8::Multipole_Energies(8),Ind_Energ(5),Hyp_Energ(2),Dispersion_Energies(3)
@@ -180,7 +205,9 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
     real*8 , dimension(40) :: A_HPol,B_HPol
     real*8 , dimension(873) :: Disp_AB
 
-    real*8 :: Const=349.75d0
+    real*8 :: Elect_energy(9),Dispe_energy(4),Induc_energy(6),Hyper_energy(3),term
+
+    
 
     cal_coord_temp = cal_coord
 
@@ -200,6 +227,11 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
      ED  = 0.d0
      EI  = 0.d0
      EH  = 0.d0
+
+     Elect_energy  = 0.d0
+     Dispe_energy  = 0.d0
+     Induc_energy  = 0.d0
+     Hyper_energy  = 0.d0
 
 
 
@@ -224,7 +256,10 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==8)Then
                 Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))         
             endif
-            Ene = Ene+(C1*C2**n)*Multipole_Energies(n)
+            term = (C1*C2**n)*Multipole_Energies(n)
+            Elect_energy(1+n) = term
+            Elect_energy(1) = Elect_energy(1)+term 
+            Ene = Ene+term
             !write(*,*)"Multipole_Energies: ",n,Multipole_Energies(n),Const*(C1*C2**n)*Multipole_Energies(n)
          END IF 
          
@@ -241,7 +276,12 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==8)Then
                 Call Dispersion_8_Sph2(cal_coord_temp,Ar,Br,C, Disp_AB  ,ED)         
             endif
-            Ene = Ene+(C1*C2**n)*ED
+
+            term = (C1*C2**n)*ED
+            Dispe_energy(n-4) = term
+            Dispe_energy(1) = Dispe_energy(1)+term
+            Ene = Ene+term
+            !Ene = Ene+(C1*C2**n)*ED
             !write(*,*)"Multipole_Energies: ",n,Multipole_Energies(n),Const*(C1*C2**n)*Multipole_Energies(n)
          END IF 
         
@@ -261,7 +301,12 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==8)Then
                 Call Induction_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_Pol,B_Pol  ,EI)         
             endif
-            Ene = Ene + (C1*C2**n)*EI
+
+            term = (C1*C2**n)*EI
+            Induc_energy(n-2) = term
+            Induc_energy(1) = Induc_energy(1)+term
+            Ene = Ene+term
+            !Ene = Ene + (C1*C2**n)*EI
             !write(*,*)n, " " ,En
          END IF 
         
@@ -276,14 +321,27 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==7)Then
                 Call HyperPolarizability_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,A_HPol,B_HPol,EH)   
             endif
-            Ene = Ene + (C1*C2**n)*EH
+            term = (C1*C2**n)*EH
+            Hyper_energy(n-4) = term
+            Hyper_energy(1) = Hyper_energy(1)+term
+            Ene = Ene+term
+            !Ene = Ene + (C1*C2**n)*EH
             !write(*,*)n, " " ,En
          END IF 
         
      end do
 
 
+
     TotalEnergy  = Const*Ene
+    if (doTesting>0)Then
+        testErr(1) = TotalEnergy
+        testErr(2) = Const*Elect_energy(1)
+        testErr(3) = Const*Dispe_energy(1)
+        testErr(4) = Const*Induc_energy(1)
+        testErr(5) = Const*Hyper_energy(1)
+    end if 
+
 
 end SUBROUTINE TotalEnergy_Calc
 

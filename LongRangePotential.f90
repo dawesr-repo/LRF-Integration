@@ -15,9 +15,9 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
     real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
     character(len = 200),optional:: filename
     integer,optional::dotest
-    real*8,optional::testArr(5)
+    real*8,optional::testArr(52)
     integer*8::doTesting
-    real*8::testErr(5)
+    real*8::testErr(52)
 
 
     real*8 , dimension(3):: Ar 
@@ -195,7 +195,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
 
     real*8  , INTENT(INOut) ::TotalEnergy
     integer*8::doTesting
-    real*8::testErr(5)
+    real*8::testErr(52)
     real*8   ::Ene,EM,ED,EH,EI,T10,T20,T30,T40,cal_coord_temp(11)
     Integer :: n ;
     real*8::Multipole_Energies(8),Ind_Energ(5),Hyp_Energ(2),Dispersion_Energies(3)

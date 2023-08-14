@@ -1,5 +1,5 @@
 module Testing
-
+        
         contains
 
         Subroutine READ_DATASET(filename,systName,ntest,XDim,DATASET_,coord_format,M_Fit ,D_Fit,I_Fit,H_Fit)
@@ -48,8 +48,101 @@ module Testing
                         Read( 100, *)DATASET_(i,:)
                 enddo
 
-                close(10) 
+                close(100) 
         end Subroutine READ_DATASET
+
+         Subroutine READ_DATASET_TTensor(filename,systName,ntest,DATASET_,coord_format)
+                
+                IMPLICIT NONE
+                Character(len = *),Intent(IN) :: filename
+                Character(len = 20),Intent(out) :: coord_format,systName
+                INTEGER ,Intent(out) :: ntest    
+                real*8, allocatable,INTENT(INOUT) ::DATASET_(:,:)
+                
+
+                integer:: i
+                Character(len = 40) :: row
+
+                Open( 200, file = filename )
+                Read( 200, *) row
+                Read( 200, *) row,row,row,ntest
+                Read( 200, *) row
+                Read( 200, *) row,row,row,systName
+                Read( 200, *) row
+                Read( 200, *) row,row,row,coord_format
+                Read( 200, *) row
+
+
+                Read( 200, *) row
+                Read( 200, *) row
+
+                Allocate(DATASET_(ntest,5))
+          
+
+                do i=1,ntest
+                        Read( 200, *)DATASET_(i,:)
+                enddo
+
+                close(200) 
+        end Subroutine READ_DATASET_TTensor
+
+         Subroutine READ_TTensor_Values(ntest,la,lb,DATASET_)
+                
+                IMPLICIT NONE
+                INTEGER ,Intent(IN) :: ntest   ,la,lb 
+                real*8 ::DATASET_(ntest,(2*7+1)*(2*7+1))
+                Character(len = 23),parameter :: dirTTensor = "./files/test/T_Tensors/"
+                logical :: exist
+                integer:: i
+                Character(len = 40) :: row
+                type string
+                        character(len=:), allocatable :: s
+                end type string
+                ! create an array of strings where each element is separately allocatable
+                type(string) :: mpArr(13)
+       
+                mpArr(1)%s = 'q'   
+                mpArr(2)%s = 'm'
+                mpArr(3)%s = 'Qd'
+                mpArr(4)%s = 'O'
+                mpArr(5)%s = 'Phi'
+                mpArr(6)%s = 'M5'
+                mpArr(7)%s = 'M6'
+                mpArr(8)%s = 'M7'
+                mpArr(9)%s = 'M8'
+                mpArr(10)%s = 'M9'
+                mpArr(11)%s = 'M10'
+                mpArr(12)%s = 'M11'
+                mpArr(13)%s = 'M12'
+
+
+                inquire(file= dirTTensor//mpArr(la+1)%s//mpArr(lb+1)%s//'.txt', exist=exist)
+                if (exist)then 
+                        Open( 200, file = dirTTensor//mpArr(la+1)%s//mpArr(lb+1)%s//'.txt' )
+                        Read( 200, *) row
+                        Read( 200, *) row
+                        Read( 200, *) row
+                        Read( 200, *) row
+                        Read( 200, *) row
+                        Read( 200, *) row
+
+
+                        Read( 200, *) row
+                        Read( 200, *) row
+
+        
+
+                        do i=1,ntest
+                                Read( 200, *)DATASET_(i,1:(2*la+1)*(2*lb+1))
+                        enddo
+
+                        close(200) 
+                else
+                        write(*,*) "file locate at "//dirTTensor//mpArr(la+1)%s//mpArr(lb+1)%s//'.txt' //" DOES NOT EXIST"
+                end if 
+
+
+        end Subroutine READ_TTensor_Values
 
         Subroutine Test_Dataset(coeff_filename, data_filename,fileOutputNumber,ntestMAX)
                 IMPLICIT NONE
@@ -218,7 +311,7 @@ module Testing
                 end if
                 write(*,  '(A, I8, A, I8, A, I8)') "                                Num. Test: ",ntest,"     ---> success: "&
                                                 ,success_test," / failed : ",failed
-                write(*,  '(A, F21.15)') "                                Error Max: ",maxErr                                 
+                write(*,  '(A, E15.4)') "                                Error Max: ",maxErr                                 
                 write(*,  *)
 
                 if (present(fileOutputNumber))then
@@ -315,15 +408,172 @@ module Testing
                 end do fileloop
         END SUBROUTINE Test_All
 
-        SUBROUTINE Testing_TTensors()
+        SUBROUTINE Testing_TTensors(filename,ntestMAX,level_init,level_final)
+                use Tensors_constant 
                 IMPLICIT NONE
+                Character(len = *),Intent(IN) :: filename
+                integer,optional:: ntestMAX,level_init,level_final
+
+                real*8 :: E_fortran,E_fit
+                real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
+                real*8, allocatable :: result(:,:,:,:),dataset_(:,:),res(:,:)
+                Character(len = 20) :: coord_format,systName
+                Character(len = 2) :: str
+                INTEGER :: XDIM,ntest,nMAX
+                real*8 :: start, finish,pii
+                real*8 , dimension(3):: Ar 
+                real*8 , dimension(3):: Br
+                real*8 , dimension(9):: C
+                Integer la_,level,lb_
+                real*8 , dimension(11):: cal_coord  
+                character(len=20)::title
+                integer:: i,success_test,passed,fOutputNum,j,k,l_init,l_final
+                real*8::testArr(52),errArr(52),maxErr,err_tol,diff_comp(52),err
+                real*8::XDim_coord(6),res_partial(7,7,(2*7+1)*(2*7+1))
 
 
-                call init_Tensors() ! Initializing in zero the new vectors
+
+                Call READ_DATASET_TTensor(filename,systName,ntest,DATASET_,coord_format)
+
+                if (present(ntestMAX))then
+                        nMAX = ntestMAX
+                else
+                        nMAX = ntest
+                end if
+
+                if (present(level_init) .and. present(level_final))then
+                        l_init = level_init 
+                        l_final= level_final
+                else
+                        l_init = 1
+                        l_final= 8
+                end if
+
+
+                Allocate(result(ntest,7,7,(2*7+1)*(2*7+1)),res(ntest,(2*7+1)*(2*7+1)))
+            
+
+                result = 0d0
+                res = 0d0
+                maxErr =0d0
+
+                do level=1,level_final
+                        do la_=0,level-1
+                         lb_ = level-la_-1
+                                Call READ_TTensor_Values(ntest,la_,lb_,res )
+                                
+                                do k=1,nMAX
+                                        result(k,la_+1,lb_+1,1:(2*la_+1)*(2*lb_+1)) = res(k,1:(2*la_+1)*(2*lb_+1))
+                                end do 
+                        end do
+                end do
+
+                success_test = 0
+
+
+
+                 do i=1,nMAX
+                        
+                        call init_Tensors() ! Initializing in zero the new vectors
+
+                        XDim_coord(1) = 1
+                        XDim_coord(2:6) = dataset_(i,1:5)
+                 
+
+                        Call General_Coordinates_Format(6, XDim_coord, GeneralCoordenates)
+                        Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
+                        Call Generate_Coordenates(coordinates,cal_coord,Ar,Br,C)
+
+                        res_partial = 0d0
+                        res_partial = result(i,:,:,:) 
+                       
+                        Call Check_Tensors(Ar,Br,C,res_partial,passed,err,l_init,l_final) 
+
+                        if (err > maxErr)then
+                                maxErr = err
+                        end if 
+                        success_test = success_test + passed
+
+                 end do
+
+                write(title,'(A,I1,A,I1)')"T-Tensors Check: ",level_init,"-",level_final
+
+                Call Print_Test_Results(title,maxErr,nMAX,success_test,fOutputNum)
+
+        END SUBROUTINE Testing_TTensors 
+
+        SUBROUTINE Check_Tensors(Ar,Br,C,result,passed,errMax,linit,lfinal)
+                use Tensors_constant 
+                IMPLICIT NONE
+                
+                
+                real*8 , dimension(3),Intent(IN):: Ar 
+                real*8 , dimension(3),Intent(IN):: Br
+                real*8 , dimension(9),Intent(IN):: C
+                integer,Intent(IN)::linit,lfinal
+                integer , intent(out)::passed
+                real*8  , intent(out)::errMax
+                real*8 , Intent(IN):: result(7,7,(2*7+1)*(2*7+1))
+                real*8 :: res,check(7,7,(2*7+1)*(2*7+1)),err_tol,diff(7,7,(2*7+1)*(2*7+1))
+                integer::level,la,lb,ka,kb,mla,mlb,mka,mkb,ind
+                character(len=1)::cpa,cpb
+     
+                 err_tol =1d-6
+                 errMax = 0d0
+                 check = 0d0
+                 passed = 1
+
+
+                diff=0d0
+
+
+
+                do level=linit,lfinal
+                        do la=0,level-1
+                                lb = level-la-1
+                                mla = 2*la+1
+                                mlb = 2*lb+1
+
+                                do mka=0,mla-1
+                                        do mkb=0,mlb-1
+                                          
+                                         ! call init_Tensors()
+
+                                          call Get_Comp(mka+1,cpa)
+                                          call Get_Comp(mkb+1,cpb)
+                                          ka =  (mka+1)/2
+                                          kb =  (mkb+1)/2
+
+                                          ind = mka*mlb+mkb+1
+                                        
+                                          Call T_lk(Ar,Br,C,la,ka,cpa,lb,kb,cpb,check(la+1,lb+1,ind))
+                                          diff(la+1,lb+1,ind) = DABS(check(la+1,lb+1,ind)- result(la+1,lb+1,ind))
+
+                                          if (diff(la+1,lb+1,ind) > errMax)then
+                                                errMax = diff(la+1,lb+1,ind)
+                                          end if 
+                                          if (diff(la+1,lb+1,ind) > err_tol)then
+                                                passed = 0 
+                                                write(*,*)"Problems with ",la,ka,cpa,lb,kb,cpb,check(la+1,lb+1,ind)&
+                                                , result(la+1,lb+1,ind),diff(la+1,lb+1,ind)
+                                           else
+                                                !write(*,*)"Everything ok with ",la,lb,ka,cpa,kb,cpb      
+                                          end if 
+                                        end do
+                                end do
+
+
+                        end do
+                end do
+
+
+
 
                  
-                
-        END SUBROUTINE Testing_TTensors 
+
+        END SUBROUTINE Check_Tensors
+
+     
 end module Testing
 
 
@@ -336,7 +586,11 @@ PROGRAM main_subroutine
 
         INTEGER  :: DATE_TIME (8),fileOutNumber
         CHARACTER (LEN = 10) BIG_BEN (3)
-    
+        integer:: level_init,level_final,nMAX
+
+        nMAX=10
+        level_init=7
+        level_final=8
         fileOutNumber=12
 
         CALL DATE_AND_TIME (BIG_BEN (1), BIG_BEN (2), &
@@ -352,9 +606,10 @@ PROGRAM main_subroutine
 
 
         !call Test_All(fileOutNumber)
-        call Test_Dataset("./files/test/coefficients/coefficients_002.txt", "./files/test/datasets/datatest_002_001.txt"&
-                        ,fileOutNumber,3)
+        ! call Test_Dataset("./files/test/coefficients/coefficients_002.txt", "./files/test/datasets/datatest_002_001.txt"&
+        !                 ,fileOutNumber,3)
 
+        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
         close(fileOutNumber)
 END PROGRAM main_subroutine
 

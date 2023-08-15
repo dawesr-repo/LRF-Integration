@@ -162,7 +162,7 @@ module Testing
                 Integer, dimension (5) :: I_Fit     
                 Integer, dimension (2) :: H_Fit   
 
-                integer:: i,success_test,fOutputNum,j
+                integer:: i,success_test,fOutputNum,j,nj
                 real*8::testArr(52),errArr(52),maxErr,err_tol,diff_comp(52)
 
                 if (present(fileOutputNumber))then
@@ -175,7 +175,6 @@ module Testing
 
                 maxErr=0d0
                 err_tol = 1d-6
-                pii=DAcos(-1d0)
                 diff_comp =0d0
 
                 Call READ_DATASET(data_filename,systName,ntest,XDIM,dataset_,coord_format,M_Fit ,D_Fit,I_Fit,H_Fit)
@@ -247,20 +246,25 @@ module Testing
                                 write(fOutputNum,*) "By Components: "
 
                                 do j=6,52
-                                        if (diff_comp(j) > err_tol )then
+                                        if (diff_comp(j) >0d0)then! err_tol )then
 
                                                 if (j>5 .and. j<21)then
                                                         write(str,'(A,I1)')"M",j-5
+                                                        nj = j + 6
                                                 elseif(j>20 .and. j<31)then
                                                         write(str,'(A,I1)')"D",j-20+5
+                                                        nj = j -1
                                                 elseif(j>30 .and. j<43)then
                                                         write(str,'(A,I1)')"I",j-30+3  
+                                                        nj = j -8
                                                 elseif(j>42)then
-                                                        write(str,'(A,I1)')"H",j-42+5               
+                                                        write(str,'(A,I1)')"H",j-42+5      
+                                                        nj = j -15        
                                                 end if
                                                 
                                                 
-                                                write(fOutputNum,'(A,E15.3 )') str,diff_comp(j)
+                                                write(fOutputNum,'(A,F15.9,F15.9,E15.3 )') str&
+                                                        ,dataset_(i,nj),testArr(j),diff_comp(j)
                                         end if 
                                 end do 
                                 write(fOutputNum,*) "*****************************************"
@@ -428,10 +432,11 @@ module Testing
                 real*8 , dimension(11):: cal_coord  
                 character(len=20)::title
                 integer:: i,success_test,passed,fOutputNum,j,k,l_init,l_final
+                integer,parameter::lmax=20
                 real*8::testArr(52),errArr(52),maxErr,err_tol,diff_comp(52),err
-                real*8::XDim_coord(6),res_partial(7,7,(2*7+1)*(2*7+1))
+                real*8::XDim_coord(6),res_partial(lmax,lmax,(2*lmax+1)*(2*lmax+1))
 
-
+      
 
                 Call READ_DATASET_TTensor(filename,systName,ntest,DATASET_,coord_format)
 
@@ -450,7 +455,8 @@ module Testing
                 end if
 
 
-                Allocate(result(ntest,7,7,(2*7+1)*(2*7+1)),res(ntest,(2*7+1)*(2*7+1)))
+                Allocate(result(ntest,lmax,lmax,(2*lmax+1)*(2*lmax+1)),&
+                         res(ntest,(2*lmax+1)*(2*lmax+1)))
             
 
                 result = 0d0
@@ -510,11 +516,13 @@ module Testing
                 real*8 , dimension(3),Intent(IN):: Ar 
                 real*8 , dimension(3),Intent(IN):: Br
                 real*8 , dimension(9),Intent(IN):: C
+                integer,parameter::lmax=20
                 integer,Intent(IN)::linit,lfinal
                 integer , intent(out)::passed
                 real*8  , intent(out)::errMax
-                real*8 , Intent(IN):: result(7,7,(2*7+1)*(2*7+1))
-                real*8 :: res,check(7,7,(2*7+1)*(2*7+1)),err_tol,diff(7,7,(2*7+1)*(2*7+1))
+                real*8 , Intent(IN):: result(lmax,lmax,(2*lmax+1)*(2*lmax+1))
+                real*8 :: res,check(lmax,lmax,(2*lmax+1)*(2*lmax+1)),err_tol,&
+                                diff(lmax,lmax,(2*lmax+1)*(2*lmax+1))
                 integer::level,la,lb,ka,kb,mla,mlb,mka,mkb,ind
                 character(len=1)::cpa,cpb
      
@@ -556,8 +564,7 @@ module Testing
                                                 passed = 0 
                                                 write(*,*)"Problems with ",la,ka,cpa,lb,kb,cpb,check(la+1,lb+1,ind)&
                                                 , result(la+1,lb+1,ind),diff(la+1,lb+1,ind)
-                                           else
-                                                !write(*,*)"Everything ok with ",la,lb,ka,cpa,kb,cpb      
+                                             
                                           end if 
                                         end do
                                 end do
@@ -589,7 +596,7 @@ PROGRAM main_subroutine
         integer:: level_init,level_final,nMAX
 
         nMAX=10
-        level_init=7
+        level_init=1
         level_final=8
         fileOutNumber=12
 
@@ -606,10 +613,10 @@ PROGRAM main_subroutine
 
 
         !call Test_All(fileOutNumber)
-        ! call Test_Dataset("./files/test/coefficients/coefficients_002.txt", "./files/test/datasets/datatest_002_001.txt"&
-        !                 ,fileOutNumber,3)
+        call Test_Dataset("./files/test/coefficients/coefficients_002.txt", "./files/test/datasets/datatest_002_001.txt"&
+                       ,fileOutNumber,1)
 
-        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
+        !call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
         close(fileOutNumber)
 END PROGRAM main_subroutine
 

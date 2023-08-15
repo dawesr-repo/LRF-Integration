@@ -78,10 +78,9 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
             .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
         TotalEnergy = Zero
     else
+
         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
 
-
-        !Write(*,*)cal_coord
         call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
 
        

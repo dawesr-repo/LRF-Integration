@@ -7,6 +7,7 @@
         real*8 , dimension(6), INTENT(INOUT) :: new_coordinates
        
         new_coordinates=coordenates;
+
         
         if (coord_format == "Euler_ZYZ") then
             new_coordinates(5) = coordenates(5) - 90

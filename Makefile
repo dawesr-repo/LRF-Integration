@@ -9,8 +9,10 @@ OBJS_Test =  test.o T_saved.o General_Coordinates_Format.o Coordinate_Transforma
 
 all : $(OBJS)
 	$(F90) $(OBJS) -o ejec.x
-#	rm *.o 
-#	rm *.mod 
+	rm *.o 
+	rm *.mod 
+
+
 
 build-run-test : $(OBJS_Test)
 	$(F90) $(OBJS_Test) -o ejec_test.x

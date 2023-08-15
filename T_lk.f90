@@ -44,6 +44,11 @@
         !call change_Tensors(la,ka1,ka2,lb,kb1,kb2,3d0) 
         call get_Tensor(la,ka1,ka2,lb,kb1,kb2,T,chang) 
 
+        ! if (la==0 .and. ka1==0 .and. ka2=="0" .and. &
+        !     lb==1 .and. kb1==0 .and. kb2=="0")then
+        !   write(*,*)"found it",T,chang
+        ! end if 
+
         if (DABS(chang-1d0)<eps)Then
             !write(*,*)"T from constant!",T,chang,la,ka1,ka2,lb,kb1,kb2
            Tlk =T
@@ -279,7 +284,7 @@
       call Factorial(la-ka1,df1)
       call Factorial(lb-kb1,df2)
 
-      NN_fact  = DSQRT( (nf1*nf2)/(df1*df2));
+      NN_fact  = DSQRT( (nf1/df1)*(nf2/df2));
     end if
     
    
@@ -297,7 +302,7 @@
   
     fact = 1.0d0
     do i = 2, n
-      fact = fact * i
+      fact = fact * (i*1d0)
     end do
     
    

@@ -2,13 +2,25 @@
     !********************************************************
 module Tensors_constant  
    implicit none 
-   real*8 :: T_Tensor(9,9,21,21),T_Changed(9,9,21,21)
+   real*8 :: T_Tensor(40,40,40,40),T_Changed(40,40,40,40)
 
   contains
 
   subroutine init_Tensors()  
-    T_Tensor=0d0
-    T_Changed=0d0
+     implicit none 
+     integer :: i,j,k,l
+
+     do i=1,40
+      do j=1,40
+        do k=1,40
+          do l=1,40
+              T_Tensor(i,j,k,l)=0d0
+              T_Changed(i,j,k,l) = 0d0
+          enddo
+        enddo
+      enddo
+     enddo
+
    end subroutine init_Tensors
 
    subroutine change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,val)  
@@ -66,7 +78,7 @@ module Tensors_constant
         call T_component(la,ka1,ka2,ka) 
         call T_component(lb,kb1,kb2,kb)  
         if (ka>0 .and. kb>0)Then
-          T = T_Tensor(la+1,ka,lb+1,kb)
+          T     =  T_Tensor (la+1,ka,lb+1,kb)
           chang =  T_Changed(la+1,ka,lb+1,kb)
           RETURN
         else
@@ -115,36 +127,3 @@ module Tensors_constant
       
   end module Tensors_constant
   
-  
-  ! SUBROUTINE Sample()
-  !   use Tensors_constant     
-  !   implicit none     
-    
-  !      real*8 :: T,chang
-  !      integer::la_,ka1_,lb_,kb1_
-  !      Character(len = 1) ::ka2_,kb2_
-
-  !      la_=2
-  !      ka1_=2
-  !      ka2_="c"
-  !      lb_=1
-  !      kb1_= 0
-  !      kb2_="0"
-
-  !      call init_Tensors() 
-  !      call get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang) 
-  !      print*, "T,chang (bef) = ", T,chang
-
-  !      call change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,3d0) 
-  !      call get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang) 
-
-  !      print*, "T,chang (aft) = ", T,chang 
-       
-  !      call init_Tensors() 
-  !      call get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang) 
-  !      print*, "T,chang (bef) = ", T,chang
-    
-   
- 
-  ! End   SUBROUTINE Sample
- 

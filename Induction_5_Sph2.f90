@@ -25,6 +25,7 @@
     Call qq_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qq_mQd_0) 
     Call qq_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qq_mQd_1)
 
+!write(*,*)qm_mm_0,qm_mm_1,qq_mQd_0,qq_mQd_1
 
     
     Ind_5_Energy =   (-0.5d0)*(2.0d0*qm_mm_0 + 2.0d0*qm_mm_1 +2.0d0*qq_mQd_0+ 2.0d0*qq_mQd_1)/ R**5

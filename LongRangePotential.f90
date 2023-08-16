@@ -255,12 +255,13 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==8)Then
                 Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))         
             endif
+            
             term = (C1*C2**n)*Multipole_Energies(n)
             testErr(5 + n) = Const*term
             Elect_energy(1+n) = term
             Elect_energy(1) = Elect_energy(1)+term 
             Ene = Ene+term
-            !write(*,*)"Multipole_Energies: ",n,Multipole_Energies(n),Const*(C1*C2**n)*Multipole_Energies(n)
+            
          END IF 
          
      end do

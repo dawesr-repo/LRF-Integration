@@ -20,9 +20,10 @@
     Call Q10(Ar,Br,C ,A_Multipoles,B_Multipoles,0,Q10_0) 
     Call Q10(Ar,Br,C ,A_Multipoles,B_Multipoles,1,Q10_1)
 
-
+  
     
     Approx_2_Energy =   (Q10_0 + Q10_1)/ R**2
+
 
     RETURN
     END SUBROUTINE Approx_2_Sph2
@@ -54,13 +55,11 @@
             m  = B_Multipoles(2:4) 
         end if
 
-
-
         Call T_l0(Ar,Br,C,q,m,ind,1 , result)
 
             
         RETURN
-        END SUBROUTINE Q10
+    END SUBROUTINE Q10
 
 
         

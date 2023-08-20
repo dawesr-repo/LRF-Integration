@@ -1136,9 +1136,9 @@ PROGRAM main_subroutine
         !                     "./files/test/datasets/datatest_003_001.txt",&
         !                     "./files/test/M2(CF+_H2+).txt",&
         !                    fileOutNumber,1,10000)
-        !  call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&
-        !                 ,fileOutNumber,1,10000)
-        ! call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
+        call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&
+                        ,fileOutNumber,1,10000)
+        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
         call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber) 
      
         close(fileOutNumber)

@@ -10,20 +10,13 @@ module Tensors_constant
      implicit none 
      integer :: i,j,k,l
 
-     do i=1,40
-      do j=1,40
-        do k=1,40
-          do l=1,40
-              T_Tensor(i,j,k,l)=0d0
-              T_Changed(i,j,k,l) = 0d0
-          enddo
-        enddo
-      enddo
-     enddo
+     T_Tensor  = 0d0
+     T_Changed = 0d0
 
-   end subroutine init_Tensors
 
-   subroutine change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,val)  
+  end subroutine init_Tensors
+
+  subroutine change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,val)  
     integer ,INTENT(IN)::la_,ka1_,lb_,kb1_
       Character(len = 1) , INTENT(IN)::ka2_,kb2_
       real*8 ,INTENT(In)::val
@@ -50,9 +43,9 @@ module Tensors_constant
         Return
 
     endif
-   end subroutine change_Tensors
+  end subroutine change_Tensors
   
-     subroutine get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang)  
+  subroutine get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang)  
       
       integer ,INTENT(IN)::la_,ka1_,lb_,kb1_
       Character(len = 1) , INTENT(IN)::ka2_,kb2_
@@ -89,10 +82,10 @@ module Tensors_constant
         end if
         
        endif
-     end subroutine  get_Tensor
+  end subroutine  get_Tensor
 
 
-     subroutine T_component(l_,k1_,k2_,k)  
+  subroutine T_component(l_,k1_,k2_,k)  
       
       integer ,INTENT(IN)::k1_,l_
       Character(len = 1) , INTENT(IN)::k2_
@@ -123,7 +116,7 @@ module Tensors_constant
       
     endif
       
-     end subroutine T_component
+  end subroutine T_component
       
-  end module Tensors_constant
+end module Tensors_constant
   

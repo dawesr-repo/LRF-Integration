@@ -1068,7 +1068,7 @@ module Testing
                 real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
                 real*8 :: FourD_coord(4)
                 Character(len = 20) :: coord_format = "Euler_ZYZ"
-                INTEGER :: XDim=4,i
+                INTEGER :: XDim=4,i,ntest=1000
                 real*8 :: start, finish
                 real*8::testErr(52)
                 FourD_coord(1) = 10.271963668339600d0 !R
@@ -1080,7 +1080,7 @@ module Testing
 
                 call cpu_time(start)
 
-                do i=1,1000
+                do i=1,ntest
 
                         Call General_Coordinates_Format(XDim, FourD_coord, GeneralCoordenates)
                         Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
@@ -1092,7 +1092,7 @@ module Testing
                 enddo    
                 
                 call cpu_time(finish)
-                write(*,*)finish-start
+                write(*,*)"Num of test: ",ntest," /time: ",finish-start
                 !write(fileOutputNumber,*)finish-start
                 !print '("Time = ",f6.3," seconds.")',finish-start
 

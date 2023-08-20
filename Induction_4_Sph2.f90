@@ -1,6 +1,6 @@
 
     !********************************************************
-    SUBROUTINE Induction_4_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_4_Energy)
+SUBROUTINE Induction_4_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_4_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -26,12 +26,12 @@
     Ind_4_Energy =   (-0.5d0)*(qq_mm_0 + qq_mm_1)/ R**4
 
     RETURN
-    END SUBROUTINE Induction_4_Sph2
+END SUBROUTINE Induction_4_Sph2
     !********************************************************
 
 
 
-    SUBROUTINE qq_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qq_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k
@@ -113,7 +113,7 @@
 
     
         RETURN
-        END SUBROUTINE qq_mm
+END SUBROUTINE qq_mm
 
 
    

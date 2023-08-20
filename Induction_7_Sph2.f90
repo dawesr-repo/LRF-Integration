@@ -1,6 +1,6 @@
 
     !********************************************************
-    SUBROUTINE Induction_7_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_7_Energy)
+SUBROUTINE Induction_7_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_7_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -57,12 +57,12 @@
     
     
     RETURN
-    END SUBROUTINE Induction_7_Sph2
+END SUBROUTINE Induction_7_Sph2
     !********************************************************
 
 
 
-    SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
@@ -150,10 +150,10 @@
             
     
         RETURN
-    END SUBROUTINE qO_mm
+END SUBROUTINE qO_mm
 
 
-    SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
             IMPLICIT NONE
     
             INTEGER ::  i,j,k,h,g
@@ -251,12 +251,12 @@
 
 
             RETURN
-    END SUBROUTINE mQd_mm
+END SUBROUTINE mQd_mm
 
 
          
     
-    SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                     IMPLICIT NONE
             
                     INTEGER ::  i,j,k,h,g
@@ -357,10 +357,10 @@
                      
                     
                     RETURN
-    END SUBROUTINE mm_mQd
+END SUBROUTINE mm_mQd
     
     
-    SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
@@ -455,9 +455,9 @@
             
      
         RETURN
-    END SUBROUTINE qQd_mQd
+END SUBROUTINE qQd_mQd
 
-    SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
@@ -555,9 +555,9 @@
             
      
         RETURN
-    END SUBROUTINE qQd_Qdm
+END SUBROUTINE qQd_Qdm
 
-    SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
@@ -655,9 +655,9 @@
            
     
         RETURN
-    END SUBROUTINE qm_QdQd
+END SUBROUTINE qm_QdQd
 
-    SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
@@ -755,10 +755,10 @@
             
     
         RETURN
-    END SUBROUTINE qm_mO
+END SUBROUTINE qm_mO
 
 
-    SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
             IMPLICIT NONE
     
             INTEGER ::  i,j,k,h
@@ -852,6 +852,6 @@
                 
         
             RETURN
-    END SUBROUTINE qm_Om
+END SUBROUTINE qm_Om
 
 

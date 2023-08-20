@@ -1,8 +1,8 @@
 
-    !********************************************************
-    SUBROUTINE Approx_1_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_1_Energy)
+!********************************************************
+SUBROUTINE Approx_1_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_1_Energy)
     IMPLICIT NONE
-    
+
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
     !   ANY OTHER VARIABLES LOCAL TO THE SUBROUTINE
 
@@ -16,14 +16,14 @@
     real*8 , dimension(9), INTENT(IN):: C
 
     R =cal_coord(1);
-    
-    
+
+
     qA=A_Multipoles(1)
     qB=B_Multipoles(1)
 
-    
+
     Approx_1_Energy =   qA*qB / R
 
     RETURN
-    END SUBROUTINE Approx_1_Sph2
-    !********************************************************
+END SUBROUTINE Approx_1_Sph2
+!********************************************************

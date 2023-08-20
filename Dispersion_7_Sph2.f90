@@ -1,6 +1,6 @@
 
-    !********************************************************
-    SUBROUTINE Dispersion_7_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_7_Energy)
+!********************************************************
+SUBROUTINE Dispersion_7_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_7_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -27,12 +27,12 @@
 
 
     RETURN
-    END SUBROUTINE Dispersion_7_Sph2
-    !********************************************************
+END SUBROUTINE Dispersion_7_Sph2
+!********************************************************
 
 
 
-    SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
+SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h,g
@@ -94,9 +94,9 @@
                 end do
             end do
         RETURN
-    END SUBROUTINE mQd_mm_Dispersion
+END SUBROUTINE mQd_mm_Dispersion
 
-    SUBROUTINE mm_mQd_Dispersion(Ar,Br,C ,Disp_AB, result)
+SUBROUTINE mm_mQd_Dispersion(Ar,Br,C ,Disp_AB, result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h,g
@@ -158,5 +158,5 @@
                 end do
             end do
         RETURN
-    END SUBROUTINE mm_mQd_Dispersion
+END SUBROUTINE mm_mQd_Dispersion
   

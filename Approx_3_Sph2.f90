@@ -1,6 +1,6 @@
 
-    !********************************************************
-    SUBROUTINE Approx_3_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_3_Energy)
+!********************************************************
+SUBROUTINE Approx_3_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_3_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -28,12 +28,12 @@
     Approx_3_Energy =   (Q20_0 + Q20_1 + Q11_0)/ R**3
 
     RETURN
-    END SUBROUTINE Approx_3_Sph2
-    !********************************************************
+END SUBROUTINE Approx_3_Sph2
+!********************************************************
 
 
 
-    SUBROUTINE Q20(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
+SUBROUTINE Q20(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
         IMPLICIT NONE
 
    
@@ -65,10 +65,10 @@
        
     
         RETURN
-        END SUBROUTINE Q20
+END SUBROUTINE Q20
 
     
-    SUBROUTINE Q11(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
+SUBROUTINE Q11(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
             IMPLICIT NONE
     
             
@@ -93,4 +93,4 @@
             Call T_ll(Ar,Br,C,mA,mB,1,1 , result)
         
             RETURN
-            END SUBROUTINE Q11
+END SUBROUTINE Q11

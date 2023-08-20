@@ -1,6 +1,6 @@
 
     !********************************************************
-    SUBROUTINE Approx_8_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_8_Energy)
+SUBROUTINE Approx_8_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles , Approx_8_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -36,10 +36,10 @@
    
 
     RETURN
-    END SUBROUTINE Approx_8_Sph2
+END SUBROUTINE Approx_8_Sph2
     !********************************************************
 
-    SUBROUTINE Q43(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
+SUBROUTINE Q43(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
         IMPLICIT NONE
 
 
@@ -72,10 +72,10 @@
             end if
     
         RETURN
-        END SUBROUTINE Q43
+END SUBROUTINE Q43
 
 
-    SUBROUTINE Q61(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
+SUBROUTINE Q61(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
         IMPLICIT NONE
 
 
@@ -110,64 +110,64 @@ END SUBROUTINE Q61
 
 
 SUBROUTINE Q52(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
-            IMPLICIT NONE
+    IMPLICIT NONE
 
-            real*8, INTENT(INOUT) ::result 
-            real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
-            real*8 , dimension(3), INTENT(IN):: Ar 
-            real*8 , dimension(3), INTENT(IN):: Br
-            real*8 , dimension(9), INTENT(IN):: C
-            Integer, INTENT(IN):: ind
-        
-            real*8 , dimension(5):: Qd
-            real*8 , dimension(11):: M5
-      
-            
-       
-            
-           
-            if (ind==0) then
-                Qd =  B_Multipoles(5:9)
-                M5  = A_Multipoles(26:36) 
-            
-                call  T_ll(Ar,Br,C,M5,Qd,5,2 , result)
-            else
-                Qd =  A_Multipoles(5:9)
-                M5  = B_Multipoles(26:36)
+    real*8, INTENT(INOUT) ::result 
+    real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
+    real*8 , dimension(3), INTENT(IN):: Ar 
+    real*8 , dimension(3), INTENT(IN):: Br
+    real*8 , dimension(9), INTENT(IN):: C
+    Integer, INTENT(IN):: ind
+
+    real*8 , dimension(5):: Qd
+    real*8 , dimension(11):: M5
+
     
-                call  T_ll(Ar,Br,C,Qd,M5,2,5 , result)
-            end if
-        
-            RETURN
+
+    
+    
+    if (ind==0) then
+        Qd =  B_Multipoles(5:9)
+        M5  = A_Multipoles(26:36) 
+    
+        call  T_ll(Ar,Br,C,M5,Qd,5,2 , result)
+    else
+        Qd =  A_Multipoles(5:9)
+        M5  = B_Multipoles(26:36)
+
+        call  T_ll(Ar,Br,C,Qd,M5,2,5 , result)
+    end if
+
+    RETURN
 END SUBROUTINE Q52
 
 SUBROUTINE Q70(Ar,Br,C ,A_Multipoles,B_Multipoles, ind , result)
-            IMPLICIT NONE
+    IMPLICIT NONE
+
+
+    real*8, INTENT(INOUT) ::result 
+    real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
+    real*8 , dimension(3), INTENT(IN):: Ar 
+    real*8 , dimension(3), INTENT(IN):: Br
+    real*8 , dimension(9), INTENT(IN):: C
+    Integer, INTENT(IN):: ind
+    real*8 :: q
+    real*8 , dimension(15):: M7
     
+
     
-            real*8, INTENT(INOUT) ::result 
-            real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
-            real*8 , dimension(3), INTENT(IN):: Ar 
-            real*8 , dimension(3), INTENT(IN):: Br
-            real*8 , dimension(9), INTENT(IN):: C
-            Integer, INTENT(IN):: ind
-            real*8 :: q
-            real*8 , dimension(15):: M7
-            
-       
-            
-            if (ind==0) then
-                q =  B_Multipoles(1)
-                M7  = A_Multipoles(50:64) 
-    
-            else
-                q =  A_Multipoles(1)
-                M7  = B_Multipoles(50:64)
-            end if
-    
-            Call T_l0(Ar,Br,C,q,M7,ind,7, result) 
-        
-            RETURN
+    if (ind==0) then
+        q =  B_Multipoles(1)
+        M7  = A_Multipoles(50:64) 
+
+    else
+        q =  A_Multipoles(1)
+        M7  = B_Multipoles(50:64)
+    end if
+
+    Call T_l0(Ar,Br,C,q,M7,ind,7, result) 
+
+    RETURN
 END SUBROUTINE Q70
 
     

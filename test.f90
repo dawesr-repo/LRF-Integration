@@ -1093,8 +1093,7 @@ module Testing
                 
                 call cpu_time(finish)
                 write(*,*)"Num of test: ",ntest," /time: ",finish-start
-                !write(fileOutputNumber,*)finish-start
-                !print '("Time = ",f6.3," seconds.")',finish-start
+ 
 
         end  Subroutine RunningTime_Performance
 

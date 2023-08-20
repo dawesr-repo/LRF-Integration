@@ -19,7 +19,7 @@ Subroutine Copy_Paste(copy_filename,read_unit,writing_unit)
         n = n + 1
     end do
 
-    print*, "File contains ", n, "commands"
+    print*,  n, "lines"," ---- ",copy_filename
 
     close(read_unit)
 
@@ -60,15 +60,18 @@ PROGRAM build_production
         integer, parameter :: N = 25
         type(string) :: fileNames(N)
         integer :: i,if1,if2,if3,if4,if5
-
+        INTEGER  :: DATE_TIME (8)
+        CHARACTER (LEN = 10) BIG_BEN (3)
+        
+        CALL DATE_AND_TIME (BIG_BEN (1), BIG_BEN (2), &
+        BIG_BEN (3), DATE_TIME)
         
 
         
-
-        fileNames(1)%s = "T_l0.f90"
+        fileNames(1)%s = "T_saved.f90"
         fileNames(2)%s = "T_lk.f90"
-        fileNames(3)%s = "T_ll.f90"
-        fileNames(4)%s = "T_saved.f90"
+        fileNames(3)%s = "T_l0.f90"
+        fileNames(4)%s = "T_ll.f90"
         fileNames(5)%s = "Index_Searcher.f90"
         fileNames(6)%s = "helperFunc.f90"
 
@@ -106,9 +109,17 @@ PROGRAM build_production
 
         fileNames(if5+1)%s = "LongRangePotential.f90"
 
-        call FileChecking('production_cp.f90',writing_unit)
+        call FileChecking('production.f90',writing_unit)
         REWIND(writing_unit)
 
+        write(writing_unit,*)"!******************************************************************************"
+        write(writing_unit,*)  "!      Compilation Day and Time"
+        write(writing_unit,*)  "!      Month / Day / Year: ",DATE_TIME(2),"/",DATE_TIME(3),"/",DATE_TIME(1) 
+        write(writing_unit,*)  "!      Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7)
+        write(writing_unit,*)  "!      LRF MATLAB  v0.7.1"
+        write(writing_unit,*)  "!      LRF_Fortran v0.3.1"  
+        write(writing_unit,*)"!******************************************************************************"
+        write(writing_unit,*)
         do i = 1, N
                 Call Copy_Paste(fileNames(i)%s,1000+i,writing_unit) 
         end do

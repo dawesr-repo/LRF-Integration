@@ -1,72 +1,132 @@
+ !******************************************************************************
+ !      Compilation Day and Time
+ !      Month / Day / Year:            8 /          20 /        2023
+ !      Hr    / Min / Sec :           16 :          56 :          51
+ !      LRF MATLAB  v0.7.1
+ !      LRF_Fortran v0.3.1
+ !******************************************************************************
+
                                                                                                                                                                                                          
- !********************************************************                                                                                                                                               
- SUBROUTINE T_l0(Ar,Br,C,q,M2,IND,lk , result)                                                                                                                                                           
-         IMPLICIT NONE                                                                                                                                                                                   
+     !********************************************************                                                                                                                                           
+ module Tensors_constant                                                                                                                                                                                 
+    implicit none                                                                                                                                                                                        
+    real*8 :: T_Tensor(40,40,40,40),T_Changed(40,40,40,40)                                                                                                                                               
                                                                                                                                                                                                          
-         INTEGER ::  i                                                                                                                                                                                   
-         real*8, INTENT(INOUT) ::result                                                                                                                                                                  
-         real*8 , dimension(3), INTENT(IN):: Ar                                                                                                                                                          
-         real*8 , dimension(3), INTENT(IN):: Br                                                                                                                                                          
-         real*8 , dimension(9), INTENT(IN):: C                                                                                                                                                           
-         Integer, INTENT(IN):: ind,lk                                                                                                                                                                    
-         real*8 :: q,t_k1,t_k2                                                                                                                                                                           
-         real*8 , dimension(2*lk+1):: M2                                                                                                                                                                 
-         real*8:: eps=EPSILON(result)                                                                                                                                                                    
+   contains                                                                                                                                                                                              
                                                                                                                                                                                                          
+   subroutine init_Tensors()                                                                                                                                                                             
+      implicit none                                                                                                                                                                                      
+      integer :: i,j,k,l                                                                                                                                                                                 
                                                                                                                                                                                                          
-                                                                                                                                                                                                         
-         result = 0d0                                                                                                                                                                                    
-                                                                                                                                                                                                         
-         do i = 0,lk                                                                                                                                                                                     
+      T_Tensor  = 0d0                                                                                                                                                                                    
+      T_Changed = 0d0                                                                                                                                                                                    
                                                                                                                                                                                                          
                                                                                                                                                                                                          
-             if (ind==0) then                                                                                                                                                                            
+   end subroutine init_Tensors                                                                                                                                                                           
                                                                                                                                                                                                          
-                 if (i==0) then                                                                                                                                                                          
+   subroutine change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,val)                                                                                                                                            
+     integer ,INTENT(IN)::la_,ka1_,lb_,kb1_                                                                                                                                                              
+       Character(len = 1) , INTENT(IN)::ka2_,kb2_                                                                                                                                                        
+       real*8 ,INTENT(In)::val                                                                                                                                                                           
+       integer :: ka,kb,la,ka1,lb,kb1                                                                                                                                                                    
+       Character(len = 1) ::ka2,kb2                                                                                                                                                                      
+       la = la_                                                                                                                                                                                          
+       ka1 = ka1_                                                                                                                                                                                        
+       ka2 = ka2_                                                                                                                                                                                        
+       lb = lb_                                                                                                                                                                                          
+       kb1 = kb1_                                                                                                                                                                                        
+       kb2 = kb2_                                                                                                                                                                                        
                                                                                                                                                                                                          
-                     if (DABS(q)>eps .and. DABS(M2(1))>eps) Then                                                                                                                                         
-                         Call T_lk(Ar,Br,C,lk,0,"0",0,0,"0",t_k1)                                                                                                                                        
-                                                                                                                                                                                                         
-                         result = result + q*M2(1)*t_k1                                                                                                                                                  
-                     end if                                                                                                                                                                              
-                 else                                                                                                                                                                                    
-                                                                                                                                                                                                         
-                     if (DABS(q)>eps .and. DABS(M2(2*i))>eps) Then                                                                                                                                       
-                         Call T_lk(Ar,Br,C,lk,i,"c",0,0,"0",t_k1)                                                                                                                                        
-                         result = result + q*M2(2*i)*t_k1                                                                                                                                                
-                     end if                                                                                                                                                                              
-                     if ( DABS(q)>eps .and. DABS(M2(2*i+1))>eps) Then                                                                                                                                    
-                         Call T_lk(Ar,Br,C,lk,i,"s",0,0,"0",t_k2)                                                                                                                                        
-                         result = result + q*M2(2*i+1)*t_k2                                                                                                                                              
-                     end if                                                                                                                                                                              
-                                                                                                                                                                                                         
-                 end if                                                                                                                                                                                  
-         ELSE                                                                                                                                                                                            
-             if (i==0) then                                                                                                                                                                              
-                                                                                                                                                                                                         
-                 if (DABS(q)>eps .and. DABS(M2(1))>eps) Then                                                                                                                                             
-                     Call T_lk(Ar,Br,C,0,0,"0",lk,0,"0",t_k1)                                                                                                                                            
-                     result = result + q*M2(1)*t_k1                                                                                                                                                      
-                 end if                                                                                                                                                                                  
-             else                                                                                                                                                                                        
-                                                                                                                                                                                                         
-                     if (DABS(q)>eps .and. DABS(M2(2*i))>eps) Then                                                                                                                                       
-                         Call T_lk(Ar,Br,C,0,0,"0",lk,i,"c",t_k1)                                                                                                                                        
-                         result = result + q*M2(2*i)*t_k1                                                                                                                                                
-                     end if                                                                                                                                                                              
-                     if ( DABS(q)>eps .and. DABS(M2(2*i+1))>eps) Then                                                                                                                                    
-                         Call T_lk(Ar,Br,C,0,0,"0",lk,i,"s",t_k2)                                                                                                                                        
-                         result = result + q*M2(2*i+1)*t_k2                                                                                                                                              
-                     end if                                                                                                                                                                              
-                                                                                                                                                                                                         
-                 end if                                                                                                                                                                                  
-                                                                                                                                                                                                         
-             end if                                                                                                                                                                                      
-         end do                                                                                                                                                                                          
-                                                                                                                                                                                                         
+       IF (ka1<0 .or. kb1<0 .or. la<0 .or. lb<0 .or. ka1>la .or. kb1>lb) THEN                                                                                                                            
          RETURN                                                                                                                                                                                          
- END SUBROUTINE T_l0                                                                                                                                                                                     
+       ELSE IF (la==0 .and. lb==0) THEN                                                                                                                                                                  
+         RETURN                                                                                                                                                                                          
+       ELSE                                                                                                                                                                                              
+         call T_component(la,ka1,ka2,ka)                                                                                                                                                                 
+         call T_component(lb,kb1,kb2,kb)                                                                                                                                                                 
                                                                                                                                                                                                          
+         T_Tensor(la+1,ka,lb+1,kb)=val                                                                                                                                                                   
+         T_Changed(la+1,ka,lb+1,kb)=1d0                                                                                                                                                                  
+                                                                                                                                                                                                         
+         Return                                                                                                                                                                                          
+                                                                                                                                                                                                         
+     endif                                                                                                                                                                                               
+   end subroutine change_Tensors                                                                                                                                                                         
+                                                                                                                                                                                                         
+   subroutine get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang)                                                                                                                                            
+                                                                                                                                                                                                         
+       integer ,INTENT(IN)::la_,ka1_,lb_,kb1_                                                                                                                                                            
+       Character(len = 1) , INTENT(IN)::ka2_,kb2_                                                                                                                                                        
+       real*8 ,INTENT(OUT)::T,chang                                                                                                                                                                      
+       integer :: ka,kb,la,ka1,lb,kb1                                                                                                                                                                    
+       Character(len = 1) ::ka2,kb2                                                                                                                                                                      
+       la = la_                                                                                                                                                                                          
+       ka1 = ka1_                                                                                                                                                                                        
+       ka2 = ka2_                                                                                                                                                                                        
+       lb = lb_                                                                                                                                                                                          
+       kb1 = kb1_                                                                                                                                                                                        
+       kb2 = kb2_                                                                                                                                                                                        
+                                                                                                                                                                                                         
+       IF (ka1<0 .or. kb1<0 .or. la<0 .or. lb<0 .or. ka1>la .or. kb1>lb) THEN                                                                                                                            
+         T=0d0                                                                                                                                                                                           
+         chang =0d0                                                                                                                                                                                      
+         RETURN                                                                                                                                                                                          
+       ELSE IF (la==0 .and. lb==0) THEN                                                                                                                                                                  
+         T = 1d0                                                                                                                                                                                         
+         chang=1d0                                                                                                                                                                                       
+         RETURN                                                                                                                                                                                          
+       ELSE                                                                                                                                                                                              
+         call T_component(la,ka1,ka2,ka)                                                                                                                                                                 
+         call T_component(lb,kb1,kb2,kb)                                                                                                                                                                 
+         if (ka>0 .and. kb>0)Then                                                                                                                                                                        
+           T     =  T_Tensor (la+1,ka,lb+1,kb)                                                                                                                                                           
+           chang =  T_Changed(la+1,ka,lb+1,kb)                                                                                                                                                           
+           RETURN                                                                                                                                                                                        
+         else                                                                                                                                                                                            
+           T=0d0                                                                                                                                                                                         
+           chang =0d0                                                                                                                                                                                    
+           RETURN                                                                                                                                                                                        
+                                                                                                                                                                                                         
+         end if                                                                                                                                                                                          
+                                                                                                                                                                                                         
+        endif                                                                                                                                                                                            
+   end subroutine  get_Tensor                                                                                                                                                                            
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
+   subroutine T_component(l_,k1_,k2_,k)                                                                                                                                                                  
+                                                                                                                                                                                                         
+       integer ,INTENT(IN)::k1_,l_                                                                                                                                                                       
+       Character(len = 1) , INTENT(IN)::k2_                                                                                                                                                              
+       integer , INTENT(OUT)::k                                                                                                                                                                          
+       integer :: k1,l                                                                                                                                                                                   
+       Character(len = 1) ::k2                                                                                                                                                                           
+                                                                                                                                                                                                         
+       k1 = k1_                                                                                                                                                                                          
+       k2 = k2_                                                                                                                                                                                          
+       l = l_                                                                                                                                                                                            
+                                                                                                                                                                                                         
+       IF (k1<0  .or. l<0 .or. k1>l ) THEN                                                                                                                                                               
+          k = 0;                                                                                                                                                                                         
+       ELSE IF (l==0 .and. k1==0) THEN                                                                                                                                                                   
+         if (k2=="0" )then                                                                                                                                                                               
+           k = 1;                                                                                                                                                                                        
+         else                                                                                                                                                                                            
+           k = 0;                                                                                                                                                                                        
+         end if                                                                                                                                                                                          
+       ELSE                                                                                                                                                                                              
+         if (k2=="s")then                                                                                                                                                                                
+           k=2*k1+1                                                                                                                                                                                      
+         elseif (k2=="c")then                                                                                                                                                                            
+             k=2*k1                                                                                                                                                                                      
+         else                                                                                                                                                                                            
+            k = 1                                                                                                                                                                                        
+         endif                                                                                                                                                                                           
+                                                                                                                                                                                                         
+     endif                                                                                                                                                                                               
+                                                                                                                                                                                                         
+   end subroutine T_component                                                                                                                                                                            
+                                                                                                                                                                                                         
+ end module Tensors_constant                                                                                                                                                                             
                                                                                                                                                                                                          
                                                                                                                                                                                                          
  !********************************************************                                                                                                                                               
@@ -380,6 +440,76 @@
  End   SUBROUTINE Factorial                                                                                                                                                                              
                                                                                                                                                                                                          
                                                                                                                                                                                                          
+ !********************************************************                                                                                                                                               
+ SUBROUTINE T_l0(Ar,Br,C,q,M2,IND,lk , result)                                                                                                                                                           
+         IMPLICIT NONE                                                                                                                                                                                   
+                                                                                                                                                                                                         
+         INTEGER ::  i                                                                                                                                                                                   
+         real*8, INTENT(INOUT) ::result                                                                                                                                                                  
+         real*8 , dimension(3), INTENT(IN):: Ar                                                                                                                                                          
+         real*8 , dimension(3), INTENT(IN):: Br                                                                                                                                                          
+         real*8 , dimension(9), INTENT(IN):: C                                                                                                                                                           
+         Integer, INTENT(IN):: ind,lk                                                                                                                                                                    
+         real*8 :: q,t_k1,t_k2                                                                                                                                                                           
+         real*8 , dimension(2*lk+1):: M2                                                                                                                                                                 
+         real*8:: eps=EPSILON(result)                                                                                                                                                                    
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
+         result = 0d0                                                                                                                                                                                    
+                                                                                                                                                                                                         
+         do i = 0,lk                                                                                                                                                                                     
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
+             if (ind==0) then                                                                                                                                                                            
+                                                                                                                                                                                                         
+                 if (i==0) then                                                                                                                                                                          
+                                                                                                                                                                                                         
+                     if (DABS(q)>eps .and. DABS(M2(1))>eps) Then                                                                                                                                         
+                         Call T_lk(Ar,Br,C,lk,0,"0",0,0,"0",t_k1)                                                                                                                                        
+                                                                                                                                                                                                         
+                         result = result + q*M2(1)*t_k1                                                                                                                                                  
+                     end if                                                                                                                                                                              
+                 else                                                                                                                                                                                    
+                                                                                                                                                                                                         
+                     if (DABS(q)>eps .and. DABS(M2(2*i))>eps) Then                                                                                                                                       
+                         Call T_lk(Ar,Br,C,lk,i,"c",0,0,"0",t_k1)                                                                                                                                        
+                         result = result + q*M2(2*i)*t_k1                                                                                                                                                
+                     end if                                                                                                                                                                              
+                     if ( DABS(q)>eps .and. DABS(M2(2*i+1))>eps) Then                                                                                                                                    
+                         Call T_lk(Ar,Br,C,lk,i,"s",0,0,"0",t_k2)                                                                                                                                        
+                         result = result + q*M2(2*i+1)*t_k2                                                                                                                                              
+                     end if                                                                                                                                                                              
+                                                                                                                                                                                                         
+                 end if                                                                                                                                                                                  
+         ELSE                                                                                                                                                                                            
+             if (i==0) then                                                                                                                                                                              
+                                                                                                                                                                                                         
+                 if (DABS(q)>eps .and. DABS(M2(1))>eps) Then                                                                                                                                             
+                     Call T_lk(Ar,Br,C,0,0,"0",lk,0,"0",t_k1)                                                                                                                                            
+                     result = result + q*M2(1)*t_k1                                                                                                                                                      
+                 end if                                                                                                                                                                                  
+             else                                                                                                                                                                                        
+                                                                                                                                                                                                         
+                     if (DABS(q)>eps .and. DABS(M2(2*i))>eps) Then                                                                                                                                       
+                         Call T_lk(Ar,Br,C,0,0,"0",lk,i,"c",t_k1)                                                                                                                                        
+                         result = result + q*M2(2*i)*t_k1                                                                                                                                                
+                     end if                                                                                                                                                                              
+                     if ( DABS(q)>eps .and. DABS(M2(2*i+1))>eps) Then                                                                                                                                    
+                         Call T_lk(Ar,Br,C,0,0,"0",lk,i,"s",t_k2)                                                                                                                                        
+                         result = result + q*M2(2*i+1)*t_k2                                                                                                                                              
+                     end if                                                                                                                                                                              
+                                                                                                                                                                                                         
+                 end if                                                                                                                                                                                  
+                                                                                                                                                                                                         
+             end if                                                                                                                                                                                      
+         end do                                                                                                                                                                                          
+                                                                                                                                                                                                         
+         RETURN                                                                                                                                                                                          
+ END SUBROUTINE T_l0                                                                                                                                                                                     
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
      !********************************************************                                                                                                                                           
  SUBROUTINE T_ll(Ar,Br,C,M1,M2,lk1,lk2 , result)                                                                                                                                                         
      IMPLICIT NONE                                                                                                                                                                                       
@@ -436,128 +566,6 @@
                                                                                                                                                                                                          
          RETURN	!!ONLY NEEDED IF WE PLAN TO REACH END FUNCTION ALL OF THE TIME                                                                                                                           
  END SUBROUTINE Get_Comp                                                                                                                                                                                 
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-     !********************************************************                                                                                                                                           
- module Tensors_constant                                                                                                                                                                                 
-    implicit none                                                                                                                                                                                        
-    real*8 :: T_Tensor(40,40,40,40),T_Changed(40,40,40,40)                                                                                                                                               
-                                                                                                                                                                                                         
-   contains                                                                                                                                                                                              
-                                                                                                                                                                                                         
-   subroutine init_Tensors()                                                                                                                                                                             
-      implicit none                                                                                                                                                                                      
-      integer :: i,j,k,l                                                                                                                                                                                 
-                                                                                                                                                                                                         
-      T_Tensor  = 0d0                                                                                                                                                                                    
-      T_Changed = 0d0                                                                                                                                                                                    
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-   end subroutine init_Tensors                                                                                                                                                                           
-                                                                                                                                                                                                         
-   subroutine change_Tensors(la_,ka1_,ka2_,lb_,kb1_,kb2_,val)                                                                                                                                            
-     integer ,INTENT(IN)::la_,ka1_,lb_,kb1_                                                                                                                                                              
-       Character(len = 1) , INTENT(IN)::ka2_,kb2_                                                                                                                                                        
-       real*8 ,INTENT(In)::val                                                                                                                                                                           
-       integer :: ka,kb,la,ka1,lb,kb1                                                                                                                                                                    
-       Character(len = 1) ::ka2,kb2                                                                                                                                                                      
-       la = la_                                                                                                                                                                                          
-       ka1 = ka1_                                                                                                                                                                                        
-       ka2 = ka2_                                                                                                                                                                                        
-       lb = lb_                                                                                                                                                                                          
-       kb1 = kb1_                                                                                                                                                                                        
-       kb2 = kb2_                                                                                                                                                                                        
-                                                                                                                                                                                                         
-       IF (ka1<0 .or. kb1<0 .or. la<0 .or. lb<0 .or. ka1>la .or. kb1>lb) THEN                                                                                                                            
-         RETURN                                                                                                                                                                                          
-       ELSE IF (la==0 .and. lb==0) THEN                                                                                                                                                                  
-         RETURN                                                                                                                                                                                          
-       ELSE                                                                                                                                                                                              
-         call T_component(la,ka1,ka2,ka)                                                                                                                                                                 
-         call T_component(lb,kb1,kb2,kb)                                                                                                                                                                 
-                                                                                                                                                                                                         
-         T_Tensor(la+1,ka,lb+1,kb)=val                                                                                                                                                                   
-         T_Changed(la+1,ka,lb+1,kb)=1d0                                                                                                                                                                  
-                                                                                                                                                                                                         
-         Return                                                                                                                                                                                          
-                                                                                                                                                                                                         
-     endif                                                                                                                                                                                               
-   end subroutine change_Tensors                                                                                                                                                                         
-                                                                                                                                                                                                         
-   subroutine get_Tensor(la_,ka1_,ka2_,lb_,kb1_,kb2_,T,chang)                                                                                                                                            
-                                                                                                                                                                                                         
-       integer ,INTENT(IN)::la_,ka1_,lb_,kb1_                                                                                                                                                            
-       Character(len = 1) , INTENT(IN)::ka2_,kb2_                                                                                                                                                        
-       real*8 ,INTENT(OUT)::T,chang                                                                                                                                                                      
-       integer :: ka,kb,la,ka1,lb,kb1                                                                                                                                                                    
-       Character(len = 1) ::ka2,kb2                                                                                                                                                                      
-       la = la_                                                                                                                                                                                          
-       ka1 = ka1_                                                                                                                                                                                        
-       ka2 = ka2_                                                                                                                                                                                        
-       lb = lb_                                                                                                                                                                                          
-       kb1 = kb1_                                                                                                                                                                                        
-       kb2 = kb2_                                                                                                                                                                                        
-                                                                                                                                                                                                         
-       IF (ka1<0 .or. kb1<0 .or. la<0 .or. lb<0 .or. ka1>la .or. kb1>lb) THEN                                                                                                                            
-         T=0d0                                                                                                                                                                                           
-         chang =0d0                                                                                                                                                                                      
-         RETURN                                                                                                                                                                                          
-       ELSE IF (la==0 .and. lb==0) THEN                                                                                                                                                                  
-         T = 1d0                                                                                                                                                                                         
-         chang=1d0                                                                                                                                                                                       
-         RETURN                                                                                                                                                                                          
-       ELSE                                                                                                                                                                                              
-         call T_component(la,ka1,ka2,ka)                                                                                                                                                                 
-         call T_component(lb,kb1,kb2,kb)                                                                                                                                                                 
-         if (ka>0 .and. kb>0)Then                                                                                                                                                                        
-           T     =  T_Tensor (la+1,ka,lb+1,kb)                                                                                                                                                           
-           chang =  T_Changed(la+1,ka,lb+1,kb)                                                                                                                                                           
-           RETURN                                                                                                                                                                                        
-         else                                                                                                                                                                                            
-           T=0d0                                                                                                                                                                                         
-           chang =0d0                                                                                                                                                                                    
-           RETURN                                                                                                                                                                                        
-                                                                                                                                                                                                         
-         end if                                                                                                                                                                                          
-                                                                                                                                                                                                         
-        endif                                                                                                                                                                                            
-   end subroutine  get_Tensor                                                                                                                                                                            
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-   subroutine T_component(l_,k1_,k2_,k)                                                                                                                                                                  
-                                                                                                                                                                                                         
-       integer ,INTENT(IN)::k1_,l_                                                                                                                                                                       
-       Character(len = 1) , INTENT(IN)::k2_                                                                                                                                                              
-       integer , INTENT(OUT)::k                                                                                                                                                                          
-       integer :: k1,l                                                                                                                                                                                   
-       Character(len = 1) ::k2                                                                                                                                                                           
-                                                                                                                                                                                                         
-       k1 = k1_                                                                                                                                                                                          
-       k2 = k2_                                                                                                                                                                                          
-       l = l_                                                                                                                                                                                            
-                                                                                                                                                                                                         
-       IF (k1<0  .or. l<0 .or. k1>l ) THEN                                                                                                                                                               
-          k = 0;                                                                                                                                                                                         
-       ELSE IF (l==0 .and. k1==0) THEN                                                                                                                                                                   
-         if (k2=="0" )then                                                                                                                                                                               
-           k = 1;                                                                                                                                                                                        
-         else                                                                                                                                                                                            
-           k = 0;                                                                                                                                                                                        
-         end if                                                                                                                                                                                          
-       ELSE                                                                                                                                                                                              
-         if (k2=="s")then                                                                                                                                                                                
-           k=2*k1+1                                                                                                                                                                                      
-         elseif (k2=="c")then                                                                                                                                                                            
-             k=2*k1                                                                                                                                                                                      
-         else                                                                                                                                                                                            
-            k = 1                                                                                                                                                                                        
-         endif                                                                                                                                                                                           
-                                                                                                                                                                                                         
-     endif                                                                                                                                                                                               
-                                                                                                                                                                                                         
-   end subroutine T_component                                                                                                                                                                            
-                                                                                                                                                                                                         
- end module Tensors_constant                                                                                                                                                                             
                                                                                                                                                                                                          
  SUBROUTINE GetIndex_mm (i,j,index)                                                                                                                                                                      
                                                                                                                                                                                                          

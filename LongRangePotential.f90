@@ -7,16 +7,13 @@
 
 ! version 3.1.1
 
-SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
+SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     use Tensors_constant
     IMPLICIT NONE
 
     real*8, INTENT(INOUT)  ::  TotalEnergy
     real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
-    character(len = 200),optional:: filename
-    integer,optional::dotest
-    real*8,optional::testArr(52)
-    integer*8::doTesting
+    character(len = *), INTENT(IN) :: filename
     real*8::testErr(52)
 
 
@@ -36,41 +33,23 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
     real*8 , dimension(1195):: coeff_arr
     Real*8  ::   Zero   
 
-    ! integer :: initflag
-    ! save initflag
-    ! !character(len=25) :: i0Type ! it defines Internal0 coodinate system in the output(options: "BiSpherical","Autosurf")
-    ! data initflag /1/
-    ! save mass,mass0,natom1,natom2,ref1_0,ref2_0,Xdim_file
+    integer :: initflag
+    save initflag
+    data initflag /1/
+    save coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero
         
 
-  
-
-      
-    !     IF(initflag==1)THEN! initialize 
-    !      Call Read_File(filePath,mass,mass0,natom1,natom2,ref1_0,ref2_0,Xdim_file)
-    !      initflag=2  
-    !     ENDIF
-
-    if (present(filename))then
-        fName = trim(filename)
-    else
-        fName = './files/coefficients.txt'
-
-    end if
-
-    if (present(dotest))then
-        doTesting = dotest
-    else
-        doTesting = 0
-    end if
 
     
     call init_Tensors() ! Initializing in zero the new vectors
 
-    CALL Prep_Param(fName,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+    
   
 
-
+     IF(initflag==1)THEN! initialize 
+         CALL Prep_Param(filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+         initflag=2  
+     ENDIF
    
 
 
@@ -81,21 +60,15 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename,dotest,testArr)
 
         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
 
-        call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
+        call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,0,testErr)
 
-       
-       if (doTesting>0 .and. present(testArr)) then
-            testArr = testErr
-       endif
+
     end if     
 
 
 
 
-    END SUBROUTINE Long_Range_Potential
-
-
-
+END SUBROUTINE Long_Range_Potential
 
 
 
@@ -193,7 +166,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
     real*8 , dimension(9), INTENT(IN):: C
 
     real*8  , INTENT(INOut) ::TotalEnergy
-    integer*8::doTesting
+    integer::doTesting
     real*8::testErr(52)
     real*8   ::Ene,EM,ED,EH,EI,T10,T20,T30,T40,cal_coord_temp(11)
     Integer :: n ;
@@ -255,7 +228,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             elseif(n==8)Then
                 Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))         
             endif
-            
+
             term = (C1*C2**n)*Multipole_Energies(n)
             testErr(5 + n) = Const*term
             Elect_energy(1+n) = term
@@ -404,7 +377,7 @@ SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
 
     real*8 , dimension(1195), INTENT(INOUT) :: coeff_arr
 
-    Character(len = 200), INTENT(IN)   ::  Coeff_Address
+    Character(len = *), INTENT(IN)   ::  Coeff_Address
 
     Integer, dimension (8),  INTENT(INOUT) :: M_Fit      
     Integer, dimension (3),  INTENT(INOUT) :: D_Fit     
@@ -417,6 +390,7 @@ SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
     Character(len = 20) :: row
     ! Integer , dimension(7) :: DataColumn ! R , Cos_b1 , Cos_b2 , alpha ,  Cos_c1 , Cos_c2 , Energy    
 
+    !write(*,*) 'Reading file'
 
     Open( 10, file = Coeff_Address )
 

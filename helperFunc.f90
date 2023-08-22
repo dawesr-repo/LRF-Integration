@@ -152,6 +152,7 @@ End   SUBROUTINE Generate_Coordenates
 
 SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
 
+ implicit none
     real*8, parameter ::  C1=627.5095d0,C2=0.529177249d0,Const=349.757d0
     ! real*8 , dimension(8) :: Multipole_Energies!M1,M2,...M8
     ! real*8 , dimension(3) :: Dispersion_Energies !D6, D7

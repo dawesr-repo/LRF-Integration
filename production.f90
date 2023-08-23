@@ -1,7 +1,7 @@
  !******************************************************************************
  !      Compilation Day and Time
- !      Month / Day / Year:            8 /          20 /        2023
- !      Hr    / Min / Sec :           16 :          56 :          51
+ !      Month / Day / Year:            8 /          22 /        2023
+ !      Hr    / Min / Sec :           21 :          34 :          25
  !      LRF MATLAB  v0.7.1
  !      LRF_Fortran v0.3.1
  !******************************************************************************
@@ -1720,6 +1720,7 @@
                                                                                                                                                                                                          
  SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)                                                                                       
                                                                                                                                                                                                          
+  implicit none                                                                                                                                                                                          
      real*8, parameter ::  C1=627.5095d0,C2=0.529177249d0,Const=349.757d0                                                                                                                                
      ! real*8 , dimension(8) :: Multipole_Energies!M1,M2,...M8                                                                                                                                           
      ! real*8 , dimension(3) :: Dispersion_Energies !D6, D7                                                                                                                                              
@@ -7164,65 +7165,91 @@
                                                                                                                                                                                                          
  ! version 3.1.1                                                                                                                                                                                         
                                                                                                                                                                                                          
+                                                                                                                                                                                                         
+ MODULE constants                                                                                                                                                                                        
+  implicit none                                                                                                                                                                                          
+  save                                                                                                                                                                                                   
+  public                                                                                                                                                                                                 
+   Integer, dimension (8) :: M_Fit                                                                                                                                                                       
+   Integer, dimension (3):: D_Fit                                                                                                                                                                        
+   Integer, dimension (5):: I_Fit                                                                                                                                                                        
+   Integer, dimension (2):: H_Fit                                                                                                                                                                        
+   real*8 , dimension(1195):: coeff_arr                                                                                                                                                                  
+   Real*8  ::   Zero                                                                                                                                                                                     
+ END MODULE constants                                                                                                                                                                                    
+                                                                                                                                                                                                         
+                                                                                                                                                                                                         
  SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)                                                                                                                                       
-     use Tensors_constant                                                                                                                                                                                
-     IMPLICIT NONE                                                                                                                                                                                       
+  use Tensors_constant                                                                                                                                                                                   
+  use constants                                                                                                                                                                                          
+  IMPLICIT NONE                                                                                                                                                                                          
                                                                                                                                                                                                          
-     real*8, INTENT(INOUT)  ::  TotalEnergy                                                                                                                                                              
-     real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree                                                                                                                         
-     character(len = *), INTENT(IN) :: filename                                                                                                                                                          
-     real*8::testErr(52)                                                                                                                                                                                 
+  real*8, INTENT(INOUT)  ::  TotalEnergy                                                                                                                                                                 
+  real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree                                                                                                                            
+  character(len = *), INTENT(IN) :: filename                                                                                                                                                             
+  real*8::testErr(52)                                                                                                                                                                                    
                                                                                                                                                                                                          
+  real*8 , dimension(3):: Ar                                                                                                                                                                             
+  real*8 , dimension(3):: Br                                                                                                                                                                             
+  real*8 , dimension(9):: C                                                                                                                                                                              
                                                                                                                                                                                                          
-     real*8 , dimension(3):: Ar                                                                                                                                                                          
-     real*8 , dimension(3):: Br                                                                                                                                                                          
-     real*8 , dimension(9):: C                                                                                                                                                                           
+  real*8 , dimension(11):: cal_coord                                                                                                                                                                     
+  character(len = 200):: fName                                                                                                                                                                           
                                                                                                                                                                                                          
-     real*8 , dimension(11):: cal_coord                                                                                                                                                                  
-     character(len = 200):: fName                                                                                                                                                                        
+ !    Integer, dimension (8) :: M_Fit                                                                                                                                                                    
+ !    Integer, dimension (3):: D_Fit                                                                                                                                                                     
+ !    Integer, dimension (5):: I_Fit                                                                                                                                                                     
+ !    Integer, dimension (2):: H_Fit                                                                                                                                                                     
+ !    real*8 , dimension(1195):: coeff_arr                                                                                                                                                               
+ !    Real*8  ::   Zero                                                                                                                                                                                  
                                                                                                                                                                                                          
+  integer :: initflag                                                                                                                                                                                    
+  save initflag                                                                                                                                                                                          
+  data initflag /1/                                                                                                                                                                                      
+ !   save coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero                                                                                                                                                        
                                                                                                                                                                                                          
-     Integer, dimension (8) :: M_Fit                                                                                                                                                                     
-     Integer, dimension (3):: D_Fit                                                                                                                                                                      
-     Integer, dimension (5):: I_Fit                                                                                                                                                                      
-     Integer, dimension (2):: H_Fit                                                                                                                                                                      
+  call init_Tensors() ! Initializing in zero the new vectors                                                                                                                                             
                                                                                                                                                                                                          
-     real*8 , dimension(1195):: coeff_arr                                                                                                                                                                
-     Real*8  ::   Zero                                                                                                                                                                                   
+  IF(initflag==1)THEN! initialize                                                                                                                                                                        
+    CALL Prep_Param(filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)                                                                                                                                    
+    initflag=2                                                                                                                                                                                           
+  ENDIF                                                                                                                                                                                                  
                                                                                                                                                                                                          
-     integer :: initflag                                                                                                                                                                                 
-     save initflag                                                                                                                                                                                       
-     data initflag /1/                                                                                                                                                                                   
-     save coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero                                                                                                                                                        
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-     call init_Tensors() ! Initializing in zero the new vectors                                                                                                                                          
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-      IF(initflag==1)THEN! initialize                                                                                                                                                                    
-          CALL Prep_Param(filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)                                                                                                                              
-          initflag=2                                                                                                                                                                                     
-      ENDIF                                                                                                                                                                                              
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-     if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &                                                                                             
-             .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN                                                                                                                                   
-         TotalEnergy = Zero                                                                                                                                                                              
-     else                                                                                                                                                                                                
-                                                                                                                                                                                                         
-         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)                                                                                                                                        
-                                                                                                                                                                                                         
-         call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,0,testErr)                                                                                              
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-     end if                                                                                                                                                                                              
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
-                                                                                                                                                                                                         
+  if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &                                                                                                
+      .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN                                                                                                                                          
+     TotalEnergy = Zero                                                                                                                                                                                  
+  else                                                                                                                                                                                                   
+     Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)                                                                                                                                            
+     call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,0,testErr)                                                                                                  
+   end if                                                                                                                                                                                                
                                                                                                                                                                                                          
  END SUBROUTINE Long_Range_Potential                                                                                                                                                                     
+ SUBROUTINE evaluateLR(coordinates,XDIM,E1,filename)                                                                                                                                                     
+ IMPLICIT NONE                                                                                                                                                                                           
+                                                                                                                                                                                                         
+ real*8, INTENT(OUT) :: E1                                                                                                                                                                               
+ INTEGER, INTENT(IN) :: XDIM                                                                                                                                                                             
+ real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)                                                                                                                                                    
+ Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical"                                                                                                           
+ real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1                                                                                                                                           
+ INTEGER :: i                                                                                                                                                                                            
+ real*8 :: x1                                                                                                                                                                                            
+ Character(*), INTENT(IN) ::  filename                                                                                                                                                                   
+                                                                                                                                                                                                         
+ x1=0d0                                                                                                                                                                                                  
+ do i=1,XDIM                                                                                                                                                                                             
+   x1=x1+dabs(coordinates(i))                                                                                                                                                                            
+ enddo                                                                                                                                                                                                   
+                                                                                                                                                                                                         
+ if (x1 <= 1d-10) then                                                                                                                                                                                   
+   GeneralCoordenates=0d0                                                                                                                                                                                
+   CALL Long_Range_Potential(GeneralCoordenates,E1,filename)                                                                                                                                             
+   return                                                                                                                                                                                                
+ endif                                                                                                                                                                                                   
+                                                                                                                                                                                                         
+ Call General_Coordinates_Format(XDIM, coordinates, GeneralCoordenates)                                                                                                                                  
+ Call Coordinate_Transformation(GeneralCoordenates,coord_format,GeneralCoordenates1)                                                                                                                     
+ CALL Long_Range_Potential(GeneralCoordenates1,E1,filename)                                                                                                                                              
+ return                                                                                                                                                                                                  
+                                                                                                                                                                                                         
+ END SUBROUTINE evaluateLR                                                                                                                                                                               

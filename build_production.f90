@@ -57,7 +57,7 @@ PROGRAM build_production
         character(:), allocatable :: s
         end type
 
-        integer, parameter :: N = 25
+        integer, parameter :: N = 26
         type(string) :: fileNames(N)
         integer :: i,if1,if2,if3,if4,if5
         INTEGER  :: DATE_TIME (8)
@@ -108,6 +108,7 @@ PROGRAM build_production
         if5 = if4+2
 
         fileNames(if5+1)%s = "LongRangePotential.f90"
+        fileNames(if5+2)%s = "evaluateLRF.f90"
 
         call FileChecking('production.f90',writing_unit)
         REWIND(writing_unit)

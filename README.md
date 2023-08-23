@@ -1,4 +1,5 @@
-# LRF-Fortran
+# LRF-Fortran 
+## (Version Designed to deal with 2 different set of coefficients at the same time)
 
 ## Important files
 * production file:     production (The compiled version of the code)

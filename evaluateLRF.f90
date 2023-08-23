@@ -4,7 +4,7 @@ IMPLICIT NONE
 real*8, INTENT(OUT) :: E1
 INTEGER, INTENT(IN) :: XDIM
 real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)
-!real*8 ,dimension(:):: zero(XDIM)
+Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical"  
 real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1
 INTEGER :: i
 real*8 :: x1
@@ -22,7 +22,7 @@ if (x1 <= 1d-10) then
 endif
 
 Call General_Coordinates_Format(XDIM, coordinates, GeneralCoordenates)
-Call Coordinate_Transformation(GeneralCoordenates,XDIM,GeneralCoordenates1)
+Call Coordinate_Transformation(GeneralCoordenates,coord_format,GeneralCoordenates1)
 CALL Long_Range_Potential(GeneralCoordenates1,E1,filename)
 return
 

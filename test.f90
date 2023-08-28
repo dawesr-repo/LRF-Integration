@@ -1,50 +1,60 @@
 module Testing
         
         contains
+
+        SUBROUTINE evaluateLR_test(coordinates,XDIM,E1,filename,testArr)
+                IMPLICIT NONE
+
+                real*8, INTENT(OUT) :: E1
+                INTEGER, INTENT(IN) :: XDIM
+                real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)
+                Character(len = 20) :: coord_format = "Euler_ZXZ" !for Xdim =3, use coord_format ="Spherical" for Autosurf input 
+                real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1
+                INTEGER :: i
+                real*8 :: x1
+                Character(*), INTENT(IN) ::  filename
+
+                real*8, INTENT(INOUT)::testArr(52)
+
+                x1=0d0
+                do i=1,XDIM
+                x1=x1+dabs(coordinates(i))
+                enddo
+
+                if (x1 <= 1d-10) then
+                GeneralCoordenates=0d0
+                CALL Long_Range_Potential_Testing(GeneralCoordenates,E1,filename)
+                return
+                endif
+
+                Call General_Coordinates_Format(XDIM, coordinates, GeneralCoordenates)
+                Call Coordinate_Transformation(GeneralCoordenates,coord_format,GeneralCoordenates1)
+                CALL Long_Range_Potential_Testing(GeneralCoordenates1,E1,filename,1,testArr)
+                return
+
+        END SUBROUTINE evaluateLR_test
+
         SUBROUTINE Long_Range_Potential_Testing(coordenates,TotalEnergy,filename,dotest,testArr)
+
                 use Tensors_constant
+                use FitConstants
+
                 IMPLICIT NONE
 
                 real*8, INTENT(INOUT)  ::  TotalEnergy
                 real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
-                character(len = *),optional:: filename
+                character(len = *), INTENT(IN) :: filename
                 integer,optional::dotest
                 real*8,optional::testArr(52)
-                integer::doTesting
-                real*8::testErr(52)
-
 
                 real*8 , dimension(3):: Ar 
                 real*8 , dimension(3):: Br
                 real*8 , dimension(9):: C
 
                 real*8 , dimension(11):: cal_coord
-                character(len = 200):: fName
-
-
-                Integer, dimension (8) :: M_Fit     
-                Integer, dimension (3):: D_Fit     
-                Integer, dimension (5):: I_Fit     
-                Integer, dimension (2):: H_Fit     
-
-                real*8 , dimension(1195):: coeff_arr
-                Real*8  ::   Zero   
-
-                integer :: initflag
-                save initflag
-                data initflag /1/
-                save coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero
-                        
-
-                        
-                        
-
-                if (present(filename))then
-                        fName = trim(filename)
-                else
-                        fName = './files/coefficients.txt'
-
-                end if
+                integer::CoeffIndex
+                integer::doTesting
+                real*8::testErr(52)
 
                 if (present(dotest))then
                         doTesting = dotest
@@ -52,37 +62,22 @@ module Testing
                         doTesting = 0
                 end if
 
-
+                
                 call init_Tensors() ! Initializing in zero the new vectors
-
-
-
-
-                        IF(initflag==1)THEN! initialize 
-                        CALL Prep_Param(fName,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
-                        initflag=2  
-                        ENDIF
-
+                call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
 
 
                 if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
                         .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
-                        TotalEnergy = Zero
+                        TotalEnergy = Coeff(CoeffIndex)%Zero
                 else
-
                         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
-
-                        call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
-
-                        
+                        call TotalEnergy_Calc(cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,0,testErr)
                         if (doTesting>0 .and. present(testArr)) then
-                        testArr = testErr
+                                testArr = testErr
                         endif
-
-
-                end if     
-
-
+                end if             
+                        
 
 
         END SUBROUTINE Long_Range_Potential_Testing
@@ -340,10 +335,7 @@ module Testing
                      else
                         XDim_coord = dataset_(i,1:XDIM)
                         E_fit = dataset_(i,7)
-
-                        Call General_Coordinates_Format(XDIM, XDim_coord, GeneralCoordenates)
-                        Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
-                        CALL Long_Range_Potential_Testing(coordinates,E_fortran,coeff_filename,1,testArr)
+                        Call evaluateLR_test(XDim_coord,XDIM,E_fortran,coeff_filename,testArr)
 
                         diff_comp(1) = DABS(E_fortran-E_fit)
                         diff_comp(2) = DABS(dataset_(i,8)-testArr(2))
@@ -1068,9 +1060,10 @@ module Testing
                 real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
                 real*8 :: FourD_coord(4)
                 Character(len = 20) :: coord_format = "Euler_ZYZ"
-                INTEGER :: XDim=4,i,ntest=1000
+                INTEGER :: XDim=4,i,ntest=10000
                 real*8 :: start, finish
                 real*8::testErr(52)
+
                 FourD_coord(1) = 10.271963668339600d0 !R
                 FourD_coord(2) = 30d0  !b1
                 FourD_coord(3) = 20d0  !b2
@@ -1088,12 +1081,12 @@ module Testing
                
                          CALL Long_Range_Potential_Testing(coordinates,E1,coeff_filename,0,testErr)
     
-
                 enddo    
                 
                 call cpu_time(finish)
-                write(*,*)"Num of test: ",ntest," /time: ",finish-start
- 
+                write(*,*)"*********************************************************************"
+                write(*,*)"* PERFORMANCE for: ",ntest," /time: ",finish-start," *"
+                write(*,*)"*********************************************************************"
 
         end  Subroutine RunningTime_Performance
 
@@ -1129,16 +1122,20 @@ PROGRAM main_subroutine
 
 
         ! call Test_All(fileOutNumber)
-        ! call Test_Dataset("./files/test/coefficients/coefficients_003.txt", "./files/test/datasets/datatest_003_001.txt"&
-        !                ,fileOutNumber,1,10000)
+        call Test_Dataset("./files/test/coefficients/coefficients_003.txt", "./files/test/datasets/datatest_003_001.txt"&
+                       ,fileOutNumber,1,1)
+        
+        ! call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&
+        !                 ,fileOutNumber,1,10000)
+        ! call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
+        ! call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
+
+! this is useful to test a particular tensort component (Debugging)
+
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&
         !                     "./files/test/M2(CF+_H2+).txt",&
-        !                    fileOutNumber,1,10000)
-        call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&
-                        ,fileOutNumber,1,10000)
-        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
-        call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber) 
+        !                    fileOutNumber,1,10000) 
      
         close(fileOutNumber)
 END PROGRAM main_subroutine

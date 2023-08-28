@@ -6,18 +6,6 @@
 ! version 3.1.1
 
 
-MODULE constants
- implicit none
- save
- public
-  Integer, dimension (8) :: M_Fit     
-  Integer, dimension (3):: D_Fit     
-  Integer, dimension (5):: I_Fit     
-  Integer, dimension (2):: H_Fit     
-  real*8 , dimension(1195):: coeff_arr
-  Real*8  ::   Zero  
-END MODULE constants
-
 
 SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
@@ -48,7 +36,7 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
  if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
      .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
-    TotalEnergy = Zero
+    TotalEnergy = Coeff(CoeffIndex)%Zero
  else
     Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
     call TotalEnergy_Calc(cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,0,testErr)

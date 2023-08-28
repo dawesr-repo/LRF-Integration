@@ -57,8 +57,8 @@ CONTAINS
     if (this%initflag==1)Then
        
        
-       this%initflag = 2
-        write(*,*)"initflag",this%initflag
+        this%initflag = 2
+        !write(*,*)"initflag",this%initflag
         Open( 10, file = this%filename )
 
         Read( 10, *) row

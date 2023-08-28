@@ -164,7 +164,7 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,doTesting,
 
     real*8, INTENT(INOUT) ::TotalEnergy
     integer,intent(in)::CoeffIndex,doTesting
-    real*8,intent(in)::testErr(52)
+    real*8,intent(INOUT)::testErr(52)
 
 
     real*8   ::Ene,EM,ED,EH,EI,T10,T20,T30,T40,cal_coord_temp(11)
@@ -174,7 +174,12 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,doTesting,
     real*8 , dimension(64) :: A_Mult,B_Mult
     real*8 , dimension(57) :: A_Pol,B_Pol
     real*8 , dimension(40) :: A_HPol,B_HPol
-    real*8 , dimension(873) :: Disp_AB
+    real*8 , dimension(873):: Disp_AB
+
+    Integer, dimension (8):: M_Fit      
+    Integer, dimension (3):: D_Fit     
+    Integer, dimension (5):: I_Fit     
+    Integer, dimension (2):: H_Fit  
 
     real*8 :: Elect_energy(9),Dispe_energy(4),Induc_energy(6),Hyper_energy(3),term
 
@@ -182,7 +187,10 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,doTesting,
 
     cal_coord_temp = cal_coord
 
-
+    M_Fit = Coeff(CoeffIndex)%M_Fit
+    I_Fit = Coeff(CoeffIndex)%I_Fit
+    D_Fit = Coeff(CoeffIndex)%D_Fit
+    H_Fit = Coeff(CoeffIndex)%H_Fit
 
     A_Mult = Coeff(CoeffIndex)%A_Mult
     B_Mult = Coeff(CoeffIndex)%A_Mult
@@ -191,6 +199,8 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,doTesting,
     A_HPol = Coeff(CoeffIndex)%A_HPol
     B_HPol = Coeff(CoeffIndex)%B_HPol
     Disp_AB= Coeff(CoeffIndex)%Disp
+
+
    
   
      Ene = 0.d0

@@ -150,33 +150,28 @@ End   SUBROUTINE Generate_Coordenates
 
 
 
-SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,doTesting,testErr)
+SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,doTesting,testErr)
 
- implicit none
+    use FitConstants
+    implicit none
     real*8, parameter ::  C1=627.5095d0,C2=0.529177249d0,Const=349.757d0
-    ! real*8 , dimension(8) :: Multipole_Energies!M1,M2,...M8
-    ! real*8 , dimension(3) :: Dispersion_Energies !D6, D7
-    ! real*8 , dimension(5) :: Ind_Energ !I4 I5 I6 I7 I8
-    ! real*8 , dimension(2) :: Hyp_Energ !H6, H7
-    
-    Integer, dimension (8) , INTENT(IN):: M_Fit      
-    Integer, dimension (2) , INTENT(IN):: D_Fit    
-    Integer, dimension (5) , INTENT(IN):: I_Fit 
-    Integer, dimension (2) , INTENT(IN):: H_Fit    
-    real*8 , dimension(1195) , INTENT(IN):: coeff_arr
+
+
     real*8 , dimension(11) , INTENT(IN):: cal_coord
     real*8 , dimension(3), INTENT(IN):: Ar 
     real*8 , dimension(3), INTENT(IN):: Br
     real*8 , dimension(9), INTENT(IN):: C
 
-    real*8  , INTENT(INOut) ::TotalEnergy
-    integer::doTesting
-    real*8::testErr(52)
+    real*8, INTENT(INOUT) ::TotalEnergy
+    integer,intent(in)::CoeffIndex,doTesting
+    real*8,intent(in)::testErr(52)
+
+
     real*8   ::Ene,EM,ED,EH,EI,T10,T20,T30,T40,cal_coord_temp(11)
     Integer :: n ;
     real*8::Multipole_Energies(8),Ind_Energ(5),Hyp_Energ(2),Dispersion_Energies(3)
 
-    real*8 , dimension(64) :: A_Mult,B_Mult !q, mz, Qz, Oz, Phiz, M5z, M6z, M7z 
+    real*8 , dimension(64) :: A_Mult,B_Mult
     real*8 , dimension(57) :: A_Pol,B_Pol
     real*8 , dimension(40) :: A_HPol,B_HPol
     real*8 , dimension(873) :: Disp_AB
@@ -189,17 +184,17 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
 
 
 
-    A_Mult=coeff_arr(1:64)
-    B_Mult=coeff_arr(65:128)
-    A_Pol=coeff_arr(129:185)
-    B_Pol=coeff_arr(186:242)
-    A_HPol=coeff_arr(243:282)
-    B_HPol=coeff_arr(283:322)
-    Disp_AB=coeff_arr(323:1195)
+    A_Mult = Coeff(CoeffIndex)%A_Mult
+    B_Mult = Coeff(CoeffIndex)%A_Mult
+    A_Pol  = Coeff(CoeffIndex)%A_Pol
+    B_Pol  = Coeff(CoeffIndex)%B_Pol
+    A_HPol = Coeff(CoeffIndex)%A_HPol
+    B_HPol = Coeff(CoeffIndex)%B_HPol
+    Disp_AB= Coeff(CoeffIndex)%Disp
    
   
      Ene = 0.d0
-     Multipole_Energies  = 0.d0
+     EM  = 0.d0
      ED  = 0.d0
      EI  = 0.d0
      EH  = 0.d0
@@ -216,24 +211,24 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
     do n = 1, 8
         IF (M_Fit(n) > 0) THEN
             if (n==1)Then
-                Call Approx_1_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(1))
+                Call Approx_1_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==2)Then
-                Call Approx_2_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(2))
+                Call Approx_2_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==3)Then
-                Call Approx_3_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(3))
+                Call Approx_3_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==4)Then
-                Call Approx_4_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(4))    
+                Call Approx_4_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)    
             elseif (n==5)Then
-                Call Approx_5_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(5))
+                Call Approx_5_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==6)Then
-                Call Approx_6_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(6))
+                Call Approx_6_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==7)Then
-                Call Approx_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(7))
+                Call Approx_7_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)
             elseif(n==8)Then
-                Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,Multipole_Energies(8))         
+                Call Approx_8_Sph2(cal_coord_temp,Ar,Br,C , A_Mult,B_Mult ,EM)         
             endif
 
-            term = (C1*C2**n)*Multipole_Energies(n)
+            term = (C1*C2**n)*EM
             testErr(5 + n) = Const*term
             Elect_energy(1+n) = term
             Elect_energy(1) = Elect_energy(1)+term 
@@ -260,8 +255,6 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             Dispe_energy(n-4) = term
             Dispe_energy(1) = Dispe_energy(1)+term
             Ene = Ene+term
-            !Ene = Ene+(C1*C2**n)*ED
-            !write(*,*)"Multipole_Energies: ",n,Multipole_Energies(n),Const*(C1*C2**n)*Multipole_Energies(n)
          END IF 
         
      end do
@@ -286,8 +279,6 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             Induc_energy(n-2) = term
             Induc_energy(1) = Induc_energy(1)+term
             Ene = Ene+term
-            !Ene = Ene + (C1*C2**n)*EI
-            !write(*,*)n, " " ,En
          END IF 
         
      end do
@@ -306,8 +297,6 @@ SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_F
             Hyper_energy(n-4) = term
             Hyper_energy(1) = Hyper_energy(1)+term
             Ene = Ene+term
-            !Ene = Ene + (C1*C2**n)*EH
-            !write(*,*)n, " " ,En
          END IF 
         
      end do
@@ -330,9 +319,6 @@ end SUBROUTINE TotalEnergy_Calc
 
 SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
     IMPLICIT NONE
-    
-    !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
-    !   ANY OTHER VARIABLES LOCAL TO THE SUBROUTINE
 
     !Multipoles !
     
@@ -346,8 +332,6 @@ SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
     real*8 , dimension(15)   :: M7A,M7B !M7
 
     real*8 , dimension(64)   :: A_Mult,B_Mult 
-
-
 
     !Polarizability!
 

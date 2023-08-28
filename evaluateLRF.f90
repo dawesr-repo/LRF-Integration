@@ -4,7 +4,7 @@ IMPLICIT NONE
 real*8, INTENT(OUT) :: E1
 INTEGER, INTENT(IN) :: XDIM
 real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)
-Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical"  
+Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical" for Autosurf input 
 real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1
 INTEGER :: i
 real*8 :: x1

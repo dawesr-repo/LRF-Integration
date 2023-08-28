@@ -78,55 +78,55 @@ CONTAINS
         read(10, *)  this%Zero
 
         Read( 10, *) row
-        read(10, *) this%A_Mult(1)
-        read(10, *) this%A_Mult(2:4)
-        read(10, *) this%A_Mult(5:9)
-        read(10, *) this%A_Mult(10:16)
-        read(10, *) this%A_Mult(17:25)
-        read(10, *) this%A_Mult(26:36)
-        read(10, *) this%A_Mult(37:49)
-        read(10, *) this%A_Mult(50:64)
+        read(10, *) this%A_Mult(1)          !q
+        read(10, *) this%A_Mult(2:4)        !m
+        read(10, *) this%A_Mult(5:9)        !Qd
+        read(10, *) this%A_Mult(10:16)      !O
+        read(10, *) this%A_Mult(17:25)      !Phi
+        read(10, *) this%A_Mult(26:36)      !M5
+        read(10, *) this%A_Mult(37:49)      !M6
+        read(10, *) this%A_Mult(50:64)      !M7
 
         Read( 10, *) row
-        read(10, *) this%B_Mult(1)
-        read(10, *) this%B_Mult(2:4)
-        read(10, *) this%B_Mult(5:9)
-        read(10, *) this%B_Mult(10:16)
-        read(10, *) this%B_Mult(17:25)
-        read(10, *) this%B_Mult(26:36)
-        read(10, *) this%B_Mult(37:49)
-        read(10, *) this%B_Mult(50:64)
+        read(10, *) this%B_Mult(1)          !q
+        read(10, *) this%B_Mult(2:4)        !m
+        read(10, *) this%B_Mult(5:9)        !Qd
+        read(10, *) this%B_Mult(10:16)      !O
+        read(10, *) this%B_Mult(17:25)      !Phi
+        read(10, *) this%B_Mult(26:36)      !M5
+        read(10, *) this%B_Mult(37:49)      !M6
+        read(10, *) this%B_Mult(50:64)      !M7
 
-        ! Read( 10, *) row
-        ! read(10, *) mmA
-        ! read(10, *) mQdA
-        ! read(10, *) QdQdA
-        ! read(10, *) mOA
+        Read( 10, *) row
+        read(10, *) this%A_Pol(1:6)         !mm
+        read(10, *) this%A_Pol(7:21)        !Qdm
+        read(10, *) this%A_Pol(22:36)       !QdQd
+        read(10, *) this%A_Pol(37:57)       !Om
 
-        ! Read( 10, *) row
-        ! read(10, *) mmB
-        ! read(10, *) mQdB
-        ! read(10, *) QdQdB
-        ! read(10, *) mOB
+        Read( 10, *) row
+        read(10, *)  this%B_Pol(1:6)        !mm
+        read(10, *)  this%B_Pol(7:21)       !Qdm
+        read(10, *)  this%B_Pol(22:36)      !QdQd
+        read(10, *)  this%B_Pol(37:57)      !Om
 
-        ! Read( 10, *) row
-        ! read(10, *) mmmA
-        ! read(10, *) mmQdA
+        Read( 10, *) row
+        read(10, *)  this%A_HPol(1:10)      !mmm
+        read(10, *)  this%A_HPol(11:40)     !Qdmm
 
         
-        ! Read( 10, *) row
-        ! read(10, *) mmmB
-        ! read(10, *) mmQdB
+        Read( 10, *) row
+        read(10, *)  this%B_HPol(1:10)      !mmm
+        read(10, *)  this%B_HPol(11:40)     !Qdmm
 
-        ! Read( 10, *) row
-        ! read(10, *) mm_mm
-        ! read(10, *) mQd_mm
-        ! read(10, *) mm_mQd
-        ! read(10, *) mO_mm
-        ! read(10, *) mm_mO
-        ! read(10, *) QdQd_mm
-        ! read(10, *) mm_QdQd
-        ! read(10, *) mQd_mQd
+        Read( 10, *) row
+        read(10, *) this%Disp(1:36)         !mm_mm      
+        read(10, *) this%Disp(37:126)       !Qdm_mm 
+        read(10, *) this%Disp(127:216)      !mm_Qdm 
+        read(10, *) this%Disp(217:342)      !Om_mm 
+        read(10, *) this%Disp(343:468)      !mm_Om 
+        read(10, *) this%Disp(469:558)      !QdQd_mm
+        read(10, *) this%Disp(559:648)      !mm_QdQd
+        read(10, *) this%Disp(649:873)      !Qdm_Qdm
 
 
         close(10)

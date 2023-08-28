@@ -1,7 +1,109 @@
+MODULE constants_test
+ implicit none
+ save
+ public
+  Integer, dimension (8) :: M_Fit     
+  Integer, dimension (3):: D_Fit     
+  Integer, dimension (5):: I_Fit     
+  Integer, dimension (2):: H_Fit     
+  real*8 , dimension(1195):: coeff_arr
+  Real*8  ::   Zero  
+END MODULE constants_test
+
+
+
+
+
+
 module Testing
         
         contains
+
+        SUBROUTINE evaluateLR_test(coordinates,XDIM,E1,filename,testArr)
+                IMPLICIT NONE
+
+                real*8, INTENT(OUT) :: E1
+                INTEGER, INTENT(IN) :: XDIM
+                real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)
+                Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical"  
+                real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1
+                INTEGER :: i
+                real*8 :: x1
+                Character(*), INTENT(IN) ::  filename
+                real*8, INTENT(INOUT)::testArr(52)
+
+                x1=0d0
+                do i=1,XDIM
+                x1=x1+dabs(coordinates(i))
+                enddo
+
+                if (x1 <= 1d-10) then
+                GeneralCoordenates=0d0
+                CALL Long_Range_Potential_Testing(GeneralCoordenates,E1,filename,1,testArr)
+                return
+                endif
+
+                Call General_Coordinates_Format(XDIM, coordinates, GeneralCoordenates)
+                Call Coordinate_Transformation(GeneralCoordenates,coord_format,GeneralCoordenates1)
+                CALL Long_Range_Potential_Testing(GeneralCoordenates1,E1,filename,1,testArr)
+                return
+
+        END SUBROUTINE evaluateLR_test
+
         SUBROUTINE Long_Range_Potential_Testing(coordenates,TotalEnergy,filename,dotest,testArr)
+                use Tensors_constant
+                use constants_test
+                IMPLICIT NONE
+
+                real*8, INTENT(INOUT)  ::  TotalEnergy
+                real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
+                character(len = *), INTENT(IN) :: filename
+                real*8::testErr(52)
+
+                real*8 , dimension(3):: Ar 
+                real*8 , dimension(3):: Br
+                real*8 , dimension(9):: C
+
+                real*8 , dimension(11):: cal_coord
+                character(len = 200):: fName
+                integer,optional::dotest
+                real*8,optional::testArr(52)
+                integer::doTesting
+             
+              
+
+                integer :: initflag
+                save initflag
+                data initflag /1/
+                !   save coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero
+
+                 if (present(dotest))then
+                        doTesting = dotest
+                else
+                        doTesting = 0
+                end if
+                
+                call init_Tensors() ! Initializing in zero the new vectors
+
+                IF(initflag==1)THEN! initialize 
+                CALL Prep_Param(filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+                initflag=2  
+                ENDIF
+
+                if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
+                .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
+                TotalEnergy = Zero
+                else
+                Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
+                call TotalEnergy_Calc(cal_coord,Ar,Br,C,coeff_arr, M_Fit ,D_Fit,I_Fit,H_Fit,TotalEnergy,1,testErr)
+                 if (doTesting>0 .and. present(testArr)) then
+                        testArr = testErr
+                 endif
+                end if     
+
+        END SUBROUTINE Long_Range_Potential_Testing
+
+        SUBROUTINE Long_Range_Potential_Testing1(coordenates,TotalEnergy,filename,dotest,testArr)
                 use Tensors_constant
                 IMPLICIT NONE
 
@@ -85,7 +187,7 @@ module Testing
 
 
 
-        END SUBROUTINE Long_Range_Potential_Testing
+        END SUBROUTINE Long_Range_Potential_Testing1
 
  
 
@@ -340,10 +442,7 @@ module Testing
                      else
                         XDim_coord = dataset_(i,1:XDIM)
                         E_fit = dataset_(i,7)
-
-                        Call General_Coordinates_Format(XDIM, XDim_coord, GeneralCoordenates)
-                        Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
-                        CALL Long_Range_Potential_Testing(coordinates,E_fortran,coeff_filename,1,testArr)
+                        Call evaluateLR_test(XDim_coord,XDIM,E_fortran,coeff_filename,testArr)
 
                         diff_comp(1) = DABS(E_fortran-E_fit)
                         diff_comp(2) = DABS(dataset_(i,8)-testArr(2))
@@ -677,9 +776,10 @@ module Testing
         END SUBROUTINE FileChecking
 
 
-        SUBROUTINE Test_All(fileOutNumber)
+        SUBROUTINE Test_All(fileOutNumber,ntestMIN,ntestMAX)
                 IMPLICIT NONE
                 INTEGER ,Intent(In)::fileOutNumber
+                integer,optional:: ntestMIN,ntestMAX
                 character(len=20) :: bufferc,bufferd
                 logical :: exist
                 character(len = 22), parameter:: dirData = "./files/test/datasets/"
@@ -709,7 +809,7 @@ module Testing
 
                                 if (exist) then
                                         !write(*,*) "     File: '", trim(bufferd), "' found."
-                                        call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber)
+                                        call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber,ntestMIN,ntestMAX)
                                         
                                         
                                         indData = indData + 1
@@ -1081,14 +1181,7 @@ module Testing
                 call cpu_time(start)
 
                 do i=1,ntest
-
-                        Call General_Coordinates_Format(XDim, FourD_coord, GeneralCoordenates)
-                        Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
-                
-               
-                         CALL Long_Range_Potential_Testing(coordinates,E1,coeff_filename,0,testErr)
-    
-
+                        Call evaluateLR_test(FourD_coord,XDIM,E1,coeff_filename,testErr)
                 enddo    
                 
                 call cpu_time(finish)
@@ -1128,9 +1221,9 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        ! call Test_All(fileOutNumber)
-        ! call Test_Dataset("./files/test/coefficients/coefficients_003.txt", "./files/test/datasets/datatest_003_001.txt"&
-        !                ,fileOutNumber,1,10000)
+        ! call Test_All(fileOutNumber,1,1000)
+        call Test_Dataset("./files/test/coefficients/coefficients_004.txt", "./files/test/datasets/datatest_004_001.txt"&
+                       ,fileOutNumber,1,1000)
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&
         !                     "./files/test/M2(CF+_H2+).txt",&

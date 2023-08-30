@@ -1,7 +1,10 @@
 MODULE FitConstants
     save
     public
-
+    real*8, parameter ::  C1=627.5095d0
+    real*8, parameter ::  C2=0.529177249d0
+    real*8, parameter ::  C3=349.757d0
+    
     TYPE Fit_Contant
      character(:), allocatable :: filename
      real*8 :: Zero

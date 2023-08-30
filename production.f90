@@ -1,7 +1,7 @@
  !******************************************************************************
  !      Compilation Day and Time
  !      Month / Day / Year:            8 /          30 /        2023
- !      Hr    / Min / Sec :           11 :          45 :          22
+ !      Hr    / Min / Sec :           12 :          46 :          41
  !      LRF MATLAB  v0.7.1
  !      LRF_Fortran v0.3.1
  !******************************************************************************
@@ -127,6 +127,10 @@
    end subroutine T_component                                                                                                                                                                            
                                                                                                                                                                                                          
  end module Tensors_constant                                                                                                                                                                             
+                                                                                                                                                                                                         
+ !FittingConstant is the module in charge of all constants related with the fit                                                                                                                          
+ !It can handle several coefficient files at the same time                                                                                                                                               
+                                                                                                                                                                                                         
                                                                                                                                                                                                          
  MODULE FitConstants                                                                                                                                                                                     
      save                                                                                                                                                                                                

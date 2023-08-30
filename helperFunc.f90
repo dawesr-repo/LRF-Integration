@@ -327,200 +327,200 @@ end SUBROUTINE TotalEnergy_Calc
 
 
 
-SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
-    IMPLICIT NONE
+! SUBROUTINE Prep_Param(Coeff_Address, coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+!     IMPLICIT NONE
 
-    !Multipoles !
+!     !Multipoles !
     
-    real*8 , dimension(1)   :: qA,qB !q
-    real*8 , dimension(3)   :: mA,mB !m
-    real*8 , dimension(5)   :: QdA,QdB !Qd 
-    real*8 , dimension(7)   :: OA,OB !O 
-    real*8 , dimension(9)   :: PhiA,PhiB !Phi 
-    real*8 , dimension(11)   :: M5A,M5B !M5
-    real*8 , dimension(13)   :: M6A,M6B !M6 
-    real*8 , dimension(15)   :: M7A,M7B !M7
+!     real*8 , dimension(1)   :: qA,qB !q
+!     real*8 , dimension(3)   :: mA,mB !m
+!     real*8 , dimension(5)   :: QdA,QdB !Qd 
+!     real*8 , dimension(7)   :: OA,OB !O 
+!     real*8 , dimension(9)   :: PhiA,PhiB !Phi 
+!     real*8 , dimension(11)   :: M5A,M5B !M5
+!     real*8 , dimension(13)   :: M6A,M6B !M6 
+!     real*8 , dimension(15)   :: M7A,M7B !M7
 
-    real*8 , dimension(64)   :: A_Mult,B_Mult 
+!     real*8 , dimension(64)   :: A_Mult,B_Mult 
 
-    !Polarizability!
+!     !Polarizability!
 
-    real*8 , dimension(6)   :: mmA,mmB 
-    real*8 , dimension(15)  :: mQdA,mQdB
-    real*8 , dimension(15)  :: QdQdA,QdQdB
-    real*8 , dimension(21)  :: mOA,mOB
+!     real*8 , dimension(6)   :: mmA,mmB 
+!     real*8 , dimension(15)  :: mQdA,mQdB
+!     real*8 , dimension(15)  :: QdQdA,QdQdB
+!     real*8 , dimension(21)  :: mOA,mOB
 
-    real*8 , dimension(57)   :: A_Pol,B_Pol 
+!     real*8 , dimension(57)   :: A_Pol,B_Pol 
 
-    !Hyperpolarizability!
+!     !Hyperpolarizability!
 
-    real*8 , dimension(10)   :: mmmA,mmmB 
-    real*8 , dimension(30)  :: mmQdA,mmQdB
+!     real*8 , dimension(10)   :: mmmA,mmmB 
+!     real*8 , dimension(30)  :: mmQdA,mmQdB
 
-    real*8 , dimension(40)   :: A_HPol,B_HPol 
+!     real*8 , dimension(40)   :: A_HPol,B_HPol 
 
-    !Dispersion!
+!     !Dispersion!
 
-    real*8 , dimension(36)   :: mm_mm 
-    real*8 , dimension(90)  ::  mm_mQd,mQd_mm,mm_QdQd,QdQd_mm
-    real*8 , dimension(126)   :: mO_mm,mm_mO 
-    real*8 , dimension(225)   :: mQd_mQd 
+!     real*8 , dimension(36)   :: mm_mm 
+!     real*8 , dimension(90)  ::  mm_mQd,mQd_mm,mm_QdQd,QdQd_mm
+!     real*8 , dimension(126)   :: mO_mm,mm_mO 
+!     real*8 , dimension(225)   :: mQd_mQd 
 
-    real*8 , dimension(873)   :: Disp
-
-
-
-    real*8 , dimension(1195), INTENT(INOUT) :: coeff_arr
-
-    Character(len = *), INTENT(IN)   ::  Coeff_Address
-
-    Integer, dimension (8),  INTENT(INOUT) :: M_Fit      
-    Integer, dimension (3),  INTENT(INOUT) :: D_Fit     
-    Integer, dimension (5),  INTENT(INOUT) :: I_Fit     
-    Integer, dimension (2),  INTENT(INOUT) :: H_Fit     
-
-    Real*8 , INTENT(out) :: Zero                         
-
-
-    Character(len = 20) :: row
-    ! Integer , dimension(7) :: DataColumn ! R , Cos_b1 , Cos_b2 , alpha ,  Cos_c1 , Cos_c2 , Energy    
-
-    !write(*,*) 'Reading file'
-
-    Open( 10, file = Coeff_Address )
-
-    Read( 10, *) row
-    Read( 10, *) row
-    Read( 10, *) row
-    Read( 10, *) row
-    Read( 10, *) row
-    Read( 10, *) row
-    Read( 10, *) row
-
-    read(10, *)  M_Fit
-    read(10, *)  D_Fit
-    read(10, *)  I_Fit
-    read(10, *)  H_Fit
-
-    Read( 10, *) row
-    read(10, *) Zero
-
-    Read( 10, *) row
-    read(10, *) qA
-    read(10, *) mA
-    read(10, *) QdA
-    read(10, *) OA
-    read(10, *) PhiA
-    read(10, *) M5A
-    read(10, *) M6A
-    read(10, *) M7A
-
-    Read( 10, *) row
-    read(10, *) qB
-    read(10, *) mB
-    read(10, *) QdB
-    read(10, *) OB
-    read(10, *) PhiB
-    read(10, *) M5B
-    read(10, *) M6B
-    read(10, *) M7B
-
-    Read( 10, *) row
-    read(10, *) mmA
-    read(10, *) mQdA
-    read(10, *) QdQdA
-    read(10, *) mOA
-
-    Read( 10, *) row
-    read(10, *) mmB
-    read(10, *) mQdB
-    read(10, *) QdQdB
-    read(10, *) mOB
-
-    Read( 10, *) row
-    read(10, *) mmmA
-    read(10, *) mmQdA
-
-    
-    Read( 10, *) row
-    read(10, *) mmmB
-    read(10, *) mmQdB
-
-    Read( 10, *) row
-    read(10, *) mm_mm
-    read(10, *) mQd_mm
-    read(10, *) mm_mQd
-    read(10, *) mO_mm
-    read(10, *) mm_mO
-    read(10, *) QdQd_mm
-    read(10, *) mm_QdQd
-    read(10, *) mQd_mQd
-
-
-    close(10) 
+!     real*8 , dimension(873)   :: Disp
 
 
 
-    A_Mult(1:1) = qA
-    A_Mult(2:4) = mA
-    A_Mult(5:9) = QdA
-    A_Mult(10:16) = OA
-    A_Mult(17:25) = PhiA
-    A_Mult(26:36) = M5A
-    A_Mult(37:49) = M6A
-    A_Mult(50:64) = M7A
+!     real*8 , dimension(1195), INTENT(INOUT) :: coeff_arr
 
-    B_Mult(1:1) = qB
-    B_Mult(2:4) = mB
-    B_Mult(5:9) = QdB
-    B_Mult(10:16) = OB
-    B_Mult(17:25) = PhiB
-    B_Mult(26:36) = M5B
-    B_Mult(37:49) = M6B
-    B_Mult(50:64) = M7B
+!     Character(len = *), INTENT(IN)   ::  Coeff_Address
+
+!     Integer, dimension (8),  INTENT(INOUT) :: M_Fit      
+!     Integer, dimension (3),  INTENT(INOUT) :: D_Fit     
+!     Integer, dimension (5),  INTENT(INOUT) :: I_Fit     
+!     Integer, dimension (2),  INTENT(INOUT) :: H_Fit     
+
+!     Real*8 , INTENT(out) :: Zero                         
 
 
-    A_Pol(1:6) = mmA
-    A_Pol(7:21) = mQdA
-    A_Pol(22:36) = QdQdA
-    A_Pol(37:57) = mOA
+!     Character(len = 20) :: row
+!     ! Integer , dimension(7) :: DataColumn ! R , Cos_b1 , Cos_b2 , alpha ,  Cos_c1 , Cos_c2 , Energy    
+
+!     !write(*,*) 'Reading file'
+
+!     Open( 10, file = Coeff_Address )
+
+!     Read( 10, *) row
+!     Read( 10, *) row
+!     Read( 10, *) row
+!     Read( 10, *) row
+!     Read( 10, *) row
+!     Read( 10, *) row
+!     Read( 10, *) row
+
+!     read(10, *)  M_Fit
+!     read(10, *)  D_Fit
+!     read(10, *)  I_Fit
+!     read(10, *)  H_Fit
+
+!     Read( 10, *) row
+!     read(10, *) Zero
+
+!     Read( 10, *) row
+!     read(10, *) qA
+!     read(10, *) mA
+!     read(10, *) QdA
+!     read(10, *) OA
+!     read(10, *) PhiA
+!     read(10, *) M5A
+!     read(10, *) M6A
+!     read(10, *) M7A
+
+!     Read( 10, *) row
+!     read(10, *) qB
+!     read(10, *) mB
+!     read(10, *) QdB
+!     read(10, *) OB
+!     read(10, *) PhiB
+!     read(10, *) M5B
+!     read(10, *) M6B
+!     read(10, *) M7B
+
+!     Read( 10, *) row
+!     read(10, *) mmA
+!     read(10, *) mQdA
+!     read(10, *) QdQdA
+!     read(10, *) mOA
+
+!     Read( 10, *) row
+!     read(10, *) mmB
+!     read(10, *) mQdB
+!     read(10, *) QdQdB
+!     read(10, *) mOB
+
+!     Read( 10, *) row
+!     read(10, *) mmmA
+!     read(10, *) mmQdA
 
     
-    B_Pol(1:6) = mmB
-    B_Pol(7:21) = mQdB
-    B_Pol(22:36) = QdQdB
-    B_Pol(37:57) = mOB
+!     Read( 10, *) row
+!     read(10, *) mmmB
+!     read(10, *) mmQdB
 
-    A_HPol(1:10) = mmmA
-    A_HPol(11:40) = mmQdA
-
-    B_HPol(1:10) = mmmB
-    B_HPol(11:40) = mmQdB
-
-    Disp(1:36) = mm_mm
-    Disp(37:126) = mQd_mm
-    Disp(127:216) = mm_mQd
-    Disp(217:342) = mO_mm
-    Disp(343:468) = mm_mO
-    Disp(469:558) = QdQd_mm
-    Disp(559:648) = mm_QdQd
-    Disp(649:873) = mQd_mQd
+!     Read( 10, *) row
+!     read(10, *) mm_mm
+!     read(10, *) mQd_mm
+!     read(10, *) mm_mQd
+!     read(10, *) mO_mm
+!     read(10, *) mm_mO
+!     read(10, *) QdQd_mm
+!     read(10, *) mm_QdQd
+!     read(10, *) mQd_mQd
 
 
-    coeff_arr(1:64)   = A_Mult
-    coeff_arr(65:128) = B_Mult
-
-    coeff_arr(129:185)   = A_Pol
-    coeff_arr(186:242)   = B_Pol
-
-    coeff_arr(243:282)   = A_HPol
-    coeff_arr(283:322)   = B_HPol
-
-    coeff_arr(323:1195)   = Disp
+!     close(10) 
 
 
-    RETURN
-END SUBROUTINE Prep_Param
+
+!     A_Mult(1:1) = qA
+!     A_Mult(2:4) = mA
+!     A_Mult(5:9) = QdA
+!     A_Mult(10:16) = OA
+!     A_Mult(17:25) = PhiA
+!     A_Mult(26:36) = M5A
+!     A_Mult(37:49) = M6A
+!     A_Mult(50:64) = M7A
+
+!     B_Mult(1:1) = qB
+!     B_Mult(2:4) = mB
+!     B_Mult(5:9) = QdB
+!     B_Mult(10:16) = OB
+!     B_Mult(17:25) = PhiB
+!     B_Mult(26:36) = M5B
+!     B_Mult(37:49) = M6B
+!     B_Mult(50:64) = M7B
+
+
+!     A_Pol(1:6) = mmA
+!     A_Pol(7:21) = mQdA
+!     A_Pol(22:36) = QdQdA
+!     A_Pol(37:57) = mOA
+
+    
+!     B_Pol(1:6) = mmB
+!     B_Pol(7:21) = mQdB
+!     B_Pol(22:36) = QdQdB
+!     B_Pol(37:57) = mOB
+
+!     A_HPol(1:10) = mmmA
+!     A_HPol(11:40) = mmQdA
+
+!     B_HPol(1:10) = mmmB
+!     B_HPol(11:40) = mmQdB
+
+!     Disp(1:36) = mm_mm
+!     Disp(37:126) = mQd_mm
+!     Disp(127:216) = mm_mQd
+!     Disp(217:342) = mO_mm
+!     Disp(343:468) = mm_mO
+!     Disp(469:558) = QdQd_mm
+!     Disp(559:648) = mm_QdQd
+!     Disp(649:873) = mQd_mQd
+
+
+!     coeff_arr(1:64)   = A_Mult
+!     coeff_arr(65:128) = B_Mult
+
+!     coeff_arr(129:185)   = A_Pol
+!     coeff_arr(186:242)   = B_Pol
+
+!     coeff_arr(243:282)   = A_HPol
+!     coeff_arr(283:322)   = B_HPol
+
+!     coeff_arr(323:1195)   = Disp
+
+
+!     RETURN
+! END SUBROUTINE Prep_Param
 
 
 

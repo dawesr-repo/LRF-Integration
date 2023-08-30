@@ -8,7 +8,7 @@ module Testing
                 real*8, INTENT(OUT) :: E1
                 INTEGER, INTENT(IN) :: XDIM
                 real*8 ,dimension(:), INTENT(IN):: coordinates(XDIM)
-                Character(len = 20) :: coord_format = "Euler_ZXZ" !for Xdim =3, use coord_format ="Spherical" for Autosurf input 
+                Character(len = 20) :: coord_format = "Euler_ZYZ" !for Xdim =3, use coord_format ="Spherical" for Autosurf input 
                 real*8 ,dimension(6):: GeneralCoordenates,GeneralCoordenates1
                 INTEGER :: i
                 real*8 :: x1
@@ -23,7 +23,7 @@ module Testing
 
                 if (x1 <= 1d-10) then
                 GeneralCoordenates=0d0
-                CALL Long_Range_Potential_Testing(GeneralCoordenates,E1,filename)
+                CALL Long_Range_Potential_Testing(GeneralCoordenates,E1,filename,1,testArr)
                 return
                 endif
 
@@ -66,6 +66,14 @@ module Testing
                 call init_Tensors() ! Initializing in zero the new vectors
                 call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
 
+                write(*,*) Coeff(CoeffIndex)%A_Mult(1)          !q
+                write(*,*) Coeff(CoeffIndex)%A_Mult(2:4)        !m
+                write(*,*) Coeff(CoeffIndex)%A_Mult(5:9)        !Qd
+                write(*,*) Coeff(CoeffIndex)%A_Mult(10:16)      !O
+                write(*,*) Coeff(CoeffIndex)%A_Mult(17:25)      !Phi
+                write(*,*) Coeff(CoeffIndex)%A_Mult(26:36)      !M5
+                write(*,*) Coeff(CoeffIndex)%A_Mult(37:49)      !M6
+                write(*,*) Coeff(CoeffIndex)%A_Mult(50:64)      !M7Coeff(CoeffIndex)%A_Mult(1)
 
                 if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
                         .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
@@ -347,8 +355,8 @@ module Testing
                         diff_comp(21:23) = DABS(dataset_(i,20:22)-testArr(21:23))  
                         diff_comp(31:35) = DABS(dataset_(i,23:27)-testArr(31:35)) 
                         diff_comp(43:44) = DABS(dataset_(i,28:29)-testArr(43:44)) 
-
-                        !write(*,*)testArr(21),dataset_(i,20)
+                        write(*,*)"TEST ARR"
+                        write(*,*)testArr(21),dataset_(i,20)
 
                         if(diff_comp(1)>maxErr)then
                             maxErr = diff_comp(1)
@@ -382,7 +390,7 @@ module Testing
                                         write(*,*) 
                                         write(*,*) "Row : ",i
                                         write(*,*) "Coordinates : ",XDim_coord
-                                        write(*,*) "Energy: ",E_fortran,E_fit,diff_comp(1)
+                                        write(*,*) "Energy: ",E_fit,diff_comp(1)
                                         write(*,*) "Elect. : ",dataset_(i,8),testArr(2), diff_comp(2)
                                         write(*,*) "Dispe. : ",dataset_(i,10),testArr(3),diff_comp(3)
                                         write(*,*) "Induc. : ",dataset_(i,9),testArr(4), diff_comp(4)
@@ -538,7 +546,9 @@ module Testing
                        
                         call init_Tensors() ! Initializing in zero the new vectors
 
-                        CALL Prep_Param(coeff_filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
+                        !Replace this function to futher use
+
+                        !CALL Prep_Param(coeff_filename,coeff_arr,M_Fit ,D_Fit,I_Fit,H_Fit,Zero)
 
 
                         A_Mult=coeff_arr(1:64)
@@ -675,7 +685,7 @@ module Testing
                 character(len=20) :: bufferc,bufferd
                 logical :: exist
                 character(len = 22), parameter:: dirData = "./files/test/datasets/"
-                character(len = 26), parameter:: dirCoeff="./files/test/coefficients/"
+                character(len = 26), parameter:: dirCoeff= "./files/test/coefficients/"
                 INTEGER  ::indCoeff,indData
 
                  
@@ -1122,7 +1132,7 @@ PROGRAM main_subroutine
 
 
         ! call Test_All(fileOutNumber)
-        call Test_Dataset("./files/test/coefficients/coefficients_003.txt", "./files/test/datasets/datatest_003_001.txt"&
+        call Test_Dataset("./files/test/coefficients/coefficients_001.txt", "./files/test/datasets/datatest_001_001.txt"&
                        ,fileOutNumber,1,1)
         
         ! call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&

@@ -4,13 +4,14 @@ F90 = gfortran # compiile with gfortran
 
 CMPLFLG = -c -O3 -fbacktrace
 
-OBJS = 		 T_saved.o helperFunc.o Index_Searcher.o Approx_1_Sph2.o Approx_2_Sph2.o Approx_3_Sph2.o Approx_4_Sph2.o Approx_5_Sph2.o Approx_6_Sph2.o Approx_7_Sph2.o Approx_8_Sph2.o Induction_4_Sph2.o  Induction_5_Sph2.o Induction_6_Sph2.o Induction_7_Sph2.o Induction_8_Sph2.o HyperPolarizability_6_Sph2.o HyperPolarizability_7_Sph2.o Dispersion_6_Sph2.o Dispersion_7_Sph2.o Dispersion_8_Sph2.o T_lk.o T_l0.o T_ll.o LongRangePotential.o evaluateLRF.o min_example.o 
-OBJS_Test =  T_saved.o helperFunc.o Index_Searcher.o Approx_1_Sph2.o Approx_2_Sph2.o Approx_3_Sph2.o Approx_4_Sph2.o Approx_5_Sph2.o Approx_6_Sph2.o Approx_7_Sph2.o Approx_8_Sph2.o Induction_4_Sph2.o  Induction_5_Sph2.o Induction_6_Sph2.o Induction_7_Sph2.o Induction_8_Sph2.o HyperPolarizability_6_Sph2.o HyperPolarizability_7_Sph2.o Dispersion_6_Sph2.o Dispersion_7_Sph2.o Dispersion_8_Sph2.o T_lk.o T_l0.o T_ll.o LongRangePotential.o evaluateLRF.o test.o 
+OBJS = 		 T_saved.o FittingConstant.o helperFunc.o Index_Searcher.o Approx_1_Sph2.o Approx_2_Sph2.o Approx_3_Sph2.o Approx_4_Sph2.o Approx_5_Sph2.o Approx_6_Sph2.o Approx_7_Sph2.o Approx_8_Sph2.o Induction_4_Sph2.o  Induction_5_Sph2.o Induction_6_Sph2.o Induction_7_Sph2.o Induction_8_Sph2.o HyperPolarizability_6_Sph2.o HyperPolarizability_7_Sph2.o Dispersion_6_Sph2.o Dispersion_7_Sph2.o Dispersion_8_Sph2.o T_lk.o T_l0.o T_ll.o LongRangePotential.o min_example.o 
+OBJS_Test =  T_saved.o FittingConstant.o helperFunc.o Index_Searcher.o Approx_1_Sph2.o Approx_2_Sph2.o Approx_3_Sph2.o Approx_4_Sph2.o Approx_5_Sph2.o Approx_6_Sph2.o Approx_7_Sph2.o Approx_8_Sph2.o Induction_4_Sph2.o  Induction_5_Sph2.o Induction_6_Sph2.o Induction_7_Sph2.o Induction_8_Sph2.o HyperPolarizability_6_Sph2.o HyperPolarizability_7_Sph2.o Dispersion_6_Sph2.o Dispersion_7_Sph2.o Dispersion_8_Sph2.o T_lk.o T_l0.o T_ll.o LongRangePotential.o test.o 
 
 
-OBJS_PROD =  production.o  min_example.o 
-OBJS_PROD_Test =  production.o    test.o
-OBJS_PROD_Build =  build_production.o 
+OBJS_PROD =       production.o  min_example.o 
+OBJS_PROD_Test =  production.o  test.o
+OBJS_PROD_Build = build_production.o 
+
 
 
 all : $(OBJS)

@@ -69,13 +69,14 @@ PROGRAM build_production
 
         
         fileNames(1)%s = "T_saved.f90"
-        fileNames(2)%s = "T_lk.f90"
-        fileNames(3)%s = "T_l0.f90"
-        fileNames(4)%s = "T_ll.f90"
-        fileNames(5)%s = "Index_Searcher.f90"
-        fileNames(6)%s = "helperFunc.f90"
+        fileNames(2)%s = "FittingConstant.f90"
+        fileNames(3)%s = "T_lk.f90"
+        fileNames(4)%s = "T_l0.f90"
+        fileNames(5)%s = "T_ll.f90"
+        fileNames(6)%s = "Index_Searcher.f90"
+        fileNames(7)%s = "helperFunc.f90"
 
-        if1 = 6
+        if1 = 7
         
         fileNames(if1+1)%s = "Approx_1_Sph2.f90"
         fileNames(if1+2)%s = "Approx_2_Sph2.f90"
@@ -108,7 +109,7 @@ PROGRAM build_production
         if5 = if4+2
 
         fileNames(if5+1)%s = "LongRangePotential.f90"
-        fileNames(if5+2)%s = "evaluateLRF.f90"
+     
 
         call FileChecking('production.f90',writing_unit)
         REWIND(writing_unit)

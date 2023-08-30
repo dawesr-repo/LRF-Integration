@@ -55,6 +55,7 @@ module Testing
                 integer::CoeffIndex
                 integer::doTesting
                 real*8::testErr(52)
+  
 
                 if (present(dotest))then
                         doTesting = dotest
@@ -66,21 +67,14 @@ module Testing
                 call init_Tensors() ! Initializing in zero the new vectors
                 call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
 
-                write(*,*) Coeff(CoeffIndex)%A_Mult(1)          !q
-                write(*,*) Coeff(CoeffIndex)%A_Mult(2:4)        !m
-                write(*,*) Coeff(CoeffIndex)%A_Mult(5:9)        !Qd
-                write(*,*) Coeff(CoeffIndex)%A_Mult(10:16)      !O
-                write(*,*) Coeff(CoeffIndex)%A_Mult(17:25)      !Phi
-                write(*,*) Coeff(CoeffIndex)%A_Mult(26:36)      !M5
-                write(*,*) Coeff(CoeffIndex)%A_Mult(37:49)      !M6
-                write(*,*) Coeff(CoeffIndex)%A_Mult(50:64)      !M7Coeff(CoeffIndex)%A_Mult(1)
 
                 if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
                         .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
                         TotalEnergy = Coeff(CoeffIndex)%Zero
                 else
                         Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
-                        call TotalEnergy_Calc(cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,0,testErr)
+                        Call TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,1,testErr)
+
                         if (doTesting>0 .and. present(testArr)) then
                                 testArr = testErr
                         endif
@@ -223,7 +217,7 @@ module Testing
                 close(200) 
         end Subroutine READ_DATASET_TTensor
 
-         Subroutine READ_TTensor_Values(ntest,la,lb,DATASET_)
+        Subroutine READ_TTensor_Values(ntest,la,lb,DATASET_)
                 
                 IMPLICIT NONE
                 INTEGER ,Intent(IN) :: ntest   ,la,lb 
@@ -355,8 +349,7 @@ module Testing
                         diff_comp(21:23) = DABS(dataset_(i,20:22)-testArr(21:23))  
                         diff_comp(31:35) = DABS(dataset_(i,23:27)-testArr(31:35)) 
                         diff_comp(43:44) = DABS(dataset_(i,28:29)-testArr(43:44)) 
-                        write(*,*)"TEST ARR"
-                        write(*,*)testArr(21),dataset_(i,20)
+                    
 
                         if(diff_comp(1)>maxErr)then
                             maxErr = diff_comp(1)
@@ -679,9 +672,9 @@ module Testing
         END SUBROUTINE FileChecking
 
 
-        SUBROUTINE Test_All(fileOutNumber)
+        SUBROUTINE Test_All(fileOutNumber,ntestMIN,ntestMAX)
                 IMPLICIT NONE
-                INTEGER ,Intent(In)::fileOutNumber
+                INTEGER ,optional::fileOutNumber,ntestMIN,ntestMAX
                 character(len=20) :: bufferc,bufferd
                 logical :: exist
                 character(len = 22), parameter:: dirData = "./files/test/datasets/"
@@ -711,17 +704,25 @@ module Testing
 
                                 if (exist) then
                                         !write(*,*) "     File: '", trim(bufferd), "' found."
-                                        call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber)
+                                        call Test_Dataset(dirCoeff//bufferc, dirData//bufferd,fileOutNumber,ntestMIN,ntestMAX)
                                         
                                         
                                         indData = indData + 1
                                 else 
                                         if (indData==1) then
+                                         if (present(fileOutNumber))then
                                                 write(fileOutNumber,*)
                                                 write(fileOutNumber,*) "*******************************************************"
                                                 write(fileOutNumber,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
                                                 write(fileOutNumber,*) "*******************************************************"
                                                 write(fileOutNumber,*)
+                                         else
+                                                write(*,*)
+                                                write(*,*) "*******************************************************"
+                                                write(*,*) "*    No Dataset Found for coefficients: ", trim(bufferc)
+                                                write(*,*) "*******************************************************"
+                                                write(*,*)
+                                         end if
                                         end if
                                         exit
                                 end if
@@ -1058,7 +1059,9 @@ module Testing
 
                 enddo
 
-                Call Print_Test_Results(systName,maxErr,nMAX-nMIN+1,success_test,fOutputNum)
+        
+
+                Call Print_Test_Results("GP Test: "//systName,maxErr,nMAX-nMIN+1,success_test,fOutputNum)
 
         end Subroutine Testing_GP
         
@@ -1131,16 +1134,14 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        ! call Test_All(fileOutNumber)
-        call Test_Dataset("./files/test/coefficients/coefficients_001.txt", "./files/test/datasets/datatest_001_001.txt"&
-                       ,fileOutNumber,1,1)
+        call Test_All(fileOutNumber,1,10000)
         
-        ! call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GPTable(CF+_H2+).txt"&
-        !                 ,fileOutNumber,1,10000)
-        ! call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
-        ! call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
+        call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GP/GPTable(CO_CS).txt"&
+                        ,fileOutNumber,1,10000)
+        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
+        call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
 
-! this is useful to test a particular tensort component (Debugging)
+! this is useful to test a particular tensor component (Debugging)
 
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&

@@ -1,7 +1,7 @@
  !******************************************************************************
  !      Compilation Day and Time
- !      Month / Day / Year:            8 /          30 /        2023
- !      Hr    / Min / Sec :           12 :          46 :          41
+ !      Month / Day / Year:            8 /          31 /        2023
+ !      Hr    / Min / Sec :           10 :          55 :           4
  !      LRF MATLAB  v0.7.1
  !      LRF_Fortran v0.3.1
  !******************************************************************************
@@ -168,7 +168,7 @@
          PROCEDURE, PASS :: Initializer                                                                                                                                                                  
          PROCEDURE, PASS :: Read_Parameters                                                                                                                                                              
      END TYPE                                                                                                                                                                                            
-     Integer,parameter :: NArray=5                                                                                                                                                                       
+     Integer,parameter :: NArray = 5                                                                                                                                                                     
      TYPE(Fit_Contant) :: Coeff(NArray)                                                                                                                                                                  
                                                                                                                                                                                                          
                                                                                                                                                                                                          
@@ -6158,7 +6158,6 @@
                                                                                                                                                                                                          
      RETURN                                                                                                                                                                                              
  END SUBROUTINE mm_Om                                                                                                                                                                                    
-                                                                                                                                                                                                         
  !********************************************************                                                                                                                                               
  SUBROUTINE Dispersion_6_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_6_Energy)                                                                                                                                 
      IMPLICIT NONE                                                                                                                                                                                       

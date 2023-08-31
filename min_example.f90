@@ -17,6 +17,7 @@ PROGRAM min_example
 
  call evaluateLR(X1,XDIM,E1,'./files/coefficients.txt')
 
+
  write(*,*)"Energy: ", E1
  
 END PROGRAM min_example

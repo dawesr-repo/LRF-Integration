@@ -2,13 +2,13 @@
     !********************************************************
 module Tensors_constant  
    implicit none 
-   real*8 :: T_Tensor(40,40,40,40),T_Changed(40,40,40,40)
+   integer,parameter::L=13
+   real*8 :: T_Tensor(2*L+1,2*L+1,2*L+1,2*L+1),T_Changed(2*L+1,2*L+1,2*L+1,2*L+1)
 
   contains
 
   subroutine init_Tensors()  
      implicit none 
-     integer :: i,j,k,l
 
      T_Tensor  = 0d0
      T_Changed = 0d0

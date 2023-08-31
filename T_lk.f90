@@ -284,7 +284,7 @@ SUBROUTINE NN(la,ka1,lb,kb1,NN_fact)
     call Factorial(la-ka1,df1)
     call Factorial(lb-kb1,df2)
 
-    NN_fact  = DSQRT( (nf1/df1)*(nf2/df2));
+    NN_fact  = DSQRT( (nf1/df1))*DSQRT((nf2/df2));
   end if
   
   

@@ -1134,7 +1134,7 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        call Test_All(fileOutNumber,1,10000)
+        !call Test_All(fileOutNumber,1,10000)
         
         call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GP/GPTable(CO_CS).txt"&
                         ,fileOutNumber,1,10000)
@@ -1142,6 +1142,9 @@ PROGRAM main_subroutine
         call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
+
+        Call Test_Dataset("./files/test/coefficients/coefficients_003.txt", &
+                        "./files/test/datasets/datatest_003_001.txt",fileOutNumber,1,1000)
 
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&

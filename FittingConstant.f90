@@ -38,7 +38,7 @@ MODULE FitConstants
         PROCEDURE, PASS :: Initializer
         PROCEDURE, PASS :: Read_Parameters
     END TYPE
-    Integer,parameter :: NArray=5
+    Integer,parameter :: NArray = 5
     TYPE(Fit_Contant) :: Coeff(NArray)
     
    

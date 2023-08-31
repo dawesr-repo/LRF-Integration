@@ -1,4 +1,3 @@
-
 !********************************************************
 SUBROUTINE Dispersion_6_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_6_Energy)
     IMPLICIT NONE

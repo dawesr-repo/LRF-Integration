@@ -36,7 +36,7 @@ module Testing
 
         SUBROUTINE Long_Range_Potential_Testing(coordenates,TotalEnergy,filename,dotest,testArr)
 
-                use Tensors_constant
+                use Geometry_Constant
                 use FitConstants
 
                 IMPLICIT NONE
@@ -455,7 +455,7 @@ module Testing
         Subroutine Test_Component(coeff_filename, data_filename,Comp_filename,&
                                         fileOutputNumber,ntestMIN,ntestMAX)
 
-                use Tensors_constant
+                use Geometry_Constant
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: coeff_filename, data_filename,Comp_filename
                 integer,optional:: fileOutputNumber,ntestMIN,ntestMAX
@@ -739,7 +739,7 @@ module Testing
         END SUBROUTINE Test_All
 
         SUBROUTINE Testing_TTensors(filename,ntestMAX,level_init,level_final)
-                use Tensors_constant 
+                use Geometry_Constant 
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: filename
                 integer,optional:: ntestMAX,level_init,level_final
@@ -835,7 +835,7 @@ module Testing
         END SUBROUTINE Testing_TTensors 
 
         SUBROUTINE Check_Tensors(Ar,Br,C,result,passed,errMax,linit,lfinal)
-                use Tensors_constant 
+                use Geometry_Constant 
                 IMPLICIT NONE
                 
                 

@@ -3,26 +3,56 @@
 ! last test: 26/12/2022
 
 
-PROGRAM min_example
+! PROGRAM min_example
+ 
+!  IMPLICIT NONE
+!  real*8 :: E1
+!  INTEGER :: XDIM=4
+!  real*8 :: X1(4)
+ 
+!  X1(1) = 10.271963668339600d0 !R
+!  X1(2) = 30d0  !b1
+!  X1(3) = 20d0  !b2
+!  X1(4) = 120d0  !Phi
 
+!  call evaluateLR(X1,XDIM,E1,'./files/coefficients.txt')
+
+    
+
+!  write(*,*)"Energy: ", E1
+ 
+! END PROGRAM min_example
+
+PROGRAM min_example
+ use FitConstants
  IMPLICIT NONE
  real*8 :: E1
  INTEGER :: XDIM=4
  real*8 :: X1(4)
+ real*8::arr(5),Energy
+ real*8, allocatable:: arrp(:),arrh(:),arrd(:)
  
+ integer ::i,j,k,l
+
  X1(1) = 10.271963668339600d0 !R
  X1(2) = 30d0  !b1
  X1(3) = 20d0  !b2
  X1(4) = 120d0  !Phi
 
- call evaluateLR(X1,XDIM,E1,'./files/coefficients.txt')
+
+ call evaluateLR(X1,XDIM,E1,'./files/test/coefficients/coefficients_003.txt')
+
+
+ call Dispersion_Sph2( 1,6, Energy)
+
+ 
 
 
  write(*,*)"Energy: ", E1
+
+
  
 END PROGRAM min_example
-
-
 
 
 

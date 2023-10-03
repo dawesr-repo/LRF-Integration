@@ -19,7 +19,6 @@ SUBROUTINE Coordinate_Transformation(coordenates,coord_format,new_coordinates)
     
 End   SUBROUTINE Coordinate_Transformation
 
-
     !********************************************************
 SUBROUTINE General_Coordinates_Format(Dim, old_coordinates, general_coodinates)
             IMPLICIT NONE
@@ -72,82 +71,6 @@ SUBROUTINE General_Coordinates_Format(Dim, old_coordinates, general_coodinates)
   
             RETURN
 END SUBROUTINE General_Coordinates_Format
-
-
-
-
-SUBROUTINE Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
-
-    real*8 , dimension(11), INTENT(INOUT):: cal_coord
-    real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
-    real*8, parameter :: pii = DACOS(-1.d0)  
-    real*8 , dimension(3), INTENT(INOUT):: Ar 
-    real*8 , dimension(3), INTENT(INOUT):: Br
-    real*8 , dimension(9), INTENT(INOUT):: C
-
-    real*8 :: cos_b1,cos_b2,cos_c1,cos_c2,sin_b1,sin_b2,sin_c1,sin_c2,cos_phi,sin_phi
-
-        cal_coord(1) = coordenates(1)
-           
-
-        cal_coord(2)  = DCOS(coordenates(2)*pii/180d0)
-        cal_coord(3) = DSIN(coordenates(2)*pii/180d0)
-
-        cal_coord(4) = DCOS(coordenates(3)*pii/180d0)
-        cal_coord(5) = DSIN(coordenates(3)*pii/180d0)
-    
-        cal_coord(6) = DCOS(coordenates(4)*pii/180d0)
-        cal_coord(7) = DSIN(coordenates(4)*pii/180d0)
-
-        cal_coord(8) = DCOS(coordenates(5)*pii/180d0)
-        cal_coord(9) = DSIN(coordenates(5)*pii/180d0)
-
-        cal_coord(10) = DCOS(coordenates(6)*pii/180d0)
-        cal_coord(11) = DSIN(coordenates(6)*pii/180d0)
-
-       ! write(*,*)"cal_coord",cal_coord(2),cal_coord(4),coordenates(4)*pii/180d0
-
-        cos_b1 =    cal_coord(2)
-        sin_b1 =    cal_coord(3)
-        cos_b2 =    cal_coord(4)
-        sin_b2 =    cal_coord(5)
-        cos_phi =   cal_coord(6)
-        sin_phi =   cal_coord(7)
-        cos_c1 =    cal_coord(8)
-        sin_c1 =    cal_coord(9)
-        cos_c2 =    cal_coord(10)
-        sin_c2 =    cal_coord(11)
-
-        
-
-        Ar(1) = cos_b1           !Az
-        Ar(2) = cos_c1*sin_b1    !Ay
-        Ar(3) = sin_b1*sin_c1    !Ax
-        
-        
-        Br(1) = -cos_b2           !Bz
-        Br(2) = -cos_c2*sin_b2    !By
-        Br(3) = -sin_b2*sin_c2    !Bx
-        
-        C(1)= cos_b1*cos_b2 + cos_phi*sin_b1*sin_b2 !Czz
-        C(2)= cos_b2*sin_b1*sin_c1 - sin_b2 *(cos_c1*sin_phi + cos_phi*cos_b1*sin_c1)  !Cxz
-        C(3)= cos_b2*cos_c1*sin_b1 + sin_b2 *(-cos_phi*cos_b1*cos_c1 + sin_phi*sin_c1) !Cyz
-
-        C(4)= cos_c2*sin_phi*sin_b1 + (-cos_phi*cos_b2*sin_b1 + cos_b1*sin_b2)*sin_c2; !Czx
-        C(5)= -cos_b1*cos_c2*sin_phi*sin_c1 + (cos_b2*cos_c1*sin_phi + sin_b1*sin_b2*sin_c1)*sin_c2 &
-        + cos_phi *(cos_c1*cos_c2 + cos_b1*cos_b2*sin_c1*sin_c2) !Cxx
-        C(6)= cos_c1*sin_b1*sin_b2*sin_c2 + cos_b1*cos_c1 *(-cos_c2*sin_phi + cos_phi*cos_b2*sin_c2) - &
-        sin_c1 *(cos_phi*cos_c2 + cos_b2*sin_phi*sin_c2)   !Cyx
-
-        C(7)= -cos_phi*cos_b2*cos_c2*sin_b1 + cos_b1*cos_c2*sin_b2 - sin_phi*sin_b1*sin_c2 !Czy
-        C(8)= cos_c2*sin_b1*sin_b2*sin_c1 + cos_b2*cos_c2 *(cos_c1*sin_phi + cos_phi*cos_b1*sin_c1) &
-        + (-cos_phi*cos_c1 + cos_b1*sin_phi*sin_c1)*sin_c2 !Cxy
-        C(9)= -cos_b2*cos_c2*sin_phi*sin_c1 + cos_c1 *(cos_c2*sin_b1*sin_b2 + cos_b1*sin_phi*sin_c2) &
-        + cos_phi*(cos_b1*cos_b2*cos_c1*cos_c2 + sin_c1*sin_c2) !Cyy
-       
-
-End   SUBROUTINE Generate_Coordenates
-
 
 SUBROUTINE TotalEnergy_Calc (cal_coord,Ar,Br,C,ind,TotalEnergy,doTesting,testErr)
  use FitConstants

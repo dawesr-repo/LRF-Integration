@@ -1,6 +1,6 @@
 
     !********************************************************
-SUBROUTINE Induction_7_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_7_Energy)
+SUBROUTINE Induction_7_Sph2(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_7_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -10,39 +10,36 @@ SUBROUTINE Induction_7_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
     real*8 :: R 
-    real*8 , dimension(11), INTENT(IN):: cal_coord
-    real*8 , dimension(3), INTENT(IN):: Ar 
-    real*8 , dimension(3), INTENT(IN):: Br
-    real*8 , dimension(9), INTENT(IN):: C
+
 
     real*8 :: qO_mm_0,qO_mm_1,mQd_mm_0,mQd_mm_1,mm_mQd_0,mm_mQd_1,qQd_mQd_0,qQd_mQd_1
     real*8 :: qQd_Qdm_0,qQd_Qdm_1,qm_QdQd_0,qm_QdQd_1,qm_mO_0,qm_mO_1,qm_Om_0,qm_Om_1
     
     R =cal_coord(1)
     
-    Call qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qO_mm_0) 
-    Call qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qO_mm_1)
+    Call qO_mm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qO_mm_0) 
+    Call qO_mm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qO_mm_1)
 
-    Call mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mQd_mm_0) 
-    Call mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mQd_mm_1)
+    Call mQd_mm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mQd_mm_0) 
+    Call mQd_mm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mQd_mm_1)
 
-    Call mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mm_mQd_0) 
-    Call mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mm_mQd_1)
+    Call mm_mQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mm_mQd_0) 
+    Call mm_mQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mm_mQd_1)
 
-    Call qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qQd_mQd_0) 
-    Call qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_mQd_1)
+    Call qQd_mQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qQd_mQd_0) 
+    Call qQd_mQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_mQd_1)
 
-    Call qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qQd_Qdm_0) 
-    Call qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_Qdm_1)
+    Call qQd_Qdm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qQd_Qdm_0) 
+    Call qQd_Qdm(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_Qdm_1)
 
-    Call qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_QdQd_0) 
-    Call qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_QdQd_1)
+    Call qm_QdQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_QdQd_0) 
+    Call qm_QdQd(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_QdQd_1)
 
-    Call qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_mO_0) 
-    Call qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_mO_1)
+    Call qm_mO(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_mO_0) 
+    Call qm_mO(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_mO_1)
 
-    Call qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_Om_0) 
-    Call qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_Om_1)
+    Call qm_Om(A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_Om_0) 
+    Call qm_Om(A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_Om_1)
 
     Ind_7_Energy =   (-0.5d0)*(  2.0d0*qO_mm_0 + 2.0d0*qO_mm_1  +2.0d0*mQd_mm_0 +2.0d0*mQd_mm_1 &
                                 +2.0d0*mm_mQd_0+ 2.0d0*mm_mQd_1 +2.0d0*qQd_mQd_0+2.0d0*qQd_mQd_1 & 
@@ -62,16 +59,14 @@ END SUBROUTINE Induction_7_Sph2
 
 
 
-SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qO_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
         real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         Integer, INTENT(IN):: ind
         real*8 :: q,r1,r2
         real*8 , dimension(7):: O
@@ -101,8 +96,8 @@ SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,3,Floor((h*1d0)/2d0),cp_h,r1)
-                            Call T_lk(Ar,Br,C,1,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
+                            Call T_lk(1,Floor((i*1d0)/2d0),cp_i,3,Floor((h*1d0)/2d0),cp_h,r1)
+                            Call T_lk(1,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
                                 
                                
                             result = result + (q*O(h))*alpha(k)*r1*r2
@@ -134,8 +129,8 @@ SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,3,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
-                            Call T_lk(Ar,Br,C,0,0,"0",1,Floor((j*1d0)/2d0),cp_j,r2)
+                            Call T_lk(3,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
+                            Call T_lk(0,0,"0",1,Floor((j*1d0)/2d0),cp_j,r2)
                                 
                                
                             result = result + (q*O(h))*alpha(k)*r1*r2
@@ -153,7 +148,7 @@ SUBROUTINE qO_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE qO_mm
 
 
-SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE mQd_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
             IMPLICIT NONE
     
             INTEGER ::  i,j,k,h,g
@@ -189,8 +184,8 @@ SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 Call GetIndex_mm(i,j,k)
         
                                 if (DABS(m(g))>eps .and.  DABS(alpha(k))>eps .and. DABS(Qd(h))>eps) Then
-                                        ! Call TQdm(Ar,Br,C ,h,j,mod(ind+1,2),t_jh)
-                                        ! Call Tmm(Ar,Br,C ,i,g,ind,t_ig)
+                                        ! Call TQdm(h,j,mod(ind+1,2),t_jh)
+                                        ! Call Tmm(i,g,ind,t_ig)
                                         ! result = result + (m(g)*Qd(h))*alpha(k)*t_ig*t_jh
     
                                         call Get_Comp(g,cp_g)
@@ -198,9 +193,9 @@ SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                         call Get_Comp(i,cp_i)
                                         call Get_Comp(j,cp_j)
     
-                                        Call T_lk(Ar,Br,C,1,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r1)
+                                        Call T_lk(1,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r1)
     
-                                        Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
+                                        Call T_lk(1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
                                         
                                        
                                         result = result + (m(g)*Qd(h))*alpha(k)*r1*r2    
@@ -224,8 +219,8 @@ SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 Call GetIndex_mm(i,j,k)
         
                                 if (DABS(m(g))>eps .and.  DABS(alpha(k))>eps .and. DABS(Qd(h))>eps) Then
-                                        ! Call TQdm(Ar,Br,C ,h,j,mod(ind+1,2),t_jh)
-                                        ! Call Tmm(Ar,Br,C ,i,g,ind,t_ig)
+                                        ! Call TQdm(h,j,mod(ind+1,2),t_jh)
+                                        ! Call Tmm(i,g,ind,t_ig)
                                         ! result = result + (m(g)*Qd(h))*alpha(k)*t_ig*t_jh
     
                                         call Get_Comp(g,cp_g)
@@ -233,9 +228,9 @@ SUBROUTINE mQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                         call Get_Comp(i,cp_i)
                                         call Get_Comp(j,cp_j)
     
-                                        Call T_lk(Ar,Br,C,2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r1)
+                                        Call T_lk(2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r1)
     
-                                        Call T_lk(Ar,Br,C,1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
+                                        Call T_lk(1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
                                         
                                        
                                         result = result + (m(g)*Qd(h))*alpha(k)*r1*r2    
@@ -256,7 +251,7 @@ END SUBROUTINE mQd_mm
 
          
     
-SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE mm_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                     IMPLICIT NONE
             
                     INTEGER ::  i,j,k,h,g
@@ -291,8 +286,8 @@ SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                         Call GetIndex_mQd(i,j,k)
                 
                                         if (DABS(m(h))>eps .and. DABS(m(g))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
-                                                ! Call TQdm(Ar,Br,C ,j,h,ind,t_jh)
-                                                ! Call Tmm (Ar,Br,C ,i,g,ind,t_ig)
+                                                ! Call TQdm(j,h,ind,t_jh)
+                                                ! Call Tmm (i,g,ind,t_ig)
                                                 ! result = result + (m(g)*m(h))*alpha_mQ(k)*t_ig*t_jh
                                                 
                                                 call Get_Comp(g,cp_g)
@@ -300,9 +295,9 @@ SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                                 call Get_Comp(i,cp_i)
                                                 call Get_Comp(j,cp_j)
                 
-                                                Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
+                                                Call T_lk(2,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
                 
-                                                Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
+                                                Call T_lk(1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
                                                 
                                             
                                                 result = result + (m(g)*m(h))*alpha_mQ(k)*r1*r2
@@ -327,8 +322,8 @@ SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                         Call GetIndex_mQd(i,j,k)
                 
                                         if (DABS(m(h))>eps .and. DABS(m(g))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
-                                                ! Call TQdm(Ar,Br,C ,j,h,ind,t_jh)
-                                                ! Call Tmm (Ar,Br,C ,i,g,ind,t_ig)
+                                                ! Call TQdm(j,h,ind,t_jh)
+                                                ! Call Tmm (i,g,ind,t_ig)
                                                 ! result = result + (m(g)*m(h))*alpha_mQ(k)*t_ig*t_jh
                                                 
                                                 call Get_Comp(g,cp_g)
@@ -336,9 +331,9 @@ SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                                 call Get_Comp(i,cp_i)
                                                 call Get_Comp(j,cp_j)
                 
-                                                Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r1)
+                                                Call T_lk(1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r1)
                 
-                                                Call T_lk(Ar,Br,C,1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
+                                                Call T_lk(1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
                                                 
                                             
                                                 result = result + (m(g)*m(h))*alpha_mQ(k)*r1*r2
@@ -360,16 +355,14 @@ SUBROUTINE mm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE mm_mQd
     
     
-SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qQd_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
         real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         Integer, INTENT(IN):: ind
         real*8 :: q,r1,r2
         real*8 , dimension(5):: Qd
@@ -394,8 +387,8 @@ SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         Call GetIndex_mQd(i,j,k)
 
                         if (DABS(q)>eps .and. DABS(Qd(h))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
-                                ! Call TQdQd(Ar,Br,C ,j,h,ind,t_jh)
-                                ! Call Tmq (Ar,Br,C ,i,ind,t_i)
+                                ! Call TQdQd(j,h,ind,t_jh)
+                                ! Call Tmq (i,ind,t_i)
                                 ! result = result + (q*Qd(h))*alpha_mQ(k)*t_i*t_jh
 
                            
@@ -403,9 +396,9 @@ SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,2,Floor((h*1d0)/2d0),cp_h,r1)
+                            Call T_lk(1,Floor((i*1d0)/2d0),cp_i,2,Floor((h*1d0)/2d0),cp_h,r1)
 
-                            Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
+                            Call T_lk(2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
                             
                            
                             result = result + (q*Qd(h))*alpha_mQ(k)*r1*r2
@@ -435,9 +428,9 @@ SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,2,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
+                            Call T_lk(2,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                            Call T_lk(Ar,Br,C,0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r2)
+                            Call T_lk(0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r2)
                             
                            
                             result = result + (q*Qd(h))*alpha_mQ(k)*r1*r2
@@ -457,16 +450,14 @@ SUBROUTINE qQd_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
         RETURN
 END SUBROUTINE qQd_mQd
 
-SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qQd_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
         real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         Integer, INTENT(IN):: ind
         real*8 :: q,r1,r2
         real*8 , dimension(5):: Qd
@@ -492,17 +483,17 @@ SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         Call GetIndex_mQd(i,j,k)
 
                         if (DABS(q)>eps .and. DABS(Qd(h))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
-                                ! Call TQdq(Ar,Br,C ,j,ind,t_jh)
-                                ! Call TQdm (Ar,Br,C ,h,i,mod(ind+1,2),t_i)
+                                ! Call TQdq(j,ind,t_jh)
+                                ! Call TQdm (h,i,mod(ind+1,2),t_i)
                                 ! result = result + (q*Qd(h))*alpha_mQ(k)*t_i*t_jh
 
                                 call Get_Comp(h,cp_h)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
+                                Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
 
-                                Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r2)
+                                Call T_lk(2,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r2)
                             
                                 result = result + (q*Qd(h))*alpha_mQ(k)*r1*r2
 
@@ -526,17 +517,17 @@ SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
 
 
                         if (DABS(q)>eps .and. DABS(Qd(h))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
-                                ! Call TQdq(Ar,Br,C ,j,ind,t_jh)
-                                ! Call TQdm (Ar,Br,C ,h,i,mod(ind+1,2),t_i)
+                                ! Call TQdq(j,ind,t_jh)
+                                ! Call TQdm (h,i,mod(ind+1,2),t_i)
                                 ! result = result + (q*Qd(h))*alpha_mQ(k)*t_i*t_jh
 
                                 call Get_Comp(h,cp_h)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
+                                Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                                Call T_lk(Ar,Br,C,2,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r2)
+                                Call T_lk(2,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r2)
                             
                                 result = result + (q*Qd(h))*alpha_mQ(k)*r1*r2
 
@@ -557,16 +548,14 @@ SUBROUTINE qQd_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
         RETURN
 END SUBROUTINE qQd_Qdm
 
-SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_QdQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
         real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         Integer, INTENT(IN):: ind
         real*8 :: q,r1,r2
         real*8 , dimension(3):: m
@@ -591,8 +580,8 @@ SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         Call GetIndex_QdQd(i,j,k)
 
                         if ( DABS(q)>eps .and. DABS(m(h))>eps .and.  DABS(alpha_QdQd(k))>eps ) Then
-                                ! Call TQdq(Ar,Br,C ,j,ind,t_j)
-                                ! Call TQdm (Ar,Br,C ,i,h,ind,t_ih)
+                                ! Call TQdq(j,ind,t_j)
+                                ! Call TQdm (i,h,ind,t_ih)
                                 ! result = result + (q*m(h))*alpha_QdQd(k)*t_ih*t_j
 
                           
@@ -600,9 +589,9 @@ SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
+                                Call T_lk(2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
 
-                                Call T_lk(Ar,Br,C,2,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r2)
+                                Call T_lk(2,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r2)
                                 
                             
                                 result = result + (q*m(h))*alpha_QdQd(k)*r1*r2
@@ -625,8 +614,8 @@ SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         Call GetIndex_QdQd(i,j,k)
 
                         if ( DABS(q)>eps .and. DABS(m(h))>eps .and.  DABS(alpha_QdQd(k))>eps ) Then
-                                ! Call TQdq(Ar,Br,C ,j,ind,t_j)
-                                ! Call TQdm (Ar,Br,C ,i,h,ind,t_ih)
+                                ! Call TQdq(j,ind,t_j)
+                                ! Call TQdm (i,h,ind,t_ih)
                                 ! result = result + (q*m(h))*alpha_QdQd(k)*t_ih*t_j
 
                           
@@ -634,9 +623,9 @@ SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r1)
+                                Call T_lk(0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r1)
 
-                                Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,2,Floor((i*1d0)/2d0),cp_i,r2)
+                                Call T_lk(1,Floor((h*1d0)/2d0),cp_h,2,Floor((i*1d0)/2d0),cp_i,r2)
                                 
                             
                                 result = result + (q*m(h))*alpha_QdQd(k)*r1*r2
@@ -657,16 +646,14 @@ SUBROUTINE qm_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
         RETURN
 END SUBROUTINE qm_QdQd
 
-SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_mO(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
         real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         Integer, INTENT(IN):: ind
         real*8 :: q,r1,r2
         real*8 , dimension(3):: m
@@ -691,8 +678,8 @@ SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         Call GetIndex_mO(i,j,k)
 
                         if ( DABS(m(h))>eps .and.DABS(q)>eps .and.  DABS(alpha_mO(k))>eps ) Then
-                                ! Call TOm(Ar,Br,C ,j,h,ind,t_jh)
-                                ! Call Tmq (Ar,Br,C ,i,ind,t_i)
+                                ! Call TOm(j,h,ind,t_jh)
+                                ! Call Tmq (i,ind,t_i)
                                 ! result = result + (q*m(h))*alpha_mO(k)*t_i*t_jh
 
                            
@@ -700,9 +687,9 @@ SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,3,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
+                                Call T_lk(3,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
 
-                                Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
+                                Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
                                 
                             
                                 result = result + (q*m(h))*alpha_mO(k)*r1*r2
@@ -726,8 +713,8 @@ SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         Call GetIndex_mO(i,j,k)
 
                         if ( DABS(m(h))>eps .and.DABS(q)>eps .and.  DABS(alpha_mO(k))>eps ) Then
-                                ! Call TOm(Ar,Br,C ,j,h,ind,t_jh)
-                                ! Call Tmq (Ar,Br,C ,i,ind,t_i)
+                                ! Call TOm(j,h,ind,t_jh)
+                                ! Call Tmq (i,ind,t_i)
                                 ! result = result + (q*m(h))*alpha_mO(k)*t_i*t_jh
 
                            
@@ -735,9 +722,9 @@ SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,3,Floor((j*1d0)/2d0),cp_j,r1)
+                                Call T_lk(1,Floor((h*1d0)/2d0),cp_h,3,Floor((j*1d0)/2d0),cp_j,r1)
 
-                                Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
+                                Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
                                 
                             
                                 result = result + (q*m(h))*alpha_mO(k)*r1*r2
@@ -758,7 +745,7 @@ SUBROUTINE qm_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE qm_mO
 
 
-SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+SUBROUTINE qm_Om(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
             IMPLICIT NONE
     
             INTEGER ::  i,j,k,h
@@ -798,9 +785,9 @@ SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,3,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
+                                Call T_lk(3,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
 
-                                Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r2)
+                                Call T_lk(1,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r2)
                                 
                                
                                 result = result + (q*m(h))*alpha_mO(k)*r1*r2
@@ -823,8 +810,8 @@ SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             Call GetIndex_mO(i,j,k)
     
                             if ( DABS(m(h))>eps .and.DABS(q)>eps .and.  DABS(alpha_mO(k))>eps ) Then
-                                    ! Call TOq(Ar,Br,C ,j,ind,t_j)
-                                    ! Call Tmm (Ar,Br,C ,i,h,ind,t_ih)
+                                    ! Call TOq(j,ind,t_j)
+                                    ! Call Tmm (i,h,ind,t_ih)
                                     ! result = result + (q*m(h))*alpha_mO(k)*t_ih*t_j
 
                               
@@ -832,9 +819,9 @@ SUBROUTINE qm_Om(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,0,0,"0",3,Floor((j*1d0)/2d0),cp_j,r1)
+                                Call T_lk(0,0,"0",3,Floor((j*1d0)/2d0),cp_j,r1)
 
-                                Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r2)
+                                Call T_lk(1,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r2)
                                 
                                
                                 result = result + (q*m(h))*alpha_mO(k)*r1*r2

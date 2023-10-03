@@ -1,6 +1,6 @@
 
     !********************************************************
-SUBROUTINE HyperPolarizability_6_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, H_6_Energy)
+SUBROUTINE HyperPolarizability_6_Sph2(A_Multipoles,B_Multipoles ,A_HPol,B_HPol, H_6_Energy)
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -10,16 +10,13 @@ SUBROUTINE HyperPolarizability_6_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipol
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(40) , INTENT(IN) :: A_HPol,B_HPol
     real*8 :: R 
-    real*8 , dimension(11), INTENT(IN):: cal_coord
-    real*8 , dimension(3), INTENT(IN):: Ar 
-    real*8 , dimension(3), INTENT(IN):: Br
-    real*8 , dimension(9), INTENT(IN):: C
+
     real*8 :: qqq_mmm_0 , qqq_mmm_1
 
     R =cal_coord(1)
     
-    Call qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_HPol,B_HPol,0,qqq_mmm_0) 
-    Call qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_HPol,B_HPol,1,qqq_mmm_1)
+    Call qqq_mmm(A_Multipoles,B_Multipoles,A_HPol,B_HPol,0,qqq_mmm_0) 
+    Call qqq_mmm(A_Multipoles,B_Multipoles,A_HPol,B_HPol,1,qqq_mmm_1)
 
 
     
@@ -31,16 +28,14 @@ END SUBROUTINE HyperPolarizability_6_Sph2
 
 
 
-SUBROUTINE qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , result)
+SUBROUTINE qqq_mmm(A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , result)
     IMPLICIT NONE
 
     INTEGER ::  i,j,h,k
     real*8, INTENT(INOUT) ::result 
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(40) , INTENT(IN) :: A_HPol,B_HPol
-    real*8 , dimension(3), INTENT(IN):: Ar 
-    real*8 , dimension(3), INTENT(IN):: Br
-    real*8 , dimension(9), INTENT(IN):: C
+
     Integer, INTENT(IN):: ind
     real*8 :: q,r1,r2,r3
     real*8 , dimension(10):: beta
@@ -63,9 +58,9 @@ SUBROUTINE qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , resu
                     Call GetIndex_mmm(h,i,j,k)
 
                     if (DABS(q)>eps .and.  DABS(beta(k))>eps) Then
-                            ! Call Tmq(Ar,Br,C ,i,ind,t_i)
-                            ! Call Tmq(Ar,Br,C ,j,ind,t_j)
-                            ! Call Tmq(Ar,Br,C ,h,ind,t_h)
+                            ! Call Tmq(i,ind,t_i)
+                            ! Call Tmq(j,ind,t_j)
+                            ! Call Tmq(h,ind,t_h)
                             ! result = result + (q**3)*beta(k)*t_i*t_j*t_h
 
                         
@@ -73,11 +68,11 @@ SUBROUTINE qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , resu
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
+                        Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
 
-                        Call T_lk(Ar,Br,C,1,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
+                        Call T_lk(1,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
                         
-                        Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,0,0,"0",r3)
+                        Call T_lk(1,Floor((h*1d0)/2d0),cp_h,0,0,"0",r3)
                         
                         result = result + (q**3)*beta(k)*r1*r2*r3
 
@@ -100,9 +95,9 @@ SUBROUTINE qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , resu
                     Call GetIndex_mmm(h,i,j,k)
 
                     if (DABS(q)>eps .and.  DABS(beta(k))>eps) Then
-                            ! Call Tmq(Ar,Br,C ,i,ind,t_i)
-                            ! Call Tmq(Ar,Br,C ,j,ind,t_j)
-                            ! Call Tmq(Ar,Br,C ,h,ind,t_h)
+                            ! Call Tmq(i,ind,t_i)
+                            ! Call Tmq(j,ind,t_j)
+                            ! Call Tmq(h,ind,t_h)
                             ! result = result + (q**3)*beta(k)*t_i*t_j*t_h
 
                         
@@ -110,11 +105,11 @@ SUBROUTINE qqq_mmm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_HPol,B_HPol, ind , resu
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
+                        Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",1,Floor((j*1d0)/2d0),cp_j,r2)
+                        Call T_lk(0,0,"0",1,Floor((j*1d0)/2d0),cp_j,r2)
                         
-                        Call T_lk(Ar,Br,C,0,0,"0",1,Floor((h*1d0)/2d0),cp_h,r3)
+                        Call T_lk(0,0,"0",1,Floor((h*1d0)/2d0),cp_h,r3)
                         
                         result = result + (q**3)*beta(k)*r1*r2*r3
 

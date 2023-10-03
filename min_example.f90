@@ -25,14 +25,15 @@
 
 PROGRAM min_example
  use FitConstants
+ use Search
  IMPLICIT NONE
  real*8 :: E1
  INTEGER :: XDIM=4
  real*8 :: X1(4)
- real*8::arr(5),Energy
+ real*8::Energy
  real*8, allocatable:: arrp(:),arrh(:),arrd(:)
- 
- integer ::i,j,k,l
+ character(len=5),allocatable::arr(:)
+ integer ::i,j,k,l,index1,index2
 
  X1(1) = 10.271963668339600d0 !R
  X1(2) = 30d0  !b1
@@ -41,13 +42,19 @@ PROGRAM min_example
 
 
  call evaluateLR(X1,XDIM,E1,'./files/test/coefficients/coefficients_003.txt')
-
-
- call Dispersion_Sph2( 1,6, Energy)
-
  
-
-
+ call Initialize_Search()
+ do i=1,3
+    do j=1,5
+        do k=1,3
+            do l=1,3
+                Call Get_Disp_Index(1,2,1,1,i,j,k,l,index1)
+                Call GetIndex_mQd_mm(i,j,k,l,index2)
+                write(*,*)i,j,k,l,index1,index2,index1-index2
+            end do 
+        end do 
+    end do 
+ end do 
  write(*,*)"Energy: ", E1
 
 

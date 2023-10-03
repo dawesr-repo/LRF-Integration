@@ -57,7 +57,7 @@ PROGRAM build_production
         character(:), allocatable :: s
         end type
 
-        integer, parameter :: N = 25
+        integer, parameter :: N = 15
         type(string) :: fileNames(N)
         integer :: i,if1,if2,if3,if4,if5
         INTEGER  :: DATE_TIME (8)
@@ -68,26 +68,12 @@ PROGRAM build_production
         
 
         
-        fileNames(1)%s = "T_saved.f90"
+        fileNames(1)%s = "Geometry_Constant.f90"
         fileNames(2)%s = "FittingConstant.f90"
-        fileNames(3)%s = "T_lk.f90"
-        fileNames(4)%s = "T_l0.f90"
-        fileNames(5)%s = "T_ll.f90"
-        fileNames(6)%s = "Index_Searcher.f90"
+        fileNames(3)%s = "Index_Searcher.f90"
+        fileNames(4)%s = "Multipole_Sph2.f90"
 
-
-        if1 = 6
-        
-        fileNames(if1+1)%s = "Approx_1_Sph2.f90"
-        fileNames(if1+2)%s = "Approx_2_Sph2.f90"
-        fileNames(if1+3)%s = "Approx_3_Sph2.f90"
-        fileNames(if1+4)%s = "Approx_4_Sph2.f90"
-        fileNames(if1+5)%s = "Approx_5_Sph2.f90"
-        fileNames(if1+6)%s = "Approx_6_Sph2.f90"
-        fileNames(if1+7)%s = "Approx_7_Sph2.f90"
-        fileNames(if1+8)%s = "Approx_8_Sph2.f90"
-
-        if2 = if1+8
+        if2 = 4
 
         fileNames(if2+1)%s = "Induction_4_Sph2.f90"
         fileNames(if2+2)%s = "Induction_5_Sph2.f90"

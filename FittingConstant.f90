@@ -100,7 +100,7 @@ CONTAINS
        
        
         this%initflag = 2
-        !write(*,*)"initflag",this%initflag
+      
         Open( 10, file = this%filename )
 
         Read( 10, *) row
@@ -181,7 +181,7 @@ CONTAINS
 
   END SUBROUTINE Read_Parameters
 
-  SUBROUTINE Get_Mult_Comp(this,Molec,i,arr,n)
+  SUBROUTINE Get_Mult_Comp(this,Molec,i,arr)
 
     IMPLICIT NONE
     CLASS(Fit_Contant), INTENT(IN) :: this
@@ -189,8 +189,9 @@ CONTAINS
     Integer, INTENT(IN) ::i
     real*8, INTENT(OUT)  :: arr(2*i+1) 
     real*8 , dimension(64)   :: Mult 
-    integer, INTENT(OUT)::n
-
+    integer::n,init
+    
+    init = i**2+1
     n = 2*i+1
     
     if (Molec=="A")then
@@ -199,7 +200,7 @@ CONTAINS
         Mult = this%B_Mult    
     end if
 
-    arr = Mult(i**2+1:(i+1)**2)
+    arr = Mult(init:init+n-1)
 
   end SUBROUTINE Get_Mult_Comp
 
@@ -265,7 +266,7 @@ CONTAINS
     end if 
     
     Allocate(arr(n))
-    write(*,*)"n ",n 
+
     arr = HPol(init: n + init-1)
 
   end SUBROUTINE Get_HPol_Comp

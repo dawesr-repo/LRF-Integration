@@ -1,6 +1,8 @@
 
 !********************************************************
-SUBROUTINE Dispersion_7_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_7_Energy)
+SUBROUTINE Dispersion_7_Sph2(Disp_AB, Disp_7_Energy)
+use Geometry_Constant
+    use FitConstants
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -10,16 +12,13 @@ SUBROUTINE Dispersion_7_Sph2(cal_coord,Ar,Br,C ,Disp_AB, Disp_7_Energy)
     real*8 , dimension(216) , INTENT(IN) :: Disp_AB
 
     real*8 :: R 
-    real*8 , dimension(11), INTENT(IN):: cal_coord
-    real*8 , dimension(3), INTENT(IN):: Ar 
-    real*8 , dimension(3), INTENT(IN):: Br
-    real*8 , dimension(9), INTENT(IN):: C
+
     real*8 :: D_mQd_mm,D_mm_mQd
 
     R =cal_coord(1)
 
-    Call mQd_mm_Dispersion(Ar,Br,C ,Disp_AB,D_mQd_mm) 
-    Call mm_mQd_Dispersion(Ar,Br,C ,Disp_AB,D_mm_mQd) 
+    Call mQd_mm_Dispersion(Disp_AB,D_mQd_mm) 
+    Call mm_mQd_Dispersion(Disp_AB,D_mm_mQd) 
 
 
     
@@ -32,15 +31,15 @@ END SUBROUTINE Dispersion_7_Sph2
 
 
 
-SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
+SUBROUTINE mQd_mm_Dispersion(Disp_AB, result)
+use Geometry_Constant
+    use FitConstants
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h,g
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(216) , INTENT(IN) :: Disp_AB
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         real*8 :: r1,r2
         real*8 , dimension(90)::  mQd_mm_AB
         real*8:: eps=EPSILON(result)
@@ -69,9 +68,9 @@ SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
 
                             if (DABS(mQd_mm_AB(k))>eps) Then
                             
-                                    ! Call TQdm(Ar,Br,C ,h,j,0,t_jh)
+                                    ! Call TQdm(h,j,0,t_jh)
                                     
-                                    ! Call Tmm(Ar,Br,C ,g,i,0,t_ig)
+                                    ! Call Tmm(g,i,0,t_ig)
 
 
                                     ! result = result + mQd_mm_AB(k)*t_ig*t_jh
@@ -81,9 +80,9 @@ SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r1)
+                                Call T_lk(1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                                Call T_lk(Ar,Br,C,2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r2)
+                                Call T_lk(2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r2)
                                 
                                 
                                 result = result + mQd_mm_AB(k)*r1*r2
@@ -96,15 +95,15 @@ SUBROUTINE mQd_mm_Dispersion(Ar,Br,C ,Disp_AB, result)
         RETURN
 END SUBROUTINE mQd_mm_Dispersion
 
-SUBROUTINE mm_mQd_Dispersion(Ar,Br,C ,Disp_AB, result)
+SUBROUTINE mm_mQd_Dispersion(Disp_AB, result)
+use Geometry_Constant
+    use FitConstants
         IMPLICIT NONE
 
         INTEGER ::  i,j,k,h,g
         real*8, INTENT(INOUT) ::result 
         real*8 , dimension(216) , INTENT(IN) :: Disp_AB
-        real*8 , dimension(3), INTENT(IN):: Ar 
-        real*8 , dimension(3), INTENT(IN):: Br
-        real*8 , dimension(9), INTENT(IN):: C
+
         real*8 :: r1,r2
         real*8 , dimension(90)::  mm_mQd_AB
         real*8:: eps=EPSILON(result)
@@ -132,9 +131,9 @@ SUBROUTINE mm_mQd_Dispersion(Ar,Br,C ,Disp_AB, result)
 
                             if (DABS(mm_mQd_AB(k))>eps) Then
                             
-                                    ! Call TQdm(Ar,Br,C ,j,h,1,t_jh)
+                                    ! Call TQdm(j,h,1,t_jh)
                                     
-                                    ! Call Tmm(Ar,Br,C ,g,i,0,t_ig)
+                                    ! Call Tmm(g,i,0,t_ig)
 
 
                                     ! result = result + mm_mQd_AB(k)*t_ig*t_jh
@@ -144,9 +143,9 @@ SUBROUTINE mm_mQd_Dispersion(Ar,Br,C ,Disp_AB, result)
                                 call Get_Comp(i,cp_i)
                                 call Get_Comp(j,cp_j)
 
-                                Call T_lk(Ar,Br,C,1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r1)
+                                Call T_lk(1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                                Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r2)
+                                Call T_lk(1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r2)
                                 
              
                                

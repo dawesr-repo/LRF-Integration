@@ -169,6 +169,51 @@ module Search
 
     END SUBROUTINE Gen_Arr_Disp
 
+        SUBROUTINE Get_Ind_Index(i,j,ci,cj,index)
+        
+        IMPLICIT NONE
+        
+        Integer , INTENT(IN) :: i,j,ci,cj
+        integer, INTENT(OUT)::index
+        Character(len = 11) ::str1,str2,IndStr
+        integer::n,s
+       
+
+        str1 =  strNum(ci)//"_"//strNum(cj)
+        str2 =  strNum(cj)//"_"//strNum(ci)
+
+
+        if (i==j )then
+            n = (i+1)*(2*i+1)
+        else
+            n = (2*i+1)*(2*j+1)
+        end if 
+
+       
+
+        do s = 1,n 
+            IndStr = IndArr(i,j)%arr(s)
+            if (i==j ) then
+                ! example mm
+                    if (     IndStr==str1 &
+                        .Or. IndStr==str2 ) Then  
+
+                        index = s 
+                        Exit
+                    end if 
+            else
+                    if (     IndStr==str1  ) Then  ! example mQd
+
+                        index = s 
+                        Exit
+                    end if 
+            end if
+            
+        end do 
+        
+
+    END SUBROUTINE Get_Ind_Index
+
     SUBROUTINE Get_Disp_Index(i,j,k,l,ci,cj,ck,cl,index)
         
         IMPLICIT NONE

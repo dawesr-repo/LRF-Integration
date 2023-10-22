@@ -283,7 +283,7 @@ SUBROUTINE qm_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
         m =  B_Multipoles(2:4)
         alpha_mQ  = A_Pol(7:21) 
         
-        
+        write(*,*)m
 
         do h = 1,3
             do i = 1,3
@@ -308,7 +308,7 @@ SUBROUTINE qm_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         Call T_lk(2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
                         
                         
-                        result = result + (q*m(h))*alpha_mQ(k)*r1*r2
+                        result = result + q*m(h)*alpha_mQ(k)*r1*r2
 
                     end if
                     end if 

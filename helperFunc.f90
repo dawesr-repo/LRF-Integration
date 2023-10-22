@@ -143,7 +143,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
      do n = 4, 8
-        Call Induction_Sph2( ind,n, EI)
+        !Call Induction_Sph2( ind,n, EI)
         ! IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
         !     if(n==4)Then
         !         Call Induction_4_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&

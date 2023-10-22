@@ -79,6 +79,7 @@ END SUBROUTINE General_Coordinates_Format
 SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
  use FitConstants, only:Coeff,C1,C2,C3
  use Geometry_Constant
+ use Search, only: Initialize_Search
  implicit none
 
  
@@ -93,7 +94,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
     
 
-  
+     call Initialize_Search()
    
   
      Ene = 0.d0
@@ -127,59 +128,49 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
      do n = 6,8
         IF (Coeff(ind)%D_Fit(n-5) > 0) THEN
+
             Call Dispersion_Sph2( ind,n, ED)
 
-            if(n==6)Then
-                Call Dispersion_6_Sph2( Coeff(ind)%Disp  ,ED)
-                Call Dispersion_Sph2( ind,n, ED_test)
-                write(*,*)"Dispersion 6", C3*(C1*C2**n)*ED,ED_test
-            elseif(n==7)Then
-                Call Dispersion_7_Sph2( Coeff(ind)%Disp  ,ED)
-                Call Dispersion_Sph2( ind,n, ED_test)
-                write(*,*)"Dispersion 7", C3*(C1*C2**n)*ED,ED_test
-            elseif(n==8)Then
-                Call Dispersion_8_Sph2( Coeff(ind)%Disp  ,ED)         
-            endif
-
-            term = (C1*C2**n)*ED
-            testErr(20 + n - 5) = C3*term
-            Dispe_energy(n-4) = term
-            Dispe_energy(1) = Dispe_energy(1)+ term
-            Ene = Ene+term
+          
+            testErr(20 + n - 5) = ED
+            Dispe_energy(n-4) = ED
+            Dispe_energy(1) = Dispe_energy(1)+ ED
+            Ene = Ene+ED
           
          END IF 
         
      end do
 
 
-    !  do n = 4, 8
-    !     IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
-    !         if(n==4)Then
-    !             Call Induction_4_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-    !             Coeff(ind)%A_Pol,Coeff(ind)%B_Pol ,EI)    
-    !         elseif (n==5)Then
-    !             Call Induction_5_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-    !             Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-    !         elseif(n==6)Then
-    !             Call Induction_6_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-    !             Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-    !         elseif(n==7)Then
-    !             Call Induction_7_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-    !             Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-    !         elseif(n==8)Then
-    !             Call Induction_8_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-    !             Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)         
-    !         endif
+     do n = 4, 8
+        Call Induction_Sph2( ind,n, EI)
+        ! IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
+        !     if(n==4)Then
+        !         Call Induction_4_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+        !         Coeff(ind)%A_Pol,Coeff(ind)%B_Pol ,EI)    
+        !     elseif (n==5)Then
+        !         Call Induction_5_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+        !         Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
+        !     elseif(n==6)Then
+        !         Call Induction_6_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+        !         Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
+        !     elseif(n==7)Then
+        !         Call Induction_7_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+        !         Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
+        !     elseif(n==8)Then
+        !         Call Induction_8_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+        !         Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)         
+        !     endif
 
-    !         term = (C1*C2**n)*EI
-    !         testErr(30 + n-3) = C3*term
-    !         Induc_energy(n-2) = term
-    !         Induc_energy(1) = Induc_energy(1)+term
-    !         Ene = Ene+term
+        !     term = (C1*C2**n)*EI
+        !     testErr(30 + n-3) = C3*term
+        !     Induc_energy(n-2) = term
+        !     Induc_energy(1) = Induc_energy(1)+term
+        !     Ene = Ene+term
             
-    !      END IF 
+        !  END IF 
         
-    !  end do
+     end do
 
 
 

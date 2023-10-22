@@ -1,6 +1,6 @@
-
-    !********************************************************
+!********************************************************
 SUBROUTINE Induction_4_Sph2(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_4_Energy)
+    use Geometry_Constant, only: cal_coord
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and

@@ -404,7 +404,7 @@ SUBROUTINE GetIndex_mm_mQd (g,h,i,j,index)
     ! write(str1, '(i1.1, i1.1,i1.1, i1.1)') g,h,i, j
     ! write(str2, '(i1.1, i1.1,i1.1, i1.1)') h,g,i, j
 
-  
+
 
     do s = 1,90 
         

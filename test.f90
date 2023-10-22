@@ -297,6 +297,7 @@ module Testing
                         fOutputNum = 0
                 end if
                 
+                write(*,*)"Test_Dataset 1"
                 
 
                 maxErr=0d0
@@ -1131,7 +1132,7 @@ PROGRAM main_subroutine
         ! call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
-
+        write(*,*)"I got here"
         Call Test_Dataset("./files/test/coefficients/coefficients_003.txt", &
                         "./files/test/datasets/datatest_003_001.txt",fileOutNumber,1,1)
 

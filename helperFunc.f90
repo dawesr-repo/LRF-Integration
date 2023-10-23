@@ -130,7 +130,6 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
         IF (Coeff(ind)%D_Fit(n-5) > 0) THEN
 
             Call Dispersion_Sph2( ind,n, ED)
-
           
             testErr(20 + n - 5) = ED
             Dispe_energy(n-4) = ED
@@ -143,39 +142,12 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
      do n = 4, 8
-        ! Call Induction_Sph2( ind,n, EI_Test)  
-        ! write(*,*) "EI_Test: ",EI_Test
-
-        IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
-            if(n==4)Then
-                Call Induction_4_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol ,EI) 
-               
-            elseif (n==5)Then
-                Call Induction_5_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-            elseif(n==6)Then
-                Call Induction_6_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-                Call Induction_Sph2( ind,n, EI_Test) 
-                write(*,*) "EI_6: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test
-            elseif(n==7)Then
-                Call Induction_7_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-                  Call Induction_Sph2( ind,n, EI_Test) 
-                  write(*,*) "EI_7: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test
-            elseif(n==8)Then
-                Call Induction_8_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI) 
-                Call Induction_Sph2( ind,n, EI_Test)      
-                write(*,*) "EI_8: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test   
-            endif
-
-            term = (C1*C2**n)*EI
-            testErr(30 + n-3) = C3*term
-            Induc_energy(n-2) = term
-            Induc_energy(1) = Induc_energy(1)+term
-            Ene = Ene+term
+            Call Induction_Sph2( ind,n, EI)  
+          
+            testErr(30 + n-3) = EI
+            Induc_energy(n-2) = EI
+            Induc_energy(1) = Induc_energy(1)+EI
+            Ene = Ene+EI
             
          END IF 
         
@@ -183,7 +155,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
 
-    !  do n = 6, 7
+     do n = 6, 7
     !     IF (Coeff(ind)%H_Fit(n-5) > 0) THEN
     !         if(n==6)Then
     !             Call HyperPolarizability_6_Sph2( Coeff(ind)%A_Mult,&
@@ -200,7 +172,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
         
     !      END IF 
         
-    !  end do
+     end do
 
 
 

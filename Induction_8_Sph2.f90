@@ -1,7 +1,7 @@
 
     !********************************************************
 SUBROUTINE Induction_8_Sph2(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_8_Energy)
-    use Geometry_Constant, only: cal_coord
+    use Geometry_Constant
     IMPLICIT NONE
     
     !   NEED TO DECLARE ALL THE SUBROUTINE ARGUMENTS and
@@ -11,7 +11,6 @@ SUBROUTINE Induction_8_Sph2(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, Ind_8_Energy
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
     real*8 :: R 
-
 
     real*8 :: qPhi_mm_0,qPhi_mm_1,mO_mm_0,mO_mm_1,QdQd_mm_0,QdQd_mm_1,qQd_QdQd_0,qQd_QdQd_1
     real*8 :: mm_QdQd_0, mm_QdQd_1,mQd_mQd_0,mQd_mQd_1,mQd_Qdm_0,mQd_Qdm_1,qO_Qdm_0,qO_Qdm_1
@@ -76,7 +75,7 @@ END SUBROUTINE Induction_8_Sph2
     !********************************************************
 
 SUBROUTINE qPhi_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -184,7 +183,7 @@ END SUBROUTINE qPhi_mm
 
 
 SUBROUTINE mO_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -192,6 +191,8 @@ SUBROUTINE mO_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
+    Integer, INTENT(IN):: ind
+    real*8 :: r1,r2
     real*8 , dimension(3):: m
     real*8 , dimension(7):: O
     real*8 , dimension(6):: alpha
@@ -280,7 +281,7 @@ SUBROUTINE mO_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE mO_mm
 
 SUBROUTINE QdQd_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -289,7 +290,9 @@ SUBROUTINE QdQd_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
     Integer, INTENT(IN):: ind
-
+    real*8 :: r1,r2
+    real*8 , dimension(5):: Qd
+    real*8 , dimension(6):: alpha
     real*8:: eps=EPSILON(result)
 
     Character :: cp_h,cp_i,cp_j,cp_g
@@ -375,14 +378,19 @@ END SUBROUTINE QdQd_mm
 
 
 SUBROUTINE qQd_QdQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
     real*8, INTENT(INOUT) ::result 
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
+
+    Integer, INTENT(IN):: ind
+    real*8 :: q,r1,r2
     real*8 , dimension(5):: Qd
+    real*8 , dimension(15):: alpha_QdQd
+    real*8:: eps=EPSILON(result)
 
     Character :: cp_h,cp_i,cp_j,cp_g
         
@@ -467,7 +475,7 @@ END SUBROUTINE qQd_QdQd
 
 
 SUBROUTINE mm_QdQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -476,7 +484,9 @@ SUBROUTINE mm_QdQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
     Integer, INTENT(IN):: ind
-
+    real*8 :: r1,r2
+    real*8 , dimension(3):: m
+    real*8 , dimension(15):: alpha_QdQd
     real*8:: eps=EPSILON(result)
 
     Character :: cp_h,cp_i,cp_j,cp_g
@@ -568,7 +578,7 @@ SUBROUTINE mm_QdQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE mm_QdQd
 
 SUBROUTINE mQd_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -579,7 +589,9 @@ SUBROUTINE mQd_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     Integer, INTENT(IN):: ind
     real*8 :: t_ih,t_jg
     real*8 , dimension(3):: m
-
+    real*8 , dimension(5):: Qd
+    real*8 , dimension(15):: alpha_mQ
+    real*8:: eps=EPSILON(result)
     real*8 :: r1,r2
 
     Character :: cp_h,cp_i,cp_j,cp_g
@@ -602,7 +614,7 @@ SUBROUTINE mQd_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 
                         if (DABS(Qd(h))>eps .and. DABS(m(g))>eps .and.  DABS(alpha_mQ(k))>eps ) Then
                                 ! Call TQdm(j,g,ind,t_jg)
-                                ! Call TQdm (nd+1,2),t_ih)
+                                ! Call TQdm (i,h,mod(ind+1,2),t_ih)
                                 ! result = result + (m(g)*Qd(h))*alpha_mQ(k)*t_ih*t_jg
 
                             call Get_Comp(g,cp_g)
@@ -669,7 +681,7 @@ SUBROUTINE mQd_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE mQd_mQd
 
 SUBROUTINE mQd_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -677,10 +689,14 @@ SUBROUTINE mQd_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
+    Integer, INTENT(IN):: ind
+    real*8 :: r1,r2
     real*8 , dimension(3):: m
     real*8 , dimension(5):: Qd
     real*8 , dimension(15):: alpha_mQ
+    real*8:: eps=EPSILON(result)
 
+    Character :: cp_h,cp_i,cp_j,cp_g
             
     result = 0d0  
     
@@ -766,7 +782,7 @@ END SUBROUTINE mQd_Qdm
 
 
 SUBROUTINE qO_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -775,11 +791,15 @@ SUBROUTINE qO_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
     Integer, INTENT(IN):: ind
-
+    real*8 ::q,r1,r2
+    real*8 , dimension(7):: O
+    real*8 , dimension(15):: alpha_mQ
     real*8:: eps=EPSILON(result)
 
     Character :: cp_h,cp_i,cp_j,cp_g
-
+            
+    result = 0d0  
+    
     
     
     if (ind==0) then
@@ -859,7 +879,7 @@ SUBROUTINE qO_Qdm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 END SUBROUTINE qO_Qdm
 
 SUBROUTINE qO_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -870,11 +890,15 @@ SUBROUTINE qO_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     Integer, INTENT(IN):: ind
     real*8 ::q,r1,r2
     real*8 , dimension(7):: O
+    real*8 , dimension(15):: alpha_mQ
+    real*8:: eps=EPSILON(result)
 
     Character :: cp_h,cp_i,cp_j,cp_g
             
     result = 0d0  
-
+    
+    
+    
     if (ind==0) then
         q =  B_Multipoles(1)
         O =  B_Multipoles(10:16)
@@ -949,24 +973,28 @@ END SUBROUTINE qO_mQd
 
 
 SUBROUTINE qQd_Om(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
     real*8, INTENT(INOUT) ::result 
     real*8 , dimension(64) , INTENT(IN) :: A_Multipoles,B_Multipoles
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
-    real*8 , dimension(3), INTENT(IN):: Ar 
-    real*8 , dimension(3), INTENT(IN):: Br
 
+    Integer, INTENT(IN):: ind
+    real*8 :: q,r1,r2
     real*8 , dimension(5):: Qd
     real*8 , dimension(21):: alpha_mO
     real*8:: eps=EPSILON(result)
-
+    Character :: cp_h,cp_i,cp_j,cp_g
+            
+    result = 0d0  
     
     
     
-
+    
+    if (ind==0) then
+        q  =  B_Multipoles(1)
         Qd =  B_Multipoles(5:9)
         alpha_mO  = A_Pol(37:57) 
     
@@ -1047,7 +1075,7 @@ END SUBROUTINE qQd_Om
 
 
 SUBROUTINE qQd_mO(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -1056,7 +1084,9 @@ SUBROUTINE qQd_mO(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     real*8 , dimension(57) , INTENT(IN) :: A_Pol,B_Pol
 
     Integer, INTENT(IN):: ind
-
+    real*8 :: q,r1,r2
+    real*8 , dimension(5):: Qd
+    real*8 , dimension(21):: alpha_mO
     real*8:: eps=EPSILON(result)
     Character :: cp_h,cp_i,cp_j
             
@@ -1066,7 +1096,9 @@ SUBROUTINE qQd_mO(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     
     
     if (ind==0) then
-
+        q  =  B_Multipoles(1)
+        Qd =  B_Multipoles(5:9)
+        alpha_mO  = A_Pol(37:57) 
     
         do h = 1,5
             do i = 1,3
@@ -1141,7 +1173,7 @@ END SUBROUTINE qQd_mO
 
 
 SUBROUTINE mm_Om(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
-     use Geometry_Constant, only: Get_Comp,T_lk
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -1164,7 +1196,9 @@ SUBROUTINE mm_Om(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     if (ind==0) then
         m =  B_Multipoles(2:4)
         alpha_mO  = A_Pol(37:57) 
-
+    
+        do g = 1,3
+            do h = 1,3
                 do i = 1,3
                     do j = 1,7
     

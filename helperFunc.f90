@@ -157,12 +157,18 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
             elseif(n==6)Then
                 Call Induction_6_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
                 Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-            ! elseif(n==7)Then
-            !     Call Induction_7_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-            !     Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
-            ! elseif(n==8)Then
-            !     Call Induction_8_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
-            !     Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)         
+                Call Induction_Sph2( ind,n, EI_Test) 
+                write(*,*) "EI_6: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test
+            elseif(n==7)Then
+                Call Induction_7_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI)
+                  Call Induction_Sph2( ind,n, EI_Test) 
+                  write(*,*) "EI_7: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test
+            elseif(n==8)Then
+                Call Induction_8_Sph2( Coeff(ind)%A_Mult,Coeff(ind)%B_Mult ,&
+                Coeff(ind)%A_Pol,Coeff(ind)%B_Pol  ,EI) 
+                Call Induction_Sph2( ind,n, EI_Test)      
+                write(*,*) "EI_8: ",C3*(C1*C2**n)*EI,EI_Test,C3*(C1*C2**n)*EI-EI_Test   
             endif
 
             term = (C1*C2**n)*EI

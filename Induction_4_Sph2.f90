@@ -28,7 +28,9 @@ END SUBROUTINE Induction_4_Sph2
 
 
 
+
 SUBROUTINE qq_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+        use Geometry_Constant, only: Get_Comp,T_lk
         IMPLICIT NONE
 
         INTEGER ::  i,j,k

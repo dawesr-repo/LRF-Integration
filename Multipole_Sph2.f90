@@ -21,9 +21,6 @@ SUBROUTINE Multipole_Sph2(ind,order, Energy)
                     result  = result +M_ij
    
     end do
-
-
-
     
     Energy =   (C3*C1*C2**order)*result/ R**order
 

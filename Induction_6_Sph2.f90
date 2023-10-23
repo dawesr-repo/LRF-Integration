@@ -19,31 +19,32 @@ SUBROUTINE Induction_6_Sph2(cal_coord,Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,
     real*8 :: qq_mO_0,qq_mO_1,qq_QdQd_0,qq_QdQd_1
 
     R =cal_coord(1)
-    
+    write(*,*)"Ind6"
     Call qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qQd_mm_0) 
-    Call qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_mm_1)
+    !Call qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qQd_mm_1)
 
-    Call mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mm_mm_0) 
-    Call mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mm_mm_1)
+    ! Call mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,mm_mm_0) 
+    ! Call mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,mm_mm_1)
 
-    Call qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_mQd_0) 
-    Call qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_mQd_1)
+    ! Call qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_mQd_0) 
+    ! Call qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_mQd_1)
 
-    Call qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_Qdm_0) 
-    Call qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_Qdm_1)
+    ! Call qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qm_Qdm_0) 
+    ! Call qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qm_Qdm_1)
     
-    Call qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qq_mO_0) 
-    Call qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qq_mO_1)
+    ! Call qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qq_mO_0) 
+    ! Call qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qq_mO_1)
 
-    Call qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qq_QdQd_0) 
-    Call qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qq_QdQd_1)
+    ! Call qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,0,qq_QdQd_0) 
+    ! Call qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles,A_Pol,B_Pol,1,qq_QdQd_1)
 
 
-    Ind_6_Energy =   (-0.5d0)*(  2.0d0*qQd_mm_0 + 2.0d0*qQd_mm_1 &
-                                 +mm_mm_0 + mm_mm_1 &
-                                 +2.0d0*qm_mQd_0 + 2.0d0*qm_mQd_1 +2.0d0*qm_Qdm_0 + 2.0d0*qm_Qdm_1 &
-                                +2.0d0*qq_mO_0  + 2.0d0*qq_mO_1 + qq_QdQd_0 + qq_QdQd_1 &
-                                )/ R**6
+    Ind_6_Energy =   (-0.5d0)*(  2.0d0*qQd_mm_0 + 2.0d0*qQd_mm_1 )/ R**6!&
+                                !  +mm_mm_0 + mm_mm_1 &
+                                !  +2.0d0*qm_mQd_0 + 2.0d0*qm_mQd_1 +2.0d0*qm_Qdm_0 + 2.0d0*qm_Qdm_1 &
+                                ! +2.0d0*qq_mO_0  + 2.0d0*qq_mO_1 + qq_QdQd_0 + qq_QdQd_1 &
+                                ! 
+                                !)/ R**6
 
 
 
@@ -54,6 +55,7 @@ END SUBROUTINE Induction_6_Sph2
 
 
 SUBROUTINE qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -71,7 +73,7 @@ SUBROUTINE qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 
     Character :: cp_h,cp_i,cp_j
     
-    
+    write(*,*)"Get in Ind6"
     
     if (ind==0) then
         q =  B_Multipoles(1)
@@ -80,6 +82,7 @@ SUBROUTINE qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
     
         result = 0d0  
 
+        write(*,*)"Get in Ind6"
         
         do h=1,5
             do i = 1,3
@@ -99,9 +102,9 @@ SUBROUTINE qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
 
                             !result = result + (q*Qd(h))*alpha(k)*t_i*t_jh
 
-                            Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
+                            Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r1)
 
-                            Call T_lk(Ar,Br,C,1,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r2)
+                            Call T_lk(1,Floor((j*1d0)/2d0),cp_j,2,Floor((h*1d0)/2d0),cp_h,r2)
                             
                             
                             result = result + (q*Qd(h))*alpha(k)*r1*r2
@@ -134,9 +137,9 @@ SUBROUTINE qQd_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
+                            Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                            Call T_lk(Ar,Br,C,2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r2)
+                            Call T_lk(2,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r2)
                             
                             
                             result = result + (q*Qd(h))*alpha(k)*r1*r2
@@ -155,6 +158,7 @@ END SUBROUTINE qQd_mm
 
 
 SUBROUTINE mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h,g
@@ -198,9 +202,9 @@ SUBROUTINE mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,1,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
+                            Call T_lk(1,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
 
-                            Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
+                            Call T_lk(1,Floor((i*1d0)/2d0),cp_i,1,Floor((g*1d0)/2d0),cp_g,r2)
                             
                             
                             result = result + (m(g)*m(h))*alpha(k)*r1*r2
@@ -235,9 +239,9 @@ SUBROUTINE mm_mm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                             call Get_Comp(i,cp_i)
                             call Get_Comp(j,cp_j)
 
-                            Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r1)
+                            Call T_lk(1,Floor((h*1d0)/2d0),cp_h,1,Floor((j*1d0)/2d0),cp_j,r1)
 
-                            Call T_lk(Ar,Br,C,1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
+                            Call T_lk(1,Floor((g*1d0)/2d0),cp_g,1,Floor((i*1d0)/2d0),cp_i,r2)
                             
                             
                             result = result + (m(g)*m(h))*alpha(k)*r1*r2
@@ -268,6 +272,7 @@ END SUBROUTINE mm_mm
 
 
 SUBROUTINE qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -313,9 +318,9 @@ SUBROUTINE qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r1)
+                        Call T_lk(1,Floor((i*1d0)/2d0),cp_i,1,Floor((h*1d0)/2d0),cp_h,r1)
 
-                        Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
+                        Call T_lk(2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r2)
                         
                         
                         result = result + (q*m(h))*alpha_mQ(k)*r1*r2
@@ -351,9 +356,9 @@ SUBROUTINE qm_mQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
+                        Call T_lk(1,Floor((h*1d0)/2d0),cp_h,1,Floor((i*1d0)/2d0),cp_i,r1)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r2)
+                        Call T_lk(0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r2)
                         
                         
                         result = result + (q*m(h))*alpha_mQ(k)*r1*r2
@@ -374,6 +379,7 @@ END SUBROUTINE qm_mQd
 
 
 SUBROUTINE qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -418,9 +424,9 @@ SUBROUTINE qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
+                        Call T_lk(2,Floor((j*1d0)/2d0),cp_j,1,Floor((h*1d0)/2d0),cp_h,r1)
 
-                        Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
+                        Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
                         
                         
                         result = result + (q*m(h))*alpha_mQ(k)*r1*r2
@@ -455,9 +461,9 @@ SUBROUTINE qm_Qdm(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r1)
+                        Call T_lk(1,Floor((h*1d0)/2d0),cp_h,2,Floor((j*1d0)/2d0),cp_j,r1)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
+                        Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
                         
                         
                         result = result + (q*m(h))*alpha_mQ(k)*r1*r2
@@ -475,6 +481,7 @@ END SUBROUTINE qm_Qdm
 
 
 SUBROUTINE qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k
@@ -518,9 +525,9 @@ SUBROUTINE qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,3,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
+                        Call T_lk(3,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
 
-                        Call T_lk(Ar,Br,C,1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
+                        Call T_lk(1,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
                         
                         
                         result = result + (q**2)*alpha_mO(k)*r1*r2
@@ -554,9 +561,9 @@ SUBROUTINE qq_mO(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",3,Floor((j*1d0)/2d0),cp_j,r1)
+                        Call T_lk(0,0,"0",3,Floor((j*1d0)/2d0),cp_j,r1)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
+                        Call T_lk(0,0,"0",1,Floor((i*1d0)/2d0),cp_i,r2)
                         
                         
                         result = result + (q**2)*alpha_mO(k)*r1*r2
@@ -576,6 +583,7 @@ END SUBROUTINE qq_mO
 
 
 SUBROUTINE qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k
@@ -616,9 +624,9 @@ SUBROUTINE qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
+                        Call T_lk(2,Floor((j*1d0)/2d0),cp_j,0,0,"0",r1)
 
-                        Call T_lk(Ar,Br,C,2,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
+                        Call T_lk(2,Floor((i*1d0)/2d0),cp_i,0,0,"0",r2)
                         
                         
                         result = result + (q**2)*alpha_QdQd(k)*r1*r2
@@ -649,9 +657,9 @@ SUBROUTINE qq_QdQd(Ar,Br,C ,A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result
                         call Get_Comp(i,cp_i)
                         call Get_Comp(j,cp_j)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r1)
+                        Call T_lk(0,0,"0",2,Floor((j*1d0)/2d0),cp_j,r1)
 
-                        Call T_lk(Ar,Br,C,0,0,"0",2,Floor((i*1d0)/2d0),cp_i,r2)
+                        Call T_lk(0,0,"0",2,Floor((i*1d0)/2d0),cp_i,r2)
                         
                         
                         result = result + (q**2)*alpha_QdQd(k)*r1*r2

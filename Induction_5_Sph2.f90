@@ -35,6 +35,7 @@ END SUBROUTINE Induction_5_Sph2
 
 
 SUBROUTINE qm_mm(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k,h
@@ -136,6 +137,7 @@ END SUBROUTINE qm_mm
 
 
 SUBROUTINE qq_mQd(A_Multipoles,B_Multipoles ,A_Pol,B_Pol, ind , result)
+    use Geometry_Constant, only: Get_Comp,T_lk
     IMPLICIT NONE
 
     INTEGER ::  i,j,k

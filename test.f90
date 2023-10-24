@@ -297,7 +297,7 @@ module Testing
                         fOutputNum = 0
                 end if
                 
-                write(*,*)"Test_Dataset 1"
+
                 
 
                 maxErr=0d0
@@ -1129,12 +1129,12 @@ PROGRAM main_subroutine
         ! call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GP/GPTable(CO_CS).txt"&
         !                 ,fileOutNumber,1,10000)
         ! call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
-        ! call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
+        !call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
-        write(*,*)"I got here"
-        Call Test_Dataset("./files/test/coefficients/coefficients_003.txt", &
-                        "./files/test/datasets/datatest_003_001.txt",fileOutNumber,1,1)
+   
+        Call Test_Dataset("./files/test/coefficients/coefficients_002.txt", &
+                        "./files/test/datasets/datatest_002_001.txt",fileOutNumber,1,1)
 
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&

@@ -13,14 +13,17 @@ module Search
         character(len=5), allocatable :: arr(:)
     end type
 
+    type strArrHp
+        character(len=8), allocatable :: arr(:)
+    end type
+
     type strArrDisp
         character(len=11), allocatable :: arr(:)
     end type
 
-
-    type(strArrInd),public::IndArr(5,5)
-    type(strArrDisp),public::DispArr(5,5,5,5)
-  
+    type(strArrInd) ,public::   IndArr(5,5)
+    type(strArrDisp),public::   DispArr(5,5,5,5)
+    type(strArrHp)  ,public::   HyperArr(5,5,5)
  
 
  contains
@@ -33,12 +36,9 @@ module Search
             initflag = 2 
             call Init_Arr_Ind()
             call Init_Arr_Disp()
+            call Init_Arr_Hyper()
         end if
-        ! write(*,*)"DispArr(1,2,1,1)"
-        ! do c = 0,14
-        !     write(*,*)DispArr(1,2,1,1)%arr(6*c+1),"    ",DispArr(1,2,1,1)%arr(6*c+2),"    ",DispArr(1,2,1,1)%arr(6*c+3),&
-        !      "    ",DispArr(1,2,1,1)%arr(6*c+4),"    ",DispArr(1,2,1,1)%arr(6*c+5),"    ",DispArr(1,2,1,1)%arr(6*c+6)
-        ! end do 
+
     end Subroutine Initialize_Search
 
     SUBROUTINE Init_Arr_Ind()
@@ -54,6 +54,22 @@ module Search
 
 
     END SUBROUTINE Init_Arr_Ind
+
+    SUBROUTINE Init_Arr_Hyper()
+        
+        IMPLICIT NONE
+        integer i,j,k
+
+        do i=1,5
+            do j=i,5
+                do k=j,5
+                    call Gen_Arr_Hyper(i,j,k,HyperArr(i,j,k)%arr)
+                end do
+            end do
+        end do
+
+
+    END SUBROUTINE Init_Arr_Hyper
 
     SUBROUTINE Init_Arr_Disp()
         
@@ -73,6 +89,79 @@ module Search
         
 
     END SUBROUTINE Init_Arr_Disp
+
+    SUBROUTINE Gen_Arr_Hyper(i,j,k,arr)
+        
+        IMPLICIT NONE
+        
+        Integer , INTENT(IN) :: i,j,k
+
+        integer :: n,ci,cj,ck,counter
+        character(len=8),allocatable, INTENT(OUT)::arr(:)
+
+        if (i==j .and. i==k)then
+            n = (2*i+1)*(2*i+2)*(2*i+3)/6
+        elseif (i==j .and. i.NE.k)then
+            n = (i+1)*(2*i+1)*(2*k+1)
+        elseif (j==k .and. j.NE.i)then
+            n = (j+1)*(2*j+1)*(2*i+1)    
+        else
+            n = (2*i+1)*(2*j+1)*(2*k+1)
+        end if 
+
+
+        Allocate(arr(n))
+        
+
+        if (i==j )then
+            if (j==k)then
+                    counter = 0
+                    do ci=1,2*i+1
+                        do cj=ci,2*i+1
+                            do ck=cj,2*j+1
+                                counter = counter+1
+                                arr(counter) = strNum(ci)//"_"//strNum(cj)//"_"//strNum(ck)
+                            end do
+                        end do
+                    end do
+            else
+
+                    counter = 0
+                    do ci=1,2*i+1
+                        do cj=ci,2*j+1
+                            do ck=1,2*k+1
+                            counter = counter+1
+                            arr(counter) = strNum(ci)//"_"//strNum(cj)//"_"//strNum(ck)
+                            end do
+                        end do
+                    end do
+            end if 
+        else
+            if (j==k)then
+                    counter = 0
+                    do ci=1,2*i+1
+                        do cj=1,2*i+1
+                            do ck=cj,2*k+1
+                                counter = counter+1
+                                arr(counter) = strNum(ci)//"_"//strNum(cj)//"_"//strNum(ck)
+                            end do
+                        end do
+                    end do
+            else
+
+                    counter = 0
+                    do ci=1,2*i+1
+                        do cj=1,2*j+1
+                            do ck=1,2*k+1
+                            counter = counter+1
+                            arr(counter) = strNum(ci)//"_"//strNum(cj)//"_"//strNum(ck)
+                            end do
+                        end do
+                    end do
+            end if 
+        end if
+
+    END SUBROUTINE Gen_Arr_Hyper
 
     SUBROUTINE Gen_Arr_Ind(i,j,arr)
         
@@ -169,13 +258,84 @@ module Search
 
     END SUBROUTINE Gen_Arr_Disp
 
-        SUBROUTINE Get_Ind_Index(i,j,ci,cj,index)
+    SUBROUTINE Get_Hyper_Index(i,j,k,ci,cj,ck,index)
+        
+        IMPLICIT NONE
+        
+        Integer , INTENT(IN) :: i,j,k,ci,cj,ck
+        integer, INTENT(OUT)::index
+        Character(len = 8) ::str1,str2,str3,str4,str5,str6,HypStr
+        integer::n,s
+       
+
+        str1 =  strNum(ci)//"_"//strNum(cj)//"_"//strNum(ck)
+        str2 =  strNum(cj)//"_"//strNum(ci)//"_"//strNum(ck)
+        str3 =  strNum(ck)//"_"//strNum(cj)//"_"//strNum(ci)
+        str4 =  strNum(cj)//"_"//strNum(ck)//"_"//strNum(ci)
+        str5 =  strNum(ci)//"_"//strNum(ck)//"_"//strNum(cj)
+        str6 =  strNum(ck)//"_"//strNum(ci)//"_"//strNum(cj)
+
+        if (i==j .and. i==k)then
+            n = (2*i+1)*(2*i+2)*(2*i+3)/6
+        elseif (i==j .and. i.NE.k)then
+            n = (i+1)*(2*i+1)*(2*k+1)
+        elseif (j==k .and. j.NE.i)then
+            n = (j+1)*(2*j+1)*(2*i+1)    
+        else
+            n = (2*i+1)*(2*j+1)*(2*k+1)
+        end if 
+
+
+       
+
+        do s = 1,n 
+            HypStr = HyperArr(i,j,k)%arr(s)
+            if (i==j  ) then
+                if (j==k)then
+                ! example mmm
+                    if (     HypStr==str1 .Or. HypStr==str2 &
+                        .Or. HypStr==str3 .Or. HypStr==str4 &
+                        .Or. HypStr==str5 .Or. HypStr==str6 ) Then  
+
+                        index = s 
+                        Exit
+                    end if 
+                    else
+                     ! example mmQd
+                    if (     HypStr==str1 .Or. HypStr==str2  ) Then  
+                        index = s 
+                        Exit
+                    end if 
+                end if 
+            else
+                if (j==k)then
+                ! example mQdQd
+                    if (     HypStr==str1 .Or. HypStr==str5 ) Then  
+
+                        index = s 
+                        Exit
+                    end if 
+                    else
+                     ! example mQdO
+                    if (     HypStr==str1  ) Then  
+                        index = s 
+                        Exit
+                    end if 
+                end if 
+            end if
+            
+        end do 
+        
+
+    END SUBROUTINE Get_Hyper_Index
+
+    SUBROUTINE Get_Ind_Index(i,j,ci,cj,index)
         
         IMPLICIT NONE
         
         Integer , INTENT(IN) :: i,j,ci,cj
         integer, INTENT(OUT)::index
-        Character(len = 11) ::str1,str2,IndStr
+        Character(len = 5) ::str1,str2,IndStr
         integer::n,s
        
 

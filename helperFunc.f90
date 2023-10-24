@@ -87,7 +87,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
     real*8  , INTENT(INOut) ::TotalEnergy,testErr(52)
     integer, INTENT(IN)::doTesting
 
-    real*8   ::Ene,EM,ED,EH,EI,term,EI_Test
+    real*8   ::Ene,EM,ED,EH,EI,term
     Integer :: n ;
 
     real*8 :: Elect_energy(9),Dispe_energy(4),Induc_energy(6),Hyper_energy(3)
@@ -142,6 +142,7 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
      do n = 4, 8
+         IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
             Call Induction_Sph2( ind,n, EI)  
           
             testErr(30 + n-3) = EI
@@ -155,24 +156,19 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
 
-     do n = 6, 7
-    !     IF (Coeff(ind)%H_Fit(n-5) > 0) THEN
-    !         if(n==6)Then
-    !             Call HyperPolarizability_6_Sph2( Coeff(ind)%A_Mult,&
-    !                                 Coeff(ind)%B_Mult ,Coeff(ind)%A_HPol,Coeff(ind)%B_HPol,EH)
-    !         elseif(n==7)Then
-    !             Call HyperPolarizability_7_Sph2( Coeff(ind)%A_Mult,&
-    !                                 Coeff(ind)%B_Mult ,Coeff(ind)%A_HPol,Coeff(ind)%B_HPol,EH)   
-    !         endif
-    !         term = (C1*C2**n)*EH
-    !         testErr(42 + n-5) = C3*term
-    !         Hyper_energy(n-4) = term
-    !         Hyper_energy(1) = Hyper_energy(1)+term
-    !         Ene = Ene+term
+    do n = 6, 7
+        IF (Coeff(ind)%H_Fit(n-5) > 0) THEN
+            Call HyperPolarizability_Sph2( ind,n, EH) 
+          
+
+            testErr(42 + n-5) = EH
+            Hyper_energy(n-4) = EH
+            Hyper_energy(1) = Hyper_energy(1)+EH
+            Ene = Ene+EH
+            END IF 
+
         
-    !      END IF 
-        
-     end do
+    end do
 
 
 

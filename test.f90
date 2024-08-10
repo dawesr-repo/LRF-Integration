@@ -1,5 +1,7 @@
 module Testing
-        
+        use Geometry_Constant
+        use FitConstants
+
         contains
 
         SUBROUTINE evaluateLR_test(coordinates,XDIM,E1,filename,testArr)
@@ -36,9 +38,6 @@ module Testing
 
         SUBROUTINE Long_Range_Potential_Testing(coordenates,TotalEnergy,filename,dotest,testArr)
 
-                use Tensors_constant
-                use FitConstants
-
                 IMPLICIT NONE
 
                 real*8, INTENT(INOUT)  ::  TotalEnergy
@@ -47,11 +46,7 @@ module Testing
                 integer,optional::dotest
                 real*8,optional::testArr(52)
 
-                real*8 , dimension(3):: Ar 
-                real*8 , dimension(3):: Br
-                real*8 , dimension(9):: C
 
-                real*8 , dimension(11):: cal_coord
                 integer::CoeffIndex
                 integer::doTesting
                 real*8::testErr(52)
@@ -72,8 +67,8 @@ module Testing
                         .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
                         TotalEnergy = Coeff(CoeffIndex)%Zero
                 else
-                        Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
-                        Call TotalEnergy_Calc (cal_coord,Ar,Br,C,CoeffIndex,TotalEnergy,1,testErr)
+                        Call Generate_Coordenates(coordenates)
+                        Call TotalEnergy_Calc (CoeffIndex,TotalEnergy,1,testErr)
 
                         if (doTesting>0 .and. present(testArr)) then
                                 testArr = testErr
@@ -302,6 +297,7 @@ module Testing
                         fOutputNum = 0
                 end if
                 
+
                 
 
                 maxErr=0d0
@@ -455,7 +451,7 @@ module Testing
         Subroutine Test_Component(coeff_filename, data_filename,Comp_filename,&
                                         fileOutputNumber,ntestMIN,ntestMAX)
 
-                use Tensors_constant
+  
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: coeff_filename, data_filename,Comp_filename
                 integer,optional:: fileOutputNumber,ntestMIN,ntestMAX
@@ -473,13 +469,11 @@ module Testing
                 Integer, dimension (5) :: I_Fit     
                 Integer, dimension (2) :: H_Fit   
 
-                real*8 , dimension(11):: cal_coord
+   
                 real*8 , dimension(1195):: coeff_arr
                 Real*8  ::   Zero 
 
-                real*8 , dimension(3):: Ar 
-                real*8 , dimension(3):: Br
-                real*8 , dimension(9):: C
+
 
                 integer:: i,success_test,fOutputNum,j,nj
                 real*8::testArr(52),errArr(52),maxErr,err_tol,diff_comp(52),Cal_Val,Const
@@ -554,9 +548,9 @@ module Testing
 
                         Call General_Coordinates_Format(XDIM, XDim_coord, GeneralCoordenates)
                         Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordenates)
-                        Call Generate_Coordenates(coordenates,cal_coord,Ar,Br,C)
+                        Call Generate_Coordenates(coordenates)
 
-                        Call Approx_2_Sph2(cal_coord,Ar,Br,C , A_Mult,B_Mult ,Cal_Val)
+                        !Call Approx_2_Sph2( A_Mult,B_Mult ,Cal_Val)
 
                         diff_comp(1) = DABS(Const*Cal_Val - Const*Check_val(i))
 
@@ -739,7 +733,7 @@ module Testing
         END SUBROUTINE Test_All
 
         SUBROUTINE Testing_TTensors(filename,ntestMAX,level_init,level_final)
-                use Tensors_constant 
+
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: filename
                 integer,optional:: ntestMAX,level_init,level_final
@@ -751,11 +745,9 @@ module Testing
                 Character(len = 2) :: str
                 INTEGER :: XDIM,ntest,nMAX
                 real*8 :: start, finish,pii
-                real*8 , dimension(3):: Ar 
-                real*8 , dimension(3):: Br
-                real*8 , dimension(9):: C
+
                 Integer la_,level,lb_
-                real*8 , dimension(11):: cal_coord  
+
                 character(len=20)::title
                 integer:: i,success_test,passed,fOutputNum,j,k,l_init,l_final
                 integer,parameter::lmax=20
@@ -814,12 +806,12 @@ module Testing
 
                         Call General_Coordinates_Format(6, XDim_coord, GeneralCoordenates)
                         Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordinates)
-                        Call Generate_Coordenates(coordinates,cal_coord,Ar,Br,C)
+                        Call Generate_Coordenates(coordinates)
 
                         res_partial = 0d0
                         res_partial = result(i,:,:,:) 
                        
-                        Call Check_Tensors(Ar,Br,C,res_partial,passed,err,l_init,l_final) 
+                        Call Check_Tensors(res_partial,passed,err,l_init,l_final) 
 
                         if (err > maxErr)then
                                 maxErr = err
@@ -834,14 +826,12 @@ module Testing
 
         END SUBROUTINE Testing_TTensors 
 
-        SUBROUTINE Check_Tensors(Ar,Br,C,result,passed,errMax,linit,lfinal)
-                use Tensors_constant 
+        SUBROUTINE Check_Tensors(result,passed,errMax,linit,lfinal)
+   
                 IMPLICIT NONE
                 
                 
-                real*8 , dimension(3),Intent(IN):: Ar 
-                real*8 , dimension(3),Intent(IN):: Br
-                real*8 , dimension(9),Intent(IN):: C
+              
                 integer,parameter::lmax=20
                 integer,Intent(IN)::linit,lfinal
                 integer , intent(out)::passed
@@ -880,7 +870,7 @@ module Testing
 
                                           ind = mka*mlb+mkb+1
                                         
-                                          Call T_lk(Ar,Br,C,la,ka,cpa,lb,kb,cpb,check(la+1,lb+1,ind))
+                                          Call T_lk(la,ka,cpa,lb,kb,cpb,check(la+1,lb+1,ind))
                                           diff(la+1,lb+1,ind) = DABS(check(la+1,lb+1,ind)- result(la+1,lb+1,ind))
 
                                           if (diff(la+1,lb+1,ind) > errMax)then
@@ -979,7 +969,7 @@ module Testing
 
                         Call General_Coordinates_Format(XDIM, XDim_coord, GeneralCoordenates)
                         Call Coordinate_Transformation(GeneralCoordenates,coord_format,coordenates)
-                        Call Generate_Coordenates(coordenates,cal_coord,Ar_,Br_,C_)
+                        Call Generate_Coordenates(coordenates)
 
                         diff_comp(1:3) = DABS(Ar(i,:) - Ar_)
                         diff_comp(4:6) = DABS(Br(i,:) - Br_)
@@ -1134,17 +1124,17 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        call Test_All(fileOutNumber,1,10000)
+        !call Test_All(fileOutNumber,1,10000)
         
-        call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GP/GPTable(CO_CS).txt"&
-                        ,fileOutNumber,1,10000)
-        call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
-        call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
+        ! call Testing_GP( "./files/test/datasets/datatest_003_001.txt","./files/test/GP/GPTable(CO_CS).txt"&
+        !                 ,fileOutNumber,1,10000)
+        ! call Testing_TTensors('./files/test/T_Tensors/datatest.txt',10,level_init,level_final)
+        !call RunningTime_Performance("./files/test/coefficients/coefficients_003.txt",fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
-
-        Call Test_Dataset("./files/test/coefficients/coefficients_003.txt", &
-                        "./files/test/datasets/datatest_003_001.txt",fileOutNumber,1,1000)
+   
+        Call Test_Dataset("./files/test/coefficients/coefficients_002.txt", &
+                        "./files/test/datasets/datatest_002_001.txt",fileOutNumber,1,1)
 
         ! Call Test_Component("./files/test/coefficients/coefficients_003.txt", &
         !                     "./files/test/datasets/datatest_003_001.txt",&

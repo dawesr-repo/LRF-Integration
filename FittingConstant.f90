@@ -40,10 +40,11 @@ MODULE FitConstants
      real*8 :: Zero
      Integer::initflag
 
-     Integer, dimension (8) :: M_Fit     
-     Integer, dimension (3):: D_Fit     
-     Integer, dimension (5):: I_Fit     
-     Integer, dimension (2):: H_Fit  
+     Integer, dimension (15) :: M_Fit     
+     Integer, dimension (15) :: D_Fit     
+     Integer, dimension (15) :: I_Fit   
+
+     INTEGER :: max_T
 
      !Multipoles !
 
@@ -51,23 +52,19 @@ MODULE FitConstants
 
      !Polarizability!
 
-     real*8 , dimension(57)   :: A_Pol,B_Pol 
+     real*8 , dimension(6,7,195)   :: A_Pol,B_Pol 
 
-     !Hyperpolarizability!
-    
-     real*8 , dimension(40)   :: A_HPol,B_HPol 
 
      !Dispersion!
 
-     real*8 , dimension(873)   :: Disp
+     real*8 , dimension(5,10,5,10,3087)   :: Disp
 
      CONTAINS
         PROCEDURE, PASS :: Initializer
         PROCEDURE, PASS :: Read_Parameters
-        PROCEDURE, PASS :: Get_Mult_Comp
-        PROCEDURE, PASS :: Get_Pol_Comp
-        PROCEDURE, PASS :: Get_HPol_Comp
-        PROCEDURE, PASS :: Get_Disp_Comp
+        ! PROCEDURE, PASS :: Get_Mult_Comp
+        ! PROCEDURE, PASS :: Get_Pol_Comp
+        ! PROCEDURE, PASS :: Get_Disp_Comp
     END TYPE
 
     Integer,parameter :: NArray = 5
@@ -93,8 +90,8 @@ CONTAINS
     CLASS(Fit_Contant), INTENT(InOut) :: this
 
     Character(len = 200) :: row
-
-    
+    Integer::iord,mord,dord
+    Integer::i,j,l1,l2,t1,t2,ln
 
     if (this%initflag==1)Then
        
@@ -109,198 +106,147 @@ CONTAINS
         Read( 10, *) row
         Read( 10, *) row
         Read( 10, *) row
+
+
+        Read(10, *)  row,this%Zero
         Read( 10, *) row
 
-        read(10, *)  this%M_Fit
-        read(10, *)  this%D_Fit
-        read(10, *)  this%I_Fit
-        read(10, *)  this%H_Fit
+        read(10, *)  row,this%M_Fit
+        read(10, *)  row,this%I_Fit
+        read(10, *)  row,this%D_Fit
 
-        Read( 10, *) row
-        read(10, *)  this%Zero
+        iord = MAXVAL(this%I_Fit);
+        mord = MAXVAL(this%M_Fit);
+        mord = MAXVAL([mord,iord-3]);
+        dord = MAXVAL(this%D_Fit);
 
-        Read( 10, *) row
-        read(10, *) this%A_Mult(1)          !q
-        read(10, *) this%A_Mult(2:4)        !m
-        read(10, *) this%A_Mult(5:9)        !Qd
-        read(10, *) this%A_Mult(10:16)      !O
-        read(10, *) this%A_Mult(17:25)      !Phi
-        read(10, *) this%A_Mult(26:36)      !M5
-        read(10, *) this%A_Mult(37:49)      !M6
-        read(10, *) this%A_Mult(50:64)      !M7
-
-        Read( 10, *) row
-        read(10, *) this%B_Mult(1)          !q
-        read(10, *) this%B_Mult(2:4)        !m
-        read(10, *) this%B_Mult(5:9)        !Qd
-        read(10, *) this%B_Mult(10:16)      !O
-        read(10, *) this%B_Mult(17:25)      !Phi
-        read(10, *) this%B_Mult(26:36)      !M5
-        read(10, *) this%B_Mult(37:49)      !M6
-        read(10, *) this%B_Mult(50:64)      !M7
-
-        Read( 10, *) row
-        read(10, *) this%A_Pol(1:6)         !mm
-        read(10, *) this%A_Pol(7:21)        !Qdm
-        read(10, *) this%A_Pol(22:36)       !QdQd
-        read(10, *) this%A_Pol(37:57)       !Om
-
-        Read( 10, *) row
-        read(10, *)  this%B_Pol(1:6)        !mm
-        read(10, *)  this%B_Pol(7:21)       !Qdm
-        read(10, *)  this%B_Pol(22:36)      !QdQd
-        read(10, *)  this%B_Pol(37:57)      !Om
-
-        Read( 10, *) row
-        read(10, *)  this%A_HPol(1:10)      !mmm
-        read(10, *)  this%A_HPol(11:40)     !Qdmm
+        this%max_T = MAXVAL([iord-2,mord,dord-3])
 
         
-        Read( 10, *) row
-        read(10, *)  this%B_HPol(1:10)      !mmm
-        read(10, *)  this%B_HPol(11:40)     !Qdmm
+        read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult        
+        read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult   
 
-        Read( 10, *) row
-        read(10, *) this%Disp(1:36)         !mm_mm      
-        read(10, *) this%Disp(37:126)       !Qdm_mm 
-        read(10, *) this%Disp(127:216)      !mm_Qdm 
-        read(10, *) this%Disp(217:342)      !Om_mm 
-        read(10, *) this%Disp(343:468)      !mm_Om 
-        read(10, *) this%Disp(469:558)      !QdQd_mm
-        read(10, *) this%Disp(559:648)      !mm_QdQd
-        read(10, *) this%Disp(649:873)      !Qdm_Qdm
+        if (iord>=4) then
+            do i=1,iord-3
+                do j=i,iord-3
+                    if (i+j<=iord-2) then
+                        ln = (2*i+1)*(2*j+1);
+                        read(10, *)row, this%A_Pol(i,j,1:ln)  !PA_i-j
+                        read(10, *)row, this%B_Pol(i,j,1:ln)  !PB_i-j
+                    end if
+                end do
+            end do
+        end if
 
 
+        if (dord>=6) then
+            do l1=1,dord-5
+                do l2=l1,dord-5
+                    do t1=1,dord-5
+                        do t2=t1,dord-5
+                    
+                            if (l1+l2+t1+t2<=dord-2) then
+                                ln = (2*l1+1)*(2*l2+1)*(2*t1+1)*(2*t2+1);
+                                read(10, *)row, this%Disp(l1,l2,t1,t2,1:ln)  !Dispersion l1,l2, t1,t2                                                           disp_kk_vv_coeff{l1,l2,t1,t2});
+                            endif
+                        enddo
+                    enddo
+                enddo
+            enddo
+        endif
+        
         close(10)
 
-
-
-    else
         
     end if
 
   END SUBROUTINE Read_Parameters
 
-  SUBROUTINE Get_Mult_Comp(this,Molec,i,arr)
+!   SUBROUTINE Get_Mult_Comp(this,Molec,i,arr)
 
-    IMPLICIT NONE
-    CLASS(Fit_Contant), INTENT(IN) :: this
-    Character(len=*), INTENT(IN) ::Molec
-    Integer, INTENT(IN) ::i
-    real*8, INTENT(OUT)  :: arr(2*i+1) 
-    real*8 , dimension(64)   :: Mult 
-    integer::n,init
+!     IMPLICIT NONE
+!     CLASS(Fit_Contant), INTENT(IN) :: this
+!     Character(len=*), INTENT(IN) ::Molec
+!     Integer, INTENT(IN) ::i
+!     real*8, INTENT(OUT)  :: arr(2*i+1) 
+!     real*8 , dimension(64)   :: Mult 
+!     integer::n,init
     
-    init = i**2+1
-    n = 2*i+1
+!     init = i**2+1
+!     n = 2*i+1
     
-    if (Molec=="A")then
-        Mult = this%A_Mult
-    else
-        Mult = this%B_Mult    
-    end if
+!     if (Molec=="A")then
+!         Mult = this%A_Mult
+!     else
+!         Mult = this%B_Mult    
+!     end if
 
-    arr = Mult(init:init+n-1)
+!     arr = Mult(init:init+n-1)
 
-  end SUBROUTINE Get_Mult_Comp
+!   end SUBROUTINE Get_Mult_Comp
 
-  SUBROUTINE Get_Pol_Comp(this,Molec,i,j,arr,n)
+!   SUBROUTINE Get_Pol_Comp(this,Molec,i,j,arr,n)
 
-    IMPLICIT NONE
-    CLASS(Fit_Contant), INTENT(IN) :: this
-    Character(len=*), INTENT(IN) ::Molec
-    Integer, INTENT(IN) ::i,j
-    real*8, allocatable, INTENT(OUT)  :: arr(:) 
-    real*8 , dimension(57)   :: Pol 
-    integer::init
-    integer, INTENT(OUT)::n
+!     IMPLICIT NONE
+!     CLASS(Fit_Contant), INTENT(IN) :: this
+!     Character(len=*), INTENT(IN) ::Molec
+!     Integer, INTENT(IN) ::i,j
+!     real*8, allocatable, INTENT(OUT)  :: arr(:) 
+!     real*8 , dimension(57)   :: Pol 
+!     integer::init
+!     integer, INTENT(OUT)::n
 
 
-    init = polArr_ij(i,j)
+!     init = polArr_ij(i,j)
    
-    if (Molec=="A")then
-        Pol = this%A_Pol
-    else
-        Pol = this%B_Pol    
-    end if
+!     if (Molec=="A")then
+!         Pol = this%A_Pol
+!     else
+!         Pol = this%B_Pol    
+!     end if
 
-    if (i==j)then
-        n = (i+1)*(2*i+1)
-    else
-        n = (2*j+1)*(2*i+1)
-    end if 
+!     if (i==j)then
+!         n = (i+1)*(2*i+1)
+!     else
+!         n = (2*j+1)*(2*i+1)
+!     end if 
     
-    Allocate(arr(n)) 
-    arr = Pol(init: n + init-1)
+!     Allocate(arr(n)) 
+!     arr = Pol(init: n + init-1)
 
-  end SUBROUTINE Get_Pol_Comp
-
-  SUBROUTINE Get_HPol_Comp(this,Molec,i,j,k,arr,n)
-
-    IMPLICIT NONE
-    CLASS(Fit_Contant), INTENT(IN) :: this
-    Character(len=*), INTENT(IN) ::Molec
-    Integer, INTENT(IN) ::i,j,k
-    real*8, allocatable, INTENT(OUT)  :: arr(:) 
-    real*8 , dimension(40)   :: HPol 
-    integer::init
-    integer, INTENT(OUT)::n
+!   end SUBROUTINE Get_Pol_Comp
 
 
-    init = hpolArr_ijk(i,j,k)
+!   SUBROUTINE Get_Disp_Comp(this,i,j,k,l,arr,n)
+
+!     IMPLICIT NONE
+!     CLASS(Fit_Contant), INTENT(IN) :: this
+!     Integer, INTENT(IN) ::i,j,k,l
+!     real*8, allocatable, INTENT(OUT)  :: arr(:)    
+!     integer, INTENT(OUT)::n
+
+!     integer::init
+
+!     init = disp_ijkl(i,j,k,l)
+
+
+!     if (i==j .and. k==l)then
+!         n = (i+1)*(2*i+1)*(k+1)*(2*k+1)
+!     elseif (i.NE.j .and. k==l)then
+!         n = (2*i+1)*(2*j+1)*(k+1)*(2*k+1)
+!     elseif (i==j .and. k.NE.l)then
+!         n = (i+1)*(2*i+1)*(2*k+1)*(2*l+1)   
+!     else
+!         n = (2*i+1)*(2*j+1)*(2*k+1)*(2*l+1)  
+!     end if 
+
+
+    
+!     Allocate(arr(n))
    
-    if (Molec=="A")then
-        HPol = this%A_HPol
-    else
-        HPol = this%B_HPol   
-    end if
+!     arr = this%Disp(init: n + init-1)
 
-    if (i==j .and. i==k)then
-        n = (2*i**2+5*i+3)*(2*i+1)/6
-    elseif (i==j .and. i.NE.k)then
-        n = (i+1)*(2*i+1)*(2*k+1)
-    elseif (j==k .and. j.NE.i)then
-        n = (j+1)*(2*j+1)*(2*i+1)    
-    else
-        n = (2*i+1)*(2*j+1)*(2*k+1)
-    end if 
-    
-    Allocate(arr(n))
-
-    arr = HPol(init: n + init-1)
-
-  end SUBROUTINE Get_HPol_Comp
-
-  SUBROUTINE Get_Disp_Comp(this,i,j,k,l,arr,n)
-
-    IMPLICIT NONE
-    CLASS(Fit_Contant), INTENT(IN) :: this
-    Integer, INTENT(IN) ::i,j,k,l
-    real*8, allocatable, INTENT(OUT)  :: arr(:)    
-    integer, INTENT(OUT)::n
-
-    integer::init
-
-    init = disp_ijkl(i,j,k,l)
-
-
-    if (i==j .and. k==l)then
-        n = (i+1)*(2*i+1)*(k+1)*(2*k+1)
-    elseif (i.NE.j .and. k==l)then
-        n = (2*i+1)*(2*j+1)*(k+1)*(2*k+1)
-    elseif (i==j .and. k.NE.l)then
-        n = (i+1)*(2*i+1)*(2*k+1)*(2*l+1)   
-    else
-        n = (2*i+1)*(2*j+1)*(2*k+1)*(2*l+1)  
-    end if 
-
-
-    
-    Allocate(arr(n))
-   
-    arr = this%Disp(init: n + init-1)
-
-  end SUBROUTINE Get_Disp_Comp
+!   end SUBROUTINE Get_Disp_Comp
 
 
   SUBROUTINE Find_Coeff_Set(filename,ind)
@@ -365,6 +311,8 @@ CONTAINS
         Call Last_Coeff_Set(lastIndex)
 
         indx = lastIndex + 1
+
+       
         CALL Coeff(indx)%Initializer(filename)
         Call Coeff(indx)%Read_Parameters()
 

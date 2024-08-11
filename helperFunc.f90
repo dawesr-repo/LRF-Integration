@@ -87,10 +87,10 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
     real*8  , INTENT(INOut) ::TotalEnergy,testErr(52)
     integer, INTENT(IN)::doTesting
 
-    real*8   ::Ene,EM,ED,EH,EI,term
+    real*8   ::Ene,EM,ED,EI,term
     Integer :: n ;
 
-    real*8 :: Elect_energy(9),Dispe_energy(4),Induc_energy(6),Hyper_energy(3)
+    real*8 :: Elect_energy(15),Dispe_energy(10),Induc_energy(12)
 
     
 
@@ -101,12 +101,12 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
      EM  = 0.d0
      ED  = 0.d0
      EI  = 0.d0
-     EH  = 0.d0
+     
 
      Elect_energy  = 0.d0
      Dispe_energy  = 0.d0
      Induc_energy  = 0.d0
-     Hyper_energy  = 0.d0
+   
 
    
     do n = 1, 8
@@ -156,19 +156,6 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
 
 
-    do n = 6, 7
-        IF (Coeff(ind)%H_Fit(n-5) > 0) THEN
-            Call HyperPolarizability_Sph2( ind,n, EH) 
-          
-
-            testErr(42 + n-5) = EH
-            Hyper_energy(n-4) = EH
-            Hyper_energy(1) = Hyper_energy(1)+EH
-            Ene = Ene+EH
-            END IF 
-
-        
-    end do
 
 
 
@@ -178,7 +165,6 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
         testErr(2) = Elect_energy(1)
         testErr(3) = Dispe_energy(1)
         testErr(4) = Induc_energy(1)
-        testErr(5) = Hyper_energy(1)
     end if 
 
 
@@ -219,7 +205,7 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     call init_Tensors() ! Initializing in zero the new vectors
 
     call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
-
+    print*, "CoeffIndex: "
     Call Generate_Coordenates(coordenates)
     Call TotalEnergy_Calc (CoeffIndex,TotalEnergy,0,testErr)
   end if     

@@ -4,8 +4,8 @@ F90 = gfortran # compiile with gfortran
 
 CMPLFLG = -c -O3 -fbacktrace
 
-OBJS = 		 Geometry_Constant.o FittingConstant.o  Search.o helperFunc.o Multipole_Sph2.o  Dispersion_Sph2.o Induction_Sph2.o HyperPolarizability_Sph2.o min_example.o 
-OBJS_Test =  Geometry_Constant.o FittingConstant.o  Search.o helperFunc.o Multipole_Sph2.o  Dispersion_Sph2.o Induction_Sph2.o HyperPolarizability_Sph2.o test.o
+OBJS = 		 Geometry_Constant.o FittingConstant.o  Search.o helperFunc.o Multipole_Sph2.o  Dispersion_Sph2.o Induction_Sph2.o  min_example.o 
+OBJS_Test =  Geometry_Constant.o FittingConstant.o  Search.o helperFunc.o Multipole_Sph2.o  Dispersion_Sph2.o Induction_Sph2.o  test.o
 
 
 OBJS_PROD =       LRF.o  min_example.o 

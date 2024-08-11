@@ -41,7 +41,7 @@ PROGRAM min_example
  X1(4) = 120d0  !Phi
 
  
- call evaluateLR(X1,XDIM,E1,'./files/test/coefficients/coefficients_002.txt')
+ call evaluateLR(X1,XDIM,E1,'./files/coefficients_v4.txt')
  
 
 

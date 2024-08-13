@@ -48,7 +48,7 @@ MODULE FitConstants
 
      !Multipoles !
 
-     real*8 , dimension(64)   :: A_Mult,B_Mult 
+     real*8 , dimension(225)   :: A_Mult,B_Mult 
 
      !Polarizability!
 

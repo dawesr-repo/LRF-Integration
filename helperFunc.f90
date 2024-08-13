@@ -97,8 +97,9 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy)
 
     call Multipole_Sph3(ind, EM)
     call Induction_Sph3(ind, EI)
+    call Dispersion_Sph3(ind, ED)
 
-    print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI
+    print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI, " Dispersion Energy: ", ED
 
 
     TotalEnergy = EM + ED + EI  

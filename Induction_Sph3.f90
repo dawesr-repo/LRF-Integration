@@ -3,18 +3,15 @@
 SUBROUTINE Induction_Sph3(ind,IM)
 !INDUCTION Summary of this function goes here
 !   Detailed explanation goes here
-    use Geometry_Constant_v2, only: cal_coord_v2
     use FitConstants, only: Coeff
     IMPLICIT NONE
     integer , INTENT(IN) :: ind
     real*8, INTENT(OUT)  :: Im
-    integer :: order,n
+    integer :: order
     real*8 :: temp1,temp2
 
     IM  = 0d0
-
-
-
+    
     do order=1,15 
         IF ( Coeff(ind)%I_Fit(order) > 0) THEN
         
@@ -86,7 +83,7 @@ SUBROUTINE induction_ij_l1l2(i,j,l1,l2,mult,pol_arr,index,energy)
                     do k1 = 0,2*l1
                         do k2 = 0,2*l2
 
-                            Call calculate_order_cpn(l1,l2,k1,k2,cpn) 
+                            Call get_IND_cpn(l1,l2,k1,k2,cpn) 
                             comp_a_k1_k2 = pol_arr(cpn)
 
                             if (Dabs(comp_a_k1_k2)>EPS) then
@@ -120,7 +117,7 @@ end SUBROUTINE induction_ij_l1l2
 
 
 
-SUBROUTINE calculate_order_cpn(l1,l2,li,lj,cpn) 
+SUBROUTINE get_IND_cpn(l1,l2,li,lj,cpn) 
     IMPLICIT NONE
     integer, INTENT(IN) :: l1,l2,li,lj
     integer, INTENT(OUT) :: cpn
@@ -131,7 +128,7 @@ SUBROUTINE calculate_order_cpn(l1,l2,li,lj,cpn)
         cpn = li*(2*l2+1) + lj + 1
     end if
 
-end SUBROUTINE calculate_order_cpn
+end SUBROUTINE get_IND_cpn
 
 
 

@@ -10,7 +10,7 @@ module Geometry_Constant_v2
     real*8 , dimension(3):: Ar_v2 
     real*8 , dimension(3):: Br_v2
     real*8 , dimension(9):: CC_v2
-    real*8 , dimension(11):: cal_coord
+    real*8 , dimension(11):: cal_coord_v2
   contains
 
   subroutine init_Tensors_v2(maxlevel,coordenates)  
@@ -433,35 +433,35 @@ module Geometry_Constant_v2
 
       real*8 :: cos_b1,cos_b2,cos_c1,cos_c2,sin_b1,sin_b2,sin_c1,sin_c2,cos_phi,sin_phi
 
-          cal_coord(1) = coordenates(1)
+          cal_coord_v2(1) = coordenates(1)
             
 
-          cal_coord(2)  = DCOS(coordenates(2)*pii/180d0)
-          cal_coord(3) = DSIN(coordenates(2)*pii/180d0)
+          cal_coord_v2(2)  = DCOS(coordenates(2)*pii/180d0)
+          cal_coord_v2(3) = DSIN(coordenates(2)*pii/180d0)
 
-          cal_coord(4) = DCOS(coordenates(3)*pii/180d0)
-          cal_coord(5) = DSIN(coordenates(3)*pii/180d0)
+          cal_coord_v2(4) = DCOS(coordenates(3)*pii/180d0)
+          cal_coord_v2(5) = DSIN(coordenates(3)*pii/180d0)
       
-          cal_coord(6) = DCOS(coordenates(4)*pii/180d0)
-          cal_coord(7) = DSIN(coordenates(4)*pii/180d0)
+          cal_coord_v2(6) = DCOS(coordenates(4)*pii/180d0)
+          cal_coord_v2(7) = DSIN(coordenates(4)*pii/180d0)
 
-          cal_coord(8) = DCOS(coordenates(5)*pii/180d0)
-          cal_coord(9) = DSIN(coordenates(5)*pii/180d0)
+          cal_coord_v2(8) = DCOS(coordenates(5)*pii/180d0)
+          cal_coord_v2(9) = DSIN(coordenates(5)*pii/180d0)
 
-          cal_coord(10) = DCOS(coordenates(6)*pii/180d0)
-          cal_coord(11) = DSIN(coordenates(6)*pii/180d0)
+          cal_coord_v2(10) = DCOS(coordenates(6)*pii/180d0)
+          cal_coord_v2(11) = DSIN(coordenates(6)*pii/180d0)
 
 
-          cos_b1 =    cal_coord(2)
-          sin_b1 =    cal_coord(3)
-          cos_b2 =    cal_coord(4)
-          sin_b2 =    cal_coord(5)
-          cos_phi =   cal_coord(6)
-          sin_phi =   cal_coord(7)
-          cos_c1 =    cal_coord(8)
-          sin_c1 =    cal_coord(9)
-          cos_c2 =    cal_coord(10)
-          sin_c2 =    cal_coord(11)
+          cos_b1 =    cal_coord_v2(2)
+          sin_b1 =    cal_coord_v2(3)
+          cos_b2 =    cal_coord_v2(4)
+          sin_b2 =    cal_coord_v2(5)
+          cos_phi =   cal_coord_v2(6)
+          sin_phi =   cal_coord_v2(7)
+          cos_c1 =    cal_coord_v2(8)
+          sin_c1 =    cal_coord_v2(9)
+          cos_c2 =    cal_coord_v2(10)
+          sin_c2 =    cal_coord_v2(11)
 
 
 

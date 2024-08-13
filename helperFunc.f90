@@ -92,38 +92,17 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
     real*8 :: Elect_energy(15),Dispe_energy(10),Induc_energy(12)
 
-    
-
      call Initialize_Search()
    
   
-     Ene = 0.d0
+     TotalEnergy = 0.d0
      EM  = 0.d0
      ED  = 0.d0
      EI  = 0.d0
      
 
-     Elect_energy  = 0.d0
-     Dispe_energy  = 0.d0
-     Induc_energy  = 0.d0
-   
-    EM  = 0.d0
-
     call Multipole_Sph3(ind, EM)
-    ! do n = 1, 15
-        
-    !     IF ( Coeff(ind)%M_Fit(n) > 0) THEN
-
-            
-           
-    !         testErr(5 + n) = EM
-    !         Elect_energy(1+n) = EM
-    !         Elect_energy(1) = Elect_energy(1)+EM 
-    !         Ene = Ene+EM
-            
-    !      END IF 
-         
-    !  end do
+    call Induction_Sph3(ind, EI)
      
 
 
@@ -156,17 +135,18 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
     !  end do
 
 
+    TotalEnergy = EM + ED + EI  
 
 
 
 
-    TotalEnergy  = Ene
-    if (doTesting>0)Then
-        testErr(1) = TotalEnergy
-        testErr(2) = Elect_energy(1)
-        ! testErr(3) = Dispe_energy(1)
-        ! testErr(4) = Induc_energy(1)
-    end if 
+    ! TotalEnergy  = Ene
+    ! if (doTesting>0)Then
+    !     testErr(1) = TotalEnergy
+    !     testErr(2) = Elect_energy(1)
+    !     ! testErr(3) = Dispe_energy(1)
+    !     ! testErr(4) = Induc_energy(1)
+    ! end if 
 
 
 end SUBROUTINE TotalEnergy_Calc
@@ -208,6 +188,7 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     call init_Tensors_v2(15,coordenates) ! Initializing in zero the new vectors v2
 
     Call TotalEnergy_Calc (CoeffIndex,TotalEnergy,0,testErr)
+    print*, "Total Energy: ", TotalEnergy
   end if     
 
 END SUBROUTINE Long_Range_Potential

@@ -77,29 +77,20 @@ END SUBROUTINE General_Coordinates_Format
 
 
 SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy)
- use FitConstants, only:Coeff,C1,C2,C3
+
  implicit none
 
  
     Integer, INTENT(IN):: ind ! index of the coefficents 
     real*8  , INTENT(INOut) ::TotalEnergy
 
-    real*8   ::Ene,EM,ED,EI,term
-    Integer :: n ;
-
-    real*8 :: Elect_energy(15),Dispe_energy(10),Induc_energy(12)
-
-     TotalEnergy = 0.d0
-     EM  = 0.d0
-     ED  = 0.d0
-     EI  = 0.d0
-     
+    real*8   ::EM,ED,EI,term
 
     call Multipole_Sph3(ind, EM)
     call Induction_Sph3(ind, EI)
     call Dispersion_Sph3(ind, ED)
 
-    print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI, " Dispersion Energy: ", ED
+    !print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI, " Dispersion Energy: ", ED
 
 
     TotalEnergy = EM + ED + EI  
@@ -120,8 +111,8 @@ end SUBROUTINE TotalEnergy_Calc
 
 SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
- use FitConstants
- use Geometry_Constant_v2
+ use FitConstants, only: Coeff, max_T, Get_Coeff_Index
+ use Geometry_Constant_v2, only: init_Tensors_v2
  IMPLICIT NONE
 
  real*8, INTENT(INOUT)  ::  TotalEnergy
@@ -140,10 +131,10 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     
     call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
     
-    call init_Tensors_v2(15,coordenates) ! Initializing in zero the new vectors v2
+    call init_Tensors_v2(max_T,coordenates) ! Initializing in zero the new vectors v2
 
     Call TotalEnergy_Calc (CoeffIndex,TotalEnergy)
-    print*, "Total Energy: ", TotalEnergy
+    !print*, "Total Energy: ", TotalEnergy
   end if     
 
 END SUBROUTINE Long_Range_Potential

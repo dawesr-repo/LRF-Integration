@@ -11,6 +11,8 @@ SUBROUTINE Induction_Sph3(ind,IM)
     real*8 :: temp1,temp2
 
     IM  = 0d0
+    temp1 = 0d0
+    temp2 = 0d0
     
     do order=1,15 
         IF ( Coeff(ind)%I_Fit(order) > 0) THEN
@@ -29,13 +31,14 @@ SUBROUTINE induction_order(order,mult_coeff,pol_kk_coeff,index,energy)
     IMPLICIT NONE
     real*8, INTENT(OUT)  :: energy
     integer , INTENT(IN) :: order,index
-    real*8 :: R, res=0d0,temp=0d0
+    real*8 :: R,temp
     integer :: l1,l2,i,j,lmin,lmax
     real*8 :: mult_coeff(225),pol_kk_coeff(6,7,195)
-
+    real*8 :: res
     R=cal_coord_v2(1)
 
-    
+    res = 0d0
+    temp= 0d0
 
     do l1=1,order-3
         do l2=1,order-3

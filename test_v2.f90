@@ -3,7 +3,23 @@ module Testing_v2
         use FitConstants
 
         contains
+        ! Helper functions         
+        SUBROUTINE FileChecking(fileName,num)
+                implicit none
+                character(*),INTENT(IN)::fileName
+                Integer,INTENT(IN)::num
+                logical :: exist
+
+                inquire(file=fileName, exist=exist)
+                if (exist) then
+                        open(num, file=fileName, status="old", position="append", action="write")
+                else
+                        open(num, file=fileName, status="new", action="write")
+                end if
+
+        END SUBROUTINE FileChecking
         
+        ! TEST Functions
         Subroutine RunningTime_Performance(coeff_filename,fileOutputNumber)
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: coeff_filename
@@ -12,7 +28,7 @@ module Testing_v2
                 real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
                 real*8 :: FourD_coord(4)
                 Character(len = 20) :: coord_format = "Euler_ZYZ"
-                INTEGER :: XDim=4,i,ntest=10000
+                INTEGER :: XDim=4,i,ntest=1000
                 real*8 :: start, finish
                 real*8::testErr(52)
 
@@ -23,10 +39,10 @@ module Testing_v2
 
                 
 
-                call cpu_time(ntest)
+                call cpu_time(start)
 
            
-                do i=1,1000
+                do i=1,ntest
                         call evaluateLR(FourD_coord,XDIM,E1,coeff_filename)
                 end do 
   
@@ -38,13 +54,13 @@ module Testing_v2
 
         end  Subroutine RunningTime_Performance
 
-end module Testing
+end module Testing_v2
 
 
 
 PROGRAM main_subroutine
 
-        use Testing
+        use Testing_v2
         IMPLICIT NONE
 
 
@@ -69,7 +85,7 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        call RunningTime_Performance("'./files/coefficients_v4.txt'",fileOutNumber)
+        call RunningTime_Performance('./files/coefficients_v4.txt',fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
 

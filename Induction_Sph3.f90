@@ -1,124 +1,137 @@
-SUBROUTINE Induction_Sph2( ind,order, Energy)
+! ****************************************************
 
-    use Geometry_Constant, only: cal_coord
+SUBROUTINE Induction_Sph3(ind,IM)
+!INDUCTION Summary of this function goes here
+!   Detailed explanation goes here
+    use Geometry_Constant_v2, only: cal_coord_v2
+    use FitConstants, only: Coeff
+    IMPLICIT NONE
+    integer , INTENT(IN) :: ind
+    real*8, INTENT(OUT)  :: Im
+    integer :: order,n
+    real*8 :: temp1,temp2
+
+    IM  = 0d0
+
+
+
+    do order=1,15 
+        IF ( Coeff(ind)%I_Fit(order) > 0) THEN
+        
+            call induction_order(order,Coeff(ind)%A_Mult,Coeff(ind)%B_Pol,1,temp1) ! indB
+            call induction_order(order,Coeff(ind)%B_Mult,Coeff(ind)%A_Pol,0,temp2) !indA
+    
+            IM = IM + temp1 + temp2
+        END IF  
+    end do
+end SUBROUTINE Induction_Sph3
+
+SUBROUTINE induction_order(order,mult_coeff,pol_kk_coeff,index,energy)
+    use Geometry_Constant_v2, only: cal_coord_v2
     use FitConstants, only: C1,C2,C3
-
     IMPLICIT NONE
-    real*8, INTENT(OUT)  :: Energy
-    integer , INTENT(IN) :: ind,order
+    real*8, INTENT(OUT)  :: energy
+    integer , INTENT(IN) :: order,index
+    real*8 :: R, res=0d0,temp=0d0
+    integer :: l1,l2,i,j,lmin,lmax
+    real*8 :: mult_coeff(225),pol_kk_coeff(6,7,195)
 
-    integer ::i,j,k,l
-    real*8:: R,result,term,fact
-    real*8:: I_ij_kl_0,I_ij_kl_1,I_ij_lk_0,I_ij_lk_1
-
-    R =cal_coord(1);
-
-
-    result = 0d0
-
-    do i=0,order-2-2
-    do j=i,order-2-1-i
-        do k=1,order-2-i-j
-        do l=k,order-2-i-j-k
-                if (i+j+k+l+2 == order)then
-                   
-                    !write(*,*) 'order : ',order, i,j,k,l
-                    Call Induction_Energy(ind,i,j,k,l ,0,I_ij_kl_0) 
-                    Call Induction_Energy(ind,i,j,k,l ,1,I_ij_kl_1) 
-                    term  = I_ij_kl_0+ I_ij_kl_1
-      
-                    if (i.NE.j .and. k.NE.l)then
-                      
-                      Call Induction_Energy(ind,j,i,k,l, 0 ,I_ij_lk_0) 
-                      Call Induction_Energy(ind,j,i,k,l, 1 ,I_ij_lk_1)
-                      term  = term +I_ij_lk_0+I_ij_lk_1
-                    end if
-
-                    if (i==j .and. k==l)then
-                        fact = 1.0d0
-                    else 
-                        fact = 2.0d0
-                    end if
-
-                    result  = result + fact*term
-
-                end if
-        end do    
-        end do
-    end do    
-    end do
-    
-
-    Energy =   -0.5d0*(C3*C1*C2**order)*result/ R**order
-
-    RETURN
-END SUBROUTINE Induction_Sph2
-
-
-SUBROUTINE Induction_Energy(ind,i,j,k,l,dir,Energy)
-    use Geometry_Constant
-    use FitConstants
-    use Search
-    IMPLICIT NONE
-    integer, INTENT(IN) ::i,j,k,l,ind,dir
-    real*8, INTENT(OUT)  :: Energy
-    
-    real*8::result
-    real*8:: eps=EPSILON(result), r1,r2
-    INTEGER::ai,aj,bk,bl, indK 
-    Character :: cp_i,cp_j,cp_k,cp_l
-
-    real*8 :: Mi(2*i+1),Mj(2*j+1) 
-    real*8, allocatable  :: Ikl(:)
-    integer::n
-    
-
-    if (dir==1)then
-        Call Coeff(ind)%Get_Mult_Comp("A",i,Mi)
-        Call Coeff(ind)%Get_Mult_Comp("A",j,Mj)
-        Call Coeff(ind)%Get_Pol_Comp("B",k,l,Ikl,n)
-    else
-        Call Coeff(ind)%Get_Mult_Comp("B",i,Mi)
-        Call Coeff(ind)%Get_Mult_Comp("B",j,Mj)
-        Call Coeff(ind)%Get_Pol_Comp("A",k,l,Ikl,n)
-    end if 
+    R=cal_coord_v2(1)
 
     
-    result = 0d0  
 
-    do ai = 1,2*i+1
-        do aj = 1,2*j+1      
-            do bk = 1,2*k+1
-                do bl = 1,2*l+1
-                    
-                    if (DABS(Mi(ai))>eps .and. DABS(Mj(aj))>eps) Then
-                            Call Get_Ind_Index(k,l,bk,bl,indK)
-                        if (DABS(Ikl(indK))>eps)then
-
-                            call Get_Comp(ai,cp_i)
-                            call Get_Comp(aj,cp_j)
-                            call Get_Comp(bk,cp_k)
-                            call Get_Comp(bl,cp_l)
-
-                            if (dir==1)then
-                                Call T_lk(i,Floor((ai*1d0)/2d0),cp_i,k,Floor((bk*1d0)/2d0),cp_k,r1)
-                                Call T_lk(j,Floor((aj*1d0)/2d0),cp_j,l,Floor((bl*1d0)/2d0),cp_l,r2)
-                            else 
-                                Call T_lk(k,Floor((bk*1d0)/2d0),cp_k,i,Floor((ai*1d0)/2d0),cp_i,r1)
-                                Call T_lk(l,Floor((bl*1d0)/2d0),cp_l,j,Floor((aj*1d0)/2d0),cp_j,r2)
-                            end if
-                            
-                            result = result + Mi(ai)*Mj(aj)*Ikl(indK)*r1*r2
-                        end if 
-                    end if 
+    do l1=1,order-3
+        do l2=1,order-3
+            if (l1+l2+2 <= order) Then
+             lmin = minval([l1,l2])
+             lmax = maxval([l1,l2])
+                do i=0,order-2-2
+                    do j=0,order-2-2
+                        if (i+j+l1+l2+2 == order)Then
+                            call induction_ij_l1l2(i,j,l1,l2,mult_coeff, &
+                                                    pol_kk_coeff(lmin,lmax,1:(2*l1+1)*(2*l2+1)), &
+                                                    index,temp)
+                            res  =  res + temp
+                        end if
+                    end do
                 end do
-            end do
+            end if
         end do
     end do
+  
+    energy =  (-0.5*(C3*C1*(C2**order))*res)/(R**order)  
 
-    Energy = result
+end SUBROUTINE induction_order
 
-end SUBROUTINE Induction_Energy
+SUBROUTINE induction_ij_l1l2(i,j,l1,l2,mult,pol_arr,index,energy)
+    use Geometry_Constant_v2, only: T_Tensor_v2
+    IMPLICIT NONE
+    integer, INTENT(IN) :: i,j,l1,l2,index
+    real*8, INTENT(IN) :: mult(225),pol_arr(195)
+    real*8, INTENT(OUT)  :: energy
+    real*8 :: Qai,Qbj,comp_a_k1_k2,T_l1_i,T_l2_j,res
+    integer :: ci,cj,k1,k2,cpn
+    
+    real*8 :: EPS = EPSILON(energy)
+  
+    res = 0d0
+
+    do ci = 0,2*i
+        Qai = mult(i**2 +1+ci)
+        if (Dabs(Qai)>EPS) then
+            do cj = 0,2*j
+                Qbj = mult(j**2 +1+cj)
+                if (Dabs(Qbj)>EPS) then
+
+                    do k1 = 0,2*l1
+                        do k2 = 0,2*l2
+
+                            Call calculate_order_cpn(l1,l2,k1,k2,cpn) 
+                            comp_a_k1_k2 = pol_arr(cpn)
+
+                            if (Dabs(comp_a_k1_k2)>EPS) then
+                                ! index indicate if Im calculating pol over A
+                                ! or pol over B
+                                if (index==0)   then      
+                                    T_l1_i = T_Tensor_v2(l1+1,k1+1,i+1,ci+1)
+                                    T_l2_j = T_Tensor_v2(l2+1,k2+1,j+1,cj+1)
+                                else
+                                    T_l1_i = T_Tensor_v2(i+1,ci+1,l1+1,k1+1)
+                                    T_l2_j = T_Tensor_v2(j+1,cj+1,l2+1,k2+1)
+                                end if
+
+                                res = res + Qai*Qbj*comp_a_k1_k2*T_l1_i*T_l2_j
+
+                             
+                            end if
+
+                        end do
+                    end do
+                end if
+    
+            end do 
+        end if
+    end do 
+
+    energy = res
+    
+end SUBROUTINE induction_ij_l1l2
+
+
+
+
+SUBROUTINE calculate_order_cpn(l1,l2,li,lj,cpn) 
+    IMPLICIT NONE
+    integer, INTENT(IN) :: l1,l2,li,lj
+    integer, INTENT(OUT) :: cpn
+
+    if (l1>l2) then
+        cpn = lj*(2*l1+1) + li + 1
+    else
+        cpn = li*(2*l2+1) + lj + 1
+    end if
+
+end SUBROUTINE calculate_order_cpn
 
 
 

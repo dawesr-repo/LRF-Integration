@@ -76,25 +76,19 @@ END SUBROUTINE General_Coordinates_Format
 
 
 
-SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
+SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy)
  use FitConstants, only:Coeff,C1,C2,C3
- use Geometry_Constant
- use Search, only: Initialize_Search
  implicit none
 
  
     Integer, INTENT(IN):: ind ! index of the coefficents 
-    real*8  , INTENT(INOut) ::TotalEnergy,testErr(52)
-    integer, INTENT(IN)::doTesting
+    real*8  , INTENT(INOut) ::TotalEnergy
 
     real*8   ::Ene,EM,ED,EI,term
     Integer :: n ;
 
     real*8 :: Elect_energy(15),Dispe_energy(10),Induc_energy(12)
 
-     call Initialize_Search()
-   
-  
      TotalEnergy = 0.d0
      EM  = 0.d0
      ED  = 0.d0
@@ -103,50 +97,11 @@ SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
 
     call Multipole_Sph3(ind, EM)
     call Induction_Sph3(ind, EI)
-     
 
-
-    !  do n = 6,8
-    !     IF (Coeff(ind)%D_Fit(n-5) > 0) THEN
-
-    !         Call Dispersion_Sph2( ind,n, ED)
-          
-    !         testErr(20 + n - 5) = ED
-    !         Dispe_energy(n-4) = ED
-    !         Dispe_energy(1) = Dispe_energy(1)+ ED
-    !         Ene = Ene+ED
-          
-    !      END IF 
-        
-    !  end do
-
-
-    !  do n = 4, 8
-    !      IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
-    !         Call Induction_Sph2( ind,n, EI)  
-          
-    !         testErr(30 + n-3) = EI
-    !         Induc_energy(n-2) = EI
-    !         Induc_energy(1) = Induc_energy(1)+EI
-    !         Ene = Ene+EI
-            
-    !      END IF 
-        
-    !  end do
+    print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI
 
 
     TotalEnergy = EM + ED + EI  
-
-
-
-
-    ! TotalEnergy  = Ene
-    ! if (doTesting>0)Then
-    !     testErr(1) = TotalEnergy
-    !     testErr(2) = Elect_energy(1)
-    !     ! testErr(3) = Dispe_energy(1)
-    !     ! testErr(4) = Induc_energy(1)
-    ! end if 
 
 
 end SUBROUTINE TotalEnergy_Calc
@@ -158,14 +113,13 @@ end SUBROUTINE TotalEnergy_Calc
 ! Arg 3 [TotalEnergy]   Total Energy calculated 
 
 
-! version 3.1.1
+! version 4.0
 
 
 
 SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
  use FitConstants
- use Geometry_Constant
  use Geometry_Constant_v2
  IMPLICIT NONE
 
@@ -187,7 +141,7 @@ SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
     
     call init_Tensors_v2(15,coordenates) ! Initializing in zero the new vectors v2
 
-    Call TotalEnergy_Calc (CoeffIndex,TotalEnergy,0,testErr)
+    Call TotalEnergy_Calc (CoeffIndex,TotalEnergy)
     print*, "Total Energy: ", TotalEnergy
   end if     
 

@@ -26,24 +26,32 @@ module Testing_v2
                 integer,optional:: fileOutputNumber
                 real*8 :: E2,E1
                 real*8 ,dimension(6):: GeneralCoordenates,coordinates,zero_coordinates
-                real*8 :: FourD_coord(4)
+                real*8 :: FourD_coord(4),SixD_coord(6)
                 Character(len = 20) :: coord_format = "Euler_ZYZ"
-                INTEGER :: XDim=4,i,ntest=1000
+                INTEGER :: XDim=6,i,ntest=1000
                 real*8 :: start, finish
                 real*8::testErr(52)
 
-                FourD_coord(1) = 10.271963668339600d0 !R
-                FourD_coord(2) = 30d0  !b1
-                FourD_coord(3) = 20d0  !b2
-                FourD_coord(4) = 120d0  !Phi
+                ! FourD_coord(1) = 10.271963668339600d0 !R
+                ! FourD_coord(2) = 30d0  !b1
+                ! FourD_coord(3) = 20d0  !b2
+                ! FourD_coord(4) = 120d0  !Phi
+                ! FourD_coord(3) = 20d0  !b2
+ 
 
+                SixD_coord(1) = 10.271963668339600d0 !R
+                SixD_coord(2) = 30d0  !b1
+                SixD_coord(3) = 20d0  !b2
+                SixD_coord(4) = 120d0 !Phi
+                SixD_coord(5) = 40d0  !c1
+                SixD_coord(6) = 50d0  !c2
                 
 
                 call cpu_time(start)
 
            
                 do i=1,ntest
-                        call evaluateLR(FourD_coord,XDIM,E1,coeff_filename)
+                        call evaluateLR(SixD_coord,XDIM,E1,coeff_filename)
                 end do 
   
                 

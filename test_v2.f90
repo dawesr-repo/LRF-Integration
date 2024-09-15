@@ -85,7 +85,7 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-        call RunningTime_Performance('./files/coefficients_v4.txt',fileOutNumber)
+        call RunningTime_Performance('./files/test/coefficients/C1(1)_C1(1)_Coeff.txt',fileOutNumber)
 
 ! this is useful to test a particular tensor component (Debugging)
 

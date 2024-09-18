@@ -28,7 +28,7 @@ MODULE FitConstants
 
      !Polarizability!
 
-     real*8 , dimension(6,7,195)   :: A_Pol,B_Pol 
+     real*8 , dimension(6,12,195)  :: A_Pol,B_Pol 
 
 
      !Dispersion!
@@ -64,6 +64,7 @@ CONTAINS
     Character(len = 200) :: row
     Integer::iord,mord,dord
     Integer::i,j,l1,l2,t1,t2,ln
+    real*8 :: polarr(195)
 
     if (this%initflag==1)Then
        
@@ -96,7 +97,9 @@ CONTAINS
 
         
         read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult        
-        read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult   
+        read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult 
+
+
 
         if (iord>=4) then
             do i=1,iord-3
@@ -104,12 +107,11 @@ CONTAINS
                     if (i+j<=iord-2) then
                         ln = (2*i+1)*(2*j+1);
                         read(10, *)row, this%A_Pol(i,j,1:ln)  !PA_i-j
-                        read(10, *)row, this%B_Pol(i,j,1:ln)  !PB_i-j
+                        read(10, *)row,  this%B_Pol(i,j,1:ln) !PB_i-j
                     end if
                 end do
             end do
         end if
-
 
         if (dord>=6) then
             do l1=1,dord-5

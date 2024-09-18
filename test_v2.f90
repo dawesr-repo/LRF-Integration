@@ -71,15 +71,17 @@ module Testing_v2
                 Character(len = *),Intent(IN) :: SystemName
                 Integer,Intent(IN):: XDIM
                 integer,optional:: fileOutputNumber
-                INTEGER :: i,j,ntest=1000
-                real*8 :: E0,E1,RMSE,Emax,E0_MAXVAL
+                INTEGER :: i,j,ntest=1
+                real*8 :: E0,E1,RMSE,Emax,E0_MAXVAL,Erel
                 real*8 :: coord(XDIM),coord_from_file(XDim+2)
-                
+                logical :: pass
                 real*8, parameter :: pii = DACOS(-1.d0) 
 
                 RMSE=0d0
                 Emax = 0d0   
                 E0_MAXVAL = 0d0     
+                Erel = 0d0 
+                pass = .false.
                
                 Open( 17, file = './files/test/datasets/'//SystemName//'.txt' )
            
@@ -103,19 +105,33 @@ module Testing_v2
                         end if
             
                         call evaluateLR(coord,XDIM,E1,'./files/test/coefficients/'//SystemName//'_Coeff.txt')
+                        write(*,*)"E: ",E0,E1
                         RMSE = RMSE+dabs(E0-E1)**2
                         Emax = MAXVAL([Emax,dabs(E0-E1)])
+                        Erel = Erel+dabs(E0-E1)/dabs(E0)
                         E0_MAXVAL = MAXVAL([E0_MAXVAL,dabs(E0)])
                 end do 
 
                 RMSE = Dsqrt(RMSE/ntest)
+                Erel = Erel/ntest
+
+             
+
+                
+
 
                 close(17)
            
                 write(*,*)"*********************************************************************"
                 write(*,*)"* System: ",SystemName
-                write(*,*)"* E0_MAXVAL: ",E0_MAXVAL," *"
-                write(*,*)"* Emax: ",Emax," *"
+                !write(*,*)"* E0_MAXVAL: ",E0_MAXVAL," *"
+                if ((RMSE+Erel)/2d0 <= 10d0**(-7)) then
+                        write(*,*)"* Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+                else
+                        write(*,*)"* Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
+                end if
+                
+                write(*,*)"* Erel: ",Erel," *"
                 write(*,*)"* RMSE: ",RMSE," *"
                 write(*,*)"*********************************************************************"
 
@@ -135,25 +151,54 @@ PROGRAM main_subroutine
 
         INTEGER  :: DATE_TIME (8),fileOutNumber
         CHARACTER (LEN = 10) BIG_BEN (3)
-        integer:: n_sys = 1
-        integer :: xdim_arr(5)
+        integer:: n_sys = 38
+        integer :: xdim_arr(38)
         Type :: varStr
                 character(len=:), allocatable :: as_str
         end Type varStr
  
-        type(varStr), dimension(1) :: Sys(30)
-        integer :: i
+        type(varStr), dimension(1) :: Sys(38)
+        type(varStr), dimension(1) :: numStr(15)
+        type(varStr), dimension(1) :: IntStr(3)
+        integer :: i,k
+
+        IntStr(1)%as_str = "E"
+        IntStr(2)%as_str = "I"
+        IntStr(3)%as_str = "D"
+
+        numStr(1)%as_str  = "1"
+        numStr(2)%as_str  = "2"
+        numStr(3)%as_str  = "3"
+        numStr(4)%as_str  = "4"
+        numStr(5)%as_str  = "5"
+        numStr(6)%as_str  = "6"
+        numStr(7)%as_str  = "7"
+        numStr(8)%as_str  = "8"
+        numStr(9)%as_str  = "9"
+        numStr(10)%as_str = "10"
+        numStr(11)%as_str = "11"
+        numStr(12)%as_str = "12"
+        numStr(13)%as_str = "13"
+        numStr(14)%as_str = "14"
+        numStr(15)%as_str = "15"
         
-        ! Sys(1)%as_str = "C1(1)_C1(1)_E"
-        ! Sys(2)%as_str = "C1(1)_C1(1)_I"
-        ! Sys(3)%as_str = "C1(1)_C1(1)_D"
-        ! Sys(4)%as_str = "C1(1)_C1(1)_I4-8"
-        Sys(1)%as_str = "C1(1)_C1(1)_I9-12"
+        do k=1,15
+                Sys(k)%as_str = "C1(1)_C1(1)_"//IntStr(1)%as_str//numStr(k)%as_str
+        end do
+        do k=6,15
+                Sys(k+10)%as_str = "C1(1)_C1(1)_"//IntStr(3)%as_str//numStr(k)%as_str
+        end do
+
+        do k=4,15
+                Sys(k+22)%as_str = "C1(1)_C1(1)_"//IntStr(2)%as_str//numStr(k)%as_str
+        end do
+
+        Sys(38)%as_str = "C1(1)_C1(1)_I11-00"       
+
         xdim_arr(:) = 6
 
         fileOutNumber=12
 
-     
 
         CALL DATE_AND_TIME (BIG_BEN (1), BIG_BEN (2), &
         BIG_BEN (3), DATE_TIME)
@@ -167,9 +212,9 @@ PROGRAM main_subroutine
         write(fileOutNumber,*)  "Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7) 
 
 
-       ! call RunningTime_Performance('./files/test/coefficients/C1(1)_C1(1)_Coeff.txt',fileOutNumber)
+        ! call RunningTime_Performance('./files/test/coefficients/C1(1)_C1(1)_Coeff.txt',fileOutNumber)
        
-       do i=1,n_sys
+        do i=1,38
              call Check_MATLAB_ENERGY(Sys(i)%as_str,xdim_arr(i),fileOutNumber)
         end do
         

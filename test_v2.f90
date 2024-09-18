@@ -3,7 +3,6 @@ module Testing_v2
         use FitConstants
 
         
-
         contains
         ! Helper functions         
         SUBROUTINE FileChecking(fileName,num)

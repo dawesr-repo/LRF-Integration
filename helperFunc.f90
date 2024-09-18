@@ -76,110 +76,24 @@ END SUBROUTINE General_Coordinates_Format
 
 
 
-SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy,doTesting,testErr)
- use FitConstants, only:Coeff,C1,C2,C3
- use Geometry_Constant
- use Search, only: Initialize_Search
+SUBROUTINE TotalEnergy_Calc (ind,TotalEnergy)
+
  implicit none
 
  
     Integer, INTENT(IN):: ind ! index of the coefficents 
-    real*8  , INTENT(INOut) ::TotalEnergy,testErr(52)
-    integer, INTENT(IN)::doTesting
+    real*8  , INTENT(INOut) ::TotalEnergy
 
-    real*8   ::Ene,EM,ED,EH,EI,term
-    Integer :: n ;
+    real*8   ::EM,ED,EI,term
 
-    real*8 :: Elect_energy(9),Dispe_energy(4),Induc_energy(6),Hyper_energy(3)
+    call Multipole_Sph3(ind, EM)
+    call Induction_Sph3(ind, EI)
+    call Dispersion_Sph3(ind, ED)
 
-    
-
-     call Initialize_Search()
-   
-  
-     Ene = 0.d0
-     EM  = 0.d0
-     ED  = 0.d0
-     EI  = 0.d0
-     EH  = 0.d0
-
-     Elect_energy  = 0.d0
-     Dispe_energy  = 0.d0
-     Induc_energy  = 0.d0
-     Hyper_energy  = 0.d0
-
-   
-    do n = 1, 8
-        EM  = 0.d0
-        IF ( Coeff(ind)%M_Fit(n) > 0) THEN
-
-            call Multipole_Sph2(ind,n, EM)
-           
-            testErr(5 + n) = EM
-            Elect_energy(1+n) = EM
-            Elect_energy(1) = Elect_energy(1)+EM 
-            Ene = Ene+EM
-            
-         END IF 
-         
-     end do
-     
+    !print*, "Electrostatic Energy: ", EM, " Induction Energy: ", EI, " Dispersion Energy: ", ED
 
 
-     do n = 6,8
-        IF (Coeff(ind)%D_Fit(n-5) > 0) THEN
-
-            Call Dispersion_Sph2( ind,n, ED)
-          
-            testErr(20 + n - 5) = ED
-            Dispe_energy(n-4) = ED
-            Dispe_energy(1) = Dispe_energy(1)+ ED
-            Ene = Ene+ED
-          
-         END IF 
-        
-     end do
-
-
-     do n = 4, 8
-         IF (Coeff(ind)%I_Fit(n-3) > 0) THEN
-            Call Induction_Sph2( ind,n, EI)  
-          
-            testErr(30 + n-3) = EI
-            Induc_energy(n-2) = EI
-            Induc_energy(1) = Induc_energy(1)+EI
-            Ene = Ene+EI
-            
-         END IF 
-        
-     end do
-
-
-
-    do n = 6, 7
-        IF (Coeff(ind)%H_Fit(n-5) > 0) THEN
-            Call HyperPolarizability_Sph2( ind,n, EH) 
-          
-
-            testErr(42 + n-5) = EH
-            Hyper_energy(n-4) = EH
-            Hyper_energy(1) = Hyper_energy(1)+EH
-            Ene = Ene+EH
-            END IF 
-
-        
-    end do
-
-
-
-    TotalEnergy  = Ene
-    if (doTesting>0)Then
-        testErr(1) = TotalEnergy
-        testErr(2) = Elect_energy(1)
-        testErr(3) = Dispe_energy(1)
-        testErr(4) = Induc_energy(1)
-        testErr(5) = Hyper_energy(1)
-    end if 
+    TotalEnergy = EM + ED + EI  
 
 
 end SUBROUTINE TotalEnergy_Calc
@@ -191,40 +105,40 @@ end SUBROUTINE TotalEnergy_Calc
 ! Arg 3 [TotalEnergy]   Total Energy calculated 
 
 
-! version 3.1.1
+! version 4.0
 
 
 
 SUBROUTINE Long_Range_Potential(coordenates,TotalEnergy,filename)
 
- use FitConstants
- use Geometry_Constant
-
+ use FitConstants, only: Coeff, max_T, Get_Coeff_Index
+ use Geometry_Constant_v2, only: init_Tensors_v2
  IMPLICIT NONE
 
  real*8, INTENT(INOUT)  ::  TotalEnergy
  real*8 ,dimension(6), INTENT(IN)  :: coordenates ! the angles are in degree
  character(len = *), INTENT(IN) :: filename
- real*8::testErr(52)
+ real*8::testErr(52),T1,T2,r1
 
  integer::CoeffIndex
-    
-
+ Character(len = 1), dimension(3) :: cpn = ["0","c","s"]
 
 
  if (coordenates(1)==0d0 .and. coordenates(2)==0d0 .and. coordenates(3)==0d0 .and. coordenates(4)==0d0 &
      .and. coordenates(5)==0d0 .and. coordenates(6)==0d0) THEN
     TotalEnergy = Coeff(CoeffIndex)%Zero
  else
-    call init_Tensors() ! Initializing in zero the new vectors
-
+    
     call Get_Coeff_Index(filename,CoeffIndex) ! Initializing coefficients Fit for the file named as "filename"
+    
+    call init_Tensors_v2(max_T,coordenates) ! Initializing in zero the new vectors v2
 
-    Call Generate_Coordenates(coordenates)
-    Call TotalEnergy_Calc (CoeffIndex,TotalEnergy,0,testErr)
+    Call TotalEnergy_Calc (CoeffIndex,TotalEnergy)
+    !print*, "Total Energy: ", TotalEnergy
   end if     
 
 END SUBROUTINE Long_Range_Potential
+
 
 SUBROUTINE evaluateLR(coordinates,XDIM,E1,filename)
   IMPLICIT NONE

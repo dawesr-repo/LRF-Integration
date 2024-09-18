@@ -72,7 +72,8 @@ module Testing_v2
                 integer,optional:: fileOutputNumber
                 INTEGER :: i,j,ntest=1000
                 real*8 :: E0,E1,RMSE,Emax,E0_MAXVAL,Erel
-                real*8 :: coord(XDIM),coord_from_file(XDim+2)
+                real*8 :: coord_from_file(XDim+2)
+                real*8 ,allocatable:: coord(:)
                 logical :: pass
                 real*8, parameter :: pii = DACOS(-1.d0) 
 
@@ -83,6 +84,7 @@ module Testing_v2
                 pass = .false.
                
                 Open( 17, file = './files/test/datasets/'//SystemName//'.txt' )
+                ALLOCATE(coord(XDIM))
            
                 do i=1,ntest
                         read(17,*)coord_from_file
@@ -142,7 +144,7 @@ module Testing_v2
                         end if
                         
                 end if
-            
+            DEALLOCATE(coord)
         end  Subroutine Check_MATLAB_ENERGY
 
 end module Testing_v2
@@ -216,7 +218,7 @@ PROGRAM main_subroutine
 
         ! call RunningTime_Performance('./files/test/coefficients/C1(1)_C1(1)_Coeff.txt',fileOutNumber)
        
-        do i=1,count-1
+        do i=1,1!count-1
              !print*,"SYSNAME",i,Sys(i)%as_str
              call Check_MATLAB_ENERGY(Sys(i)%as_str,xdim_arr(i),0,fileOutNumber)
         end do

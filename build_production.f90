@@ -57,7 +57,7 @@ PROGRAM build_production
         character(:), allocatable :: s
         end type
 
-        integer, parameter :: N = 15
+        integer, parameter :: N = 6
         type(string) :: fileNames(N)
         integer :: i,if1,if2,if3,if4,if5
         INTEGER  :: DATE_TIME (8)
@@ -68,33 +68,12 @@ PROGRAM build_production
         
 
         
-        fileNames(1)%s = "Geometry_Constant.f90"
+        fileNames(1)%s = "Geometry_Constant_v2.f90"
         fileNames(2)%s = "FittingConstant.f90"
-        fileNames(3)%s = "Index_Searcher.f90"
-        fileNames(4)%s = "Multipole_Sph2.f90"
-
-        if2 = 4
-
-        fileNames(if2+1)%s = "Induction_4_Sph2.f90"
-        fileNames(if2+2)%s = "Induction_5_Sph2.f90"
-        fileNames(if2+3)%s = "Induction_6_Sph2.f90"
-        fileNames(if2+4)%s = "Induction_7_Sph2.f90"
-        fileNames(if2+5)%s = "Induction_8_Sph2.f90"
-
-        if3 = if2+5
-
-        fileNames(if3+1)%s = "Dispersion_6_Sph2.f90"
-        fileNames(if3+2)%s = "Dispersion_7_Sph2.f90"
-        fileNames(if3+3)%s = "Dispersion_8_Sph2.f90"
-
-        if4 = if3+3
-
-        fileNames(if4+1)%s = "HyperPolarizability_6_Sph2.f90"
-        fileNames(if4+2)%s = "HyperPolarizability_7_Sph2.f90"
-
-        if5 = if4+2
-
-        fileNames(if5+1)%s = "helperFunc.f90"
+        fileNames(3)%s = "Multipole_Sph3.f90"
+        fileNames(4)%s = "Induction_Sph3.f90"
+        fileNames(5)%s = "Dispersion_Sph3.f90"
+        fileNames(6)%s = "helperFunc.f90"
      
 
         call FileChecking('LRF.f90',writing_unit)
@@ -104,8 +83,8 @@ PROGRAM build_production
         write(writing_unit,*)  "!      Compilation Day and Time"
         write(writing_unit,*)  "!      Month / Day / Year: ",DATE_TIME(2),"/",DATE_TIME(3),"/",DATE_TIME(1) 
         write(writing_unit,*)  "!      Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7)
-        write(writing_unit,*)  "!      LRF MATLAB  v0.7.1"
-        write(writing_unit,*)  "!      LRF_Fortran v0.3.1"  
+        write(writing_unit,*)  "!      LRF MATLAB  v4.0.1"
+        write(writing_unit,*)  "!      LRF_Fortran v4.0.1"  
         write(writing_unit,*)"!******************************************************************************"
         write(writing_unit,*)
         do i = 1, N
@@ -115,6 +94,13 @@ PROGRAM build_production
         close(writing_unit)
 
 END PROGRAM build_production
+
+
+
+
+
+
+
 
 
 

@@ -9,7 +9,7 @@ OBJS_Test =  Geometry_Constant_v2.o FittingConstant.o helperFunc.o Multipole_Sph
 
 
 OBJS_PROD =       LRF.o  min_example.o 
-OBJS_PROD_Test =  LRF.o  test.o
+OBJS_PROD_Test =  LRF.o  test_v2.o
 OBJS_PROD_Build = build_production.o 
 
 

@@ -66,12 +66,12 @@ module Testing_v2
 
 
         ! TEST Functions
-        Subroutine Check_MATLAB_ENERGY(SystemName,XDIM,fileOutputNumber)
+        Subroutine Check_MATLAB_ENERGY(SystemName,XDIM,verbose,fileOutputNumber)
                 IMPLICIT NONE
                 Character(len = *),Intent(IN) :: SystemName
-                Integer,Intent(IN):: XDIM
+                Integer,Intent(IN):: XDIM,verbose
                 integer,optional:: fileOutputNumber
-                INTEGER :: i,j,ntest=1
+                INTEGER :: i,j,ntest=1000
                 real*8 :: E0,E1,RMSE,Emax,E0_MAXVAL,Erel
                 real*8 :: coord(XDIM),coord_from_file(XDim+2)
                 logical :: pass
@@ -92,7 +92,7 @@ module Testing_v2
                         coord(1) = coord_from_file(2)!R
                         coord(2) = DACOS(coord_from_file(3))*180d0/pii
                         if (XDIM==3) then
-                                coord(3) = coord_from_file(4)*180d0/pii
+                                coord(3) = coord_from_file(4)*180d0/pii + 90d0
                         else
                                 coord(3) = DACOS(coord_from_file(4))*180d0/pii
                                 coord(4) = coord_from_file(5)*180d0/pii
@@ -105,7 +105,7 @@ module Testing_v2
                         end if
             
                         call evaluateLR(coord,XDIM,E1,'./files/test/coefficients/'//SystemName//'_Coeff.txt')
-                        write(*,*)"E: ",E0,E1
+                        
                         RMSE = RMSE+dabs(E0-E1)**2
                         Emax = MAXVAL([Emax,dabs(E0-E1)])
                         Erel = Erel+dabs(E0-E1)/dabs(E0)
@@ -123,18 +123,27 @@ module Testing_v2
                 close(17)
            
                 write(*,*)"*********************************************************************"
-                write(*,*)"* System: ",SystemName
-                !write(*,*)"* E0_MAXVAL: ",E0_MAXVAL," *"
-                if ((RMSE+Erel)/2d0 <= 10d0**(-7)) then
-                        write(*,*)"* Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+                if (verbose == 1) then
+                        write(*,*)"* System: ",SystemName,' - ',xdim," *"
+                        !write(*,*)"* E0_MAXVAL: ",E0_MAXVAL," *"
+                        if ((RMSE+Erel)/2d0 <= 10d0**(-7)) then
+                                write(*,*)"* Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+                        else
+                                write(*,*)"* Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
+                        end if
+                        write(*,*)"* Emax: ",Emax," *"
+                        write(*,*)"* E0_MAXVAL: ",E0_MAXVAL," *"
+                        write(*,*)"* Erel: ",Erel," *"
+                        write(*,*)"* RMSE: ",RMSE," *"
                 else
-                        write(*,*)"* Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
+                        if ((RMSE+Erel)/2d0 <= 10d0**(-7)) then
+                                write(*,*)"* System: ",SystemName," - Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+                        else
+                                write(*,*)"* System: ",SystemName," - Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
+                        end if
+                        
                 end if
-                
-                write(*,*)"* Erel: ",Erel," *"
-                write(*,*)"* RMSE: ",RMSE," *"
-                write(*,*)"*********************************************************************"
-
+            
         end  Subroutine Check_MATLAB_ENERGY
 
 end module Testing_v2
@@ -151,51 +160,45 @@ PROGRAM main_subroutine
 
         INTEGER  :: DATE_TIME (8),fileOutNumber
         CHARACTER (LEN = 10) BIG_BEN (3)
-        integer:: n_sys = 38
-        integer :: xdim_arr(38)
+        integer:: n_sys = 7**2
+        integer :: xdim_arr(50)
         Type :: varStr
                 character(len=:), allocatable :: as_str
         end Type varStr
  
-        type(varStr), dimension(1) :: Sys(38)
+        type(varStr), dimension(1) :: Sys(50)
         type(varStr), dimension(1) :: numStr(15)
-        type(varStr), dimension(1) :: IntStr(3)
-        integer :: i,k
+        integer :: i,k,h,count,xdim(7)
 
-        IntStr(1)%as_str = "E"
-        IntStr(2)%as_str = "I"
-        IntStr(3)%as_str = "D"
 
-        numStr(1)%as_str  = "1"
-        numStr(2)%as_str  = "2"
-        numStr(3)%as_str  = "3"
-        numStr(4)%as_str  = "4"
-        numStr(5)%as_str  = "5"
-        numStr(6)%as_str  = "6"
-        numStr(7)%as_str  = "7"
-        numStr(8)%as_str  = "8"
-        numStr(9)%as_str  = "9"
-        numStr(10)%as_str = "10"
-        numStr(11)%as_str = "11"
-        numStr(12)%as_str = "12"
-        numStr(13)%as_str = "13"
-        numStr(14)%as_str = "14"
-        numStr(15)%as_str = "15"
         
-        do k=1,15
-                Sys(k)%as_str = "C1(1)_C1(1)_"//IntStr(1)%as_str//numStr(k)%as_str
-        end do
-        do k=6,15
-                Sys(k+10)%as_str = "C1(1)_C1(1)_"//IntStr(3)%as_str//numStr(k)%as_str
+        numStr(1)%as_str  = "C1(1)"
+        numStr(2)%as_str  = "T(2)"
+        numStr(3)%as_str  = "Ih(2)"
+        numStr(4)%as_str  = "Cs(1)"
+
+        numStr(5)%as_str  = "D_inf_h(1)"
+        numStr(6)%as_str  = "C_inf_v(1)"
+        numStr(7)%as_str  = "Spherical(1)"
+
+        
+
+        xdim= (/3,3,3,3,2,2,0/)
+
+        count = 1
+        do k=1,7
+           do h=1,7
+                Sys(count)%as_str = numStr(k)%as_str//"_"//numStr(h)%as_str
+                xdim_arr(count) = xdim(k)+ xdim(h)
+                if (xdim(k)==1 .and. xdim(h)==1) then
+                         xdim_arr(count) = 1
+                end if       
+                count = count + 1
+           end do
         end do
 
-        do k=4,15
-                Sys(k+22)%as_str = "C1(1)_C1(1)_"//IntStr(2)%as_str//numStr(k)%as_str
-        end do
+        !xdim_arr=6
 
-        Sys(38)%as_str = "C1(1)_C1(1)_I11-00"       
-
-        xdim_arr(:) = 6
 
         fileOutNumber=12
 
@@ -214,16 +217,11 @@ PROGRAM main_subroutine
 
         ! call RunningTime_Performance('./files/test/coefficients/C1(1)_C1(1)_Coeff.txt',fileOutNumber)
        
-        do i=1,38
-             call Check_MATLAB_ENERGY(Sys(i)%as_str,xdim_arr(i),fileOutNumber)
+        do i=1,count-1
+             !print*,"SYSNAME",i,Sys(i)%as_str
+             call Check_MATLAB_ENERGY(Sys(i)%as_str,xdim_arr(i),0,fileOutNumber)
         end do
-        
 
-! this is useful to test a particular tensor component (Debugging)
-
-
-
-     
         close(fileOutNumber)
 END PROGRAM main_subroutine
 

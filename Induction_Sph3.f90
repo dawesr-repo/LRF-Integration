@@ -18,10 +18,6 @@ SUBROUTINE Induction_Sph3(ind,IM)
     
     do order=1,15 
         IF ( Coeff(ind)%I_Fit(order) > 0) THEN
-           print*,'induction',order
-            !call induction_order(order,Coeff(ind)%A_Mult,Coeff(ind)%B_Pol,1,temp1) ! indB
-            !call induction_order(order,Coeff(ind)%B_Mult,Coeff(ind)%A_Pol,0,temp2) ! indA
-
             call induction_order(order,ind,1,temp1) ! indB
             call induction_order(order,ind,0,temp2) ! indA
             IM = IM + temp1 + temp2

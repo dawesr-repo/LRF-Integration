@@ -12,7 +12,7 @@ A software package "Long-Range-Fit" (LRF) was developed, implementing a physical
 Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. Below is a minimal Fortran example demonstrating how to invoke evaluate_LRF (evaluate_LR returns the Potential Energy for a given set of coefficients exported employing LRF v4.x)
 evaluate_LR needs as function parameters:
 - Energy (Output, Real): Interaction energy between the monomers (in cm^-1).
-- XDIM (Input, Integer): Number of degrees of freedom in the system.
+- XDIM (Input, Integer): Degrees of freedom in the system.
 - COORDINATE_FORMAT (Input, Char): Euler convention used to describe the monomers’ orientation.
 - coordinates(XDIM) (Input, Real): Intermolecular distance (Å) followed by the angles (in degrees) describing the orientation.
 - PATH_TO_COEFFICIENTS (Input, Char): Path to the coefficients file containing the long-range coefficient expansion.

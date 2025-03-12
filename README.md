@@ -50,6 +50,7 @@ To obtain the coefficients file, go to the LRF software Dashboard tab and click 
 For detailed instructions on how to use LRF to obtain the coefficient file, please refer to the user manual( <a href="https://github.com/dawesr-repo/LRF-Integration/blob/Updating-Readme/LRF_User_Manual.pdf" >LRF User Manual</a>)
 ## Credits
 Research Group:
+- Adrian Batista-Planas
 - Ernesto Quintas-Sanchez
 - Richard Dawes (Advisor)
 

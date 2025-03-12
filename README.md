@@ -8,19 +8,19 @@ A software package "Long-Range-Fit" (LRF) was developed, implementing a physical
 
 
 ## Installation
-### Installation (Fortran)
+### -Fortran
 Download the file named "LRF.f90" and place it in the local directory.   
 
 ## Usage
-### Fortran
+### -Fortran
 Provide instructions and examples for use. Include screenshots as needed.
 
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
+To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative file path, add it to your README using the following syntax:
 
     ```md
     ![alt text](assets/images/screenshot.png)
     ```
-
+For a detailed description of how to use LRF, consult the user manual <a href="/pdfs/ProjMarr_slides.pdf" class="image fit"><img src="images/marr_pic.jpg" alt=""></a>
 ## Credits
 
 Ernesto Quintas-Sanchez

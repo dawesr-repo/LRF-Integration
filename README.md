@@ -2,7 +2,7 @@
 
 ## Background
 
-The study of intermolecular forces is essential for predicting and understanding the dynamics of molecular systems, which can be relevant to numerous scientific disciplines, including atmospheric chemistry, environmental chemistry, and astrochemistry. Recent discoveries of complex organic and especially chiral molecules in the interstellar medium have drawn much interest, and theory and simulation are important partners to experimental measurements in these efforts. Interactions between molecules in the gas phase can be separated into short- or long-range forces, depending on whether their molecular electronic clouds overlap. For modelling purposes, these interactions can be better understood and represented by constructing a potential energy surface (PES) for the system of interest.
+The study of intermolecular forces is essential for predicting and understanding the dynamics of molecular systems, which can be relevant to numerous scientific disciplines, including atmospheric chemistry, environmental chemistry, and astrochemistry. Recent discoveries of complex organic and especially chiral molecules in the interstellar medium have drawn much interest, and theory and simulation are important partners to experimental measurements in these efforts. Interactions between molecules in the gas phase can be separated into short- or long-range forces, depending on whether their molecular electronic clouds overlap. For modeling purposes, these interactions can be better understood and represented by constructing a potential energy surface (PES) for the system of interest.
 
 A software package "Long-Range-Fit" (LRF) was developed, implementing a physically rigorous description of interactions in the long-range region, namely electrostatic, induction, and dispersion. An interactive user-friendly interface connects the user to the underlying sophisticated high-order mathematical treatment. Moreover, the accompanying source code, LRF-Integration, allows users to merge the long-range model from LRF with any independent short-range approach by utilizing the coefficients file exported by LRF.
 
@@ -44,7 +44,7 @@ program example
 
 end program example
    ```
-To obtain the coefficients file by clicking the “Export Coefficients” button in LRF software  
+To obtain the coefficients file, go to the LRF software Dashboard tab and click on the “Export Coefficients” button in the bottom-left corner of the window.  
 ![alt text](./LRF_Export.png)
 
 For detailed instructions on how to use LRF to obtain the coefficient file, please refer to the user manual( <a href="https://github.com/dawesr-repo/LRF-Integration/blob/Updating-Readme/LRF_User_Manual.pdf" >LRF User Manual</a>)

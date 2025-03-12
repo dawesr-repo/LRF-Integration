@@ -7,20 +7,20 @@ The study of intermolecular forces is essential for predicting and understanding
 A software package "Long-Range-Fit" (LRF) was developed, implementing a physically rigorous description of interactions in the long-range region, namely electrostatic, induction, and dispersion. An interactive user-friendly interface connects the user to the underlying sophisticated high-order mathematical treatment. Moreover, the accompanying source code, LRF-Integration, allows users to merge the long-range model from LRF with any independent short-range approach by utilizing the coefficients file exported by LRF.
 
 
-## Installation
+## Installation and Usage
 ### -Fortran
-Download the file named "LRF.f90" and place it in the local directory.   
-
-## Usage
-### -Fortran
-Provide instructions and examples for use. Include screenshots as needed.
+Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. The      
+```python
+# Python example
+def greet():
+    print("Hello, world!")
 
 To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative file path, add it to your README using the following syntax:
 
     ```md
     ![alt text](assets/images/screenshot.png)
     ```
-For a detailed description of how to use LRF, consult the user manual <a href="/pdfs/ProjMarr_slides.pdf" class="image fit"><img src="images/marr_pic.jpg" alt=""></a>
+For detailed instructions on how to use LRF to obtain the coefficient file, please refer to the user manual( <a href="https://github.com/dawesr-repo/LRF-Integration/blob/Updating-Readme/LRF_User_Manual.pdf" >LRF User Manual</a>)
 ## Credits
 
 Ernesto Quintas-Sanchez

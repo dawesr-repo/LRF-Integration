@@ -1,16 +1,16 @@
 .SUFFIXES: .f .f90 .o
 
-F90 = gfortran # compiile with gfortran
+F90 = gfortran # compile with gfortran
 
 CMPLFLG = -c -O3 -fbacktrace
 
 
-OBJS = 		 Geometry_Constant_v2.o FittingConstant.o helperFunc.o Multipole_Sph3.o Induction_Sph3.o Dispersion_Sph3.o min_example.o 
-OBJS_Test =  Geometry_Constant_v2.o FittingConstant.o helperFunc.o Multipole_Sph3.o Induction_Sph3.o Dispersion_Sph3.o test_v2.o
+OBJS = 		 Fitting_Constant_v2.o Geometry_Constant_v2.o helper_functions.o min_example.o
+OBJS_Test =  Fitting_Constant_v2.o Geometry_Constant_v2.o helper_functions.o Testing_v2.o test_v2.o
 
 
 OBJS_PROD =       LRF.o  min_example.o 
-OBJS_PROD_Test =  LRF.o  test_v2.o
+OBJS_PROD_Test =  LRF.o  Testing_v2.o test_v2.o
 OBJS_PROD_Build = build_production.o 
 
 

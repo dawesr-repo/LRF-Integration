@@ -11,11 +11,11 @@ A software package "Long-Range-Fit" (LRF) was developed, implementing a physical
 ### -Fortran
 Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. Below is a minimal Fortran example demonstrating how to invoke evaluate_LRF (evaluate_LR returns the Potential Energy for a given set of coefficients exported employing LRF v4.x)
 evaluate_LR needs as function parameters:
- Energy (Output, Real): Interaction energy between the monomers (in cm^-1).
- XDIM (Input, Integer): Number of degrees of freedom in the system.
- COORDINATE_FORMAT (Input, Char): Euler convention used to describe the monomers’ orientation.
- coordinates(XDIM) (Input, Real): Intermolecular distance (Å) followed by the angles (in degrees) describing the orientation.
- PATH_TO_COEFFICIENTS (Input, Char): Path to the coefficients file containing the long-range coefficient expansion. 
+ - Energy (Output, Real): Interaction energy between the monomers (in cm^-1).
+ - XDIM (Input, Integer): Number of degrees of freedom in the system.
+ - COORDINATE_FORMAT (Input, Char): Euler convention used to describe the monomers’ orientation.
+ - coordinates(XDIM) (Input, Real): Intermolecular distance (Å) followed by the angles (in degrees) describing the orientation.
+ - PATH_TO_COEFFICIENTS (Input, Char): Path to the coefficients file containing the long-range coefficient expansion. 
  
 ```fortran
 program example
@@ -45,14 +45,13 @@ program example
 end program example
    ```
 To obtain the coefficients file by clicking the “Export Coefficients” button in LRF software  
-    ```md
-    ![alt text](assets/images/LRF_Export.png)
-    ```
+![alt text](./LRF_Export.png)
+
 For detailed instructions on how to use LRF to obtain the coefficient file, please refer to the user manual( <a href="https://github.com/dawesr-repo/LRF-Integration/blob/Updating-Readme/LRF_User_Manual.pdf" >LRF User Manual</a>)
 ## Credits
-
-Ernesto Quintas-Sanchez
-Richard Dawes
+Research Group:
+- Ernesto Quintas-Sanchez
+- Richard Dawes (Advisor)
 
 This work was partially supported by the Missouri University of Science and Technology’s Kummer Institute for Student Success and the United States Department of Energy (DOE), grant numbers DE-SC0019740 and DE-SC0025420.
 

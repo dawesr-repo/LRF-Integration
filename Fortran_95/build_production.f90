@@ -1,12 +1,11 @@
-Subroutine Copy_Paste(copy_filename,read_unit,writing_unit)
+subroutine copy_paste(copy_filename, read_unit, writing_unit)
 
     implicit none
-    character(len=*), intent(IN) ::copy_filename
-    integer, intent(IN) :: read_unit,writing_unit
-
-    integer :: ios
+    character(len=*), intent(in) ::copy_filename
+    integer(kind = 4), intent(in) :: read_unit, writing_unit
+   
     character(len=200) :: command(10000)
-    integer :: n, i
+    integer(kind = 4):: n, i,ios
 
     open(unit=read_unit, file=copy_filename, iostat=ios)
     if ( ios /= 0 ) stop "Error opening file data.dat"
@@ -27,70 +26,65 @@ Subroutine Copy_Paste(copy_filename,read_unit,writing_unit)
         write(writing_unit,*) TRIM(command(i))
     end do
 
-end Subroutine Copy_Paste
+end subroutine copy_paste
 
 
-SUBROUTINE FileChecking(fileName,num)
+subroutine file_checking(filename,num)
     implicit none
-    character(*),INTENT(IN)::fileName
-    Integer,INTENT(IN)::num
-    logical :: exist
+    character(*),intent(in)::filename
+    integer(kind = 4), intent(in)::num
+    logical (kind = 1):: exist
 
-    inquire(file=fileName, exist=exist)
+    inquire(file=filename, exist=exist)
     if (exist) then
-        open(num, file=fileName, status="old", position="append", action="write")
+        open(num, file=filename, status="old", position="append", action="write")
     else
-        open(num, file=fileName, status="new", action="write")
+        open(num, file=filename, status="new", action="write")
     end if
 
-END SUBROUTINE FileChecking
+end subroutine file_checking
 
 
 
 PROGRAM build_production
 
 
-    IMPLICIT NONE
-    integer, parameter :: writing_unit = 101
+    implicit none
+    integer(kind = 4), parameter :: WRITING_UNIT = 101
 
     type string
         character(:), allocatable :: s
     end type
 
-    integer, parameter :: N = 6
-    type(string) :: fileNames(N)
-    integer :: i,if1,if2,if3,if4,if5
-    INTEGER  :: DATE_TIME (8)
-    CHARACTER (LEN = 10) BIG_BEN (3)
+    integer(kind = 4), parameter :: N = 3
+    type(string) :: filenames(N)
+    integer(kind = 4) :: i,if1,if2,if3,if4,if5
+    integer (kind = 4):: date_time (8)
+    character (len = 10) big_ben (3)
 
-    CALL DATE_AND_TIME (BIG_BEN (1), BIG_BEN (2), &
-            BIG_BEN (3), DATE_TIME)
-
+    call date_and_time (big_ben (1), big_ben (2), big_ben (3), date_time)
 
 
-    fileNames(1)%s = "Geometry_Constant_v2.f90"
-    fileNames(2)%s = "FittingConstant.f90"
-    fileNames(3)%s = "Multipole_Sph3.f90"
-    fileNames(4)%s = "Induction_Sph3.f90"
-    fileNames(5)%s = "Dispersion_Sph3.f90"
-    fileNames(6)%s = "helperFunc.f90"
+    filenames(1)%s = "Fitting_Constant_v2.f90"
+    filenames(2)%s = "Geometry_Constant_v2.f90"
+    filenames(3)%s = "helper_functions.f90"
 
 
-    call FileChecking('LRF.f90',writing_unit)
-    REWIND(writing_unit)
+    call file_checking('LRF.f90',WRITING_UNIT)
+    rewind(WRITING_UNIT)
 
-    write(writing_unit,*)"!******************************************************************************"
-    write(writing_unit,*)  "!      Compilation Day and Time"
-    write(writing_unit,*)  "!      Month / Day / Year: ",DATE_TIME(2),"/",DATE_TIME(3),"/",DATE_TIME(1)
-    write(writing_unit,*)  "!      Hr    / Min / Sec : ",DATE_TIME(5),":",DATE_TIME(6),":",DATE_TIME(7)
-    write(writing_unit,*)  "!      LRF MATLAB  v4.1.1"
-    write(writing_unit,*)  "!      LRF_Fortran v4.1.1"
-    write(writing_unit,*)"!******************************************************************************"
-    write(writing_unit,*)
+    write(WRITING_UNIT,*)"!******************************************************************************"
+    write(WRITING_UNIT,*)  "!      Compilation Day and Time"
+    write(WRITING_UNIT,*)  "!      Month / Day / Year: ",date_time(2),"/",date_time(3),"/",date_time(1)
+    write(WRITING_UNIT,*)  "!      Hr    / Min / Sec : ",date_time(5),":",date_time(6),":",date_time(7)
+    write(WRITING_UNIT,*)  "!      LRF MATLAB  v4.1.1"
+    write(WRITING_UNIT,*)  "!      LRF_Fortran v4.1.1"
+    write(WRITING_UNIT,*)"!******************************************************************************"
+    write(WRITING_UNIT,*)
     do i = 1, N
-        Call Copy_Paste(fileNames(i)%s,1000+i,writing_unit)
+        call copy_paste(filenames(i)%s,1000+i,WRITING_UNIT)
     end do
 
-    close(writing_unit)
+    close(WRITING_UNIT)
 
-END PROGRAM build_production
+end PROGRAM build_production

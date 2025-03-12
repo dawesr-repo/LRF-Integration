@@ -9,16 +9,44 @@ A software package "Long-Range-Fit" (LRF) was developed, implementing a physical
 
 ## Installation and Usage
 ### -Fortran
-Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. The      
-```python
-# Python example
-def greet():
-    print("Hello, world!")
+Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. Below is a minimal Fortran example demonstrating how to invoke evaluate_LRF (evaluate_LR returns the Potential Energy for a given set of coefficients exported employing LRF v4.x)
+evaluate_LR needs as function parameters:
+ Energy (Output, Real): Interaction energy between the monomers (in cm^-1).
+ XDIM (Input, Integer): Number of degrees of freedom in the system.
+ COORDINATE_FORMAT (Input, Char): Euler convention used to describe the monomers’ orientation.
+ coordinates(XDIM) (Input, Real): Intermolecular distance (Å) followed by the angles (in degrees) describing the orientation.
+ PATH_TO_COEFFICIENTS (Input, Char): Path to the coefficients file containing the long-range coefficient expansion. 
+ 
+```fortran
+program example
 
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative file path, add it to your README using the following syntax:
+ implicit none
+ integer (kind=4), parameter:: XDIM=6  ! Coordinates Dimensions
+ character (len=*,kind=1), parameter:: COORDINATE_FORMAT = "Euler_ZYZ"   ! Coordinate Format
+ character (len=*,kind=1), parameter:: PATH_TO_COEFFICIENTS = "../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt"
 
+ real (kind=8):: energy    ! Interaction Energy
+ real (kind=8), dimension(XDIM):: coordinates = [10.27d0,& ! R
+                                                  30d0,&    ! beta1
+                                                  20d0,&    ! beta2
+                                                  120d0,&   ! alpha
+                                                  0d0,&     ! gamma1
+                                                  0d0]      ! gamma2
+
+
+ ! Evaluate the Potential Energy Surface in the Long-Range region
+ call evaluate_LRF( energy,&
+                    XDIM,&
+                    coordinates,&
+                    COORDINATE_FORMAT,&
+                    PATH_TO_COEFFICIENTS&
+                  )
+
+end program example
+   ```
+To obtain the coefficients file by clicking the “Export Coefficients” button in LRF software  
     ```md
-    ![alt text](assets/images/screenshot.png)
+    ![alt text](assets/images/LRF_Export.png)
     ```
 For detailed instructions on how to use LRF to obtain the coefficient file, please refer to the user manual( <a href="https://github.com/dawesr-repo/LRF-Integration/blob/Updating-Readme/LRF_User_Manual.pdf" >LRF User Manual</a>)
 ## Credits

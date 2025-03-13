@@ -54,7 +54,7 @@ program testing_subroutine
 
         call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt',fileout_number)
 
-        do i=1,1!count-1
+        do i=1,5!count-1
                 call check_energy_MATLAB( sys(i)%label,&
                                           xdim_arr(i),&
                                           0,&

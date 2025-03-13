@@ -1,4 +1,4 @@
-# Long-Range-Fit
+# Long-Range-Fit (Integration)
 
 ## Background
 

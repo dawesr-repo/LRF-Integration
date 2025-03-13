@@ -7,13 +7,19 @@
 #include <iomanip>
 #include <algorithm>
 
-
+/// @brief function that skips nlines in the file fp
+/// @param fp   ifstream object 
+/// @param nlines integer with the number of lines to skip
 void skipLines(ifstream &fp, int nlines){
   for (int i = 0; i < nlines; ++i) {
     fp.ignore(numeric_limits<streamsize>::max(), '\n');
   }
 }
 
+/// @brief function that reads an array of n elements from the file fp
+/// @param fp   ifstream object
+/// @param arr  pointer to the array where the elements will be stored
+/// @param n    integer with the number of elements to read
 template<class T>
 void readArray(ifstream &fp, T *arr, int n){
   for (int i = 0; i < n; ++i) {
@@ -25,6 +31,8 @@ void readArray(ifstream &fp, T *arr, int n){
 
 //************ PotentialEnergySurface Methods Definition **********************
 
+/// @brief Constructor of the class PotentialEnergySurface
+/// @param filename: string with the name of the file that contains the parameters of the potential energy surface.
 PotentialEnergySurface::PotentialEnergySurface(const string &filename) : file_name_(filename) {
   bool err = ReadParameters();
 
@@ -34,7 +42,10 @@ PotentialEnergySurface::PotentialEnergySurface(const string &filename) : file_na
 }
 
 
-
+/// @brief ReadParameters reads the multipole, polarizability and dispersion coefficients from the file exported 
+///        from MATLAB and stores them in the class PotentialEnergySurface. Also it calculates the maximum order of the
+///        t-tensors that will be used in the calculations.
+/// @return bool: true if the parameters were read successfully, false otherwise. 
 bool PotentialEnergySurface::ReadParameters(){
 
     ifstream infile(file_name_);

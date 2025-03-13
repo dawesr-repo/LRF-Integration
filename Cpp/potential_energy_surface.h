@@ -10,7 +10,11 @@
 #include <vector>
 using namespace std;
 
-
+/// @brief Class PotentialEnergySurface that calculates the potential energy surface of a system
+///        with 6 degrees of freedom. The class reads the parameters of the potential energy surface
+///        from a file and calculates the energy of the system at a given set of coordinates.
+///        This approach makes easier to deal with mixed states where the total surface is a linear
+///        combination of different surfaces for each state.  
 class PotentialEnergySurface {
   string file_name_;
 
@@ -45,6 +49,7 @@ public:
                       const vector <double> &coordinates,
                       const string &coordinate_format);
 private:
+
   const double MultipoleInteraction(const double &r,const vector <double> &t_tensors);
   const double MultipoleOrder(const int &order,const vector <double> &t_tensors);
 

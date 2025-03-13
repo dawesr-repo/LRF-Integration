@@ -10,7 +10,9 @@
 #include <cmath>
 #include <cfloat>
 #include <tuple>
-
+/// @brief component of the T-tensor
+/// @param la,lb,ka,kb components of the T-tensor 
+/// @return Linear index component of the T-tensor
 int getComponents(const int &la,const int &lb,const int &ka,const int &kb){
   int cpn {0};
   for (int order=1; order <= 15; ++order){
@@ -37,6 +39,10 @@ int getComponents(const int &la,const int &lb,const int &ka,const int &kb){
 //************ PotentialEnergySurface Methods Definition **********************
 
 //********************  MULTIPOLE INTERACTION  ********************************
+/// @brief Calculate the multipole interaction between two molecules by order
+/// @param r distance between the two molecules
+/// @param t_tensors vector with the T-tensors components
+/// @return the multipole interaction between the two molecules
 const double  PotentialEnergySurface::MultipoleOrder(const int &order,const vector <double> &t_tensors){
 
   double multipole_order {0.0};
@@ -63,7 +69,10 @@ const double  PotentialEnergySurface::MultipoleOrder(const int &order,const vect
   }
   return multipole_order;
 }
-
+/// @brief calculate the multipole interaction between two molecules
+/// @param r distance between the two molecules
+/// @param t_tensors vector with the T-tensors components
+/// @return the multipole interaction between the two molecules
 const double PotentialEnergySurface:: MultipoleInteraction(const double &r,const vector <double> &t_tensors){
 
       double multipole_sph = 0.0;
@@ -79,6 +88,12 @@ const double PotentialEnergySurface:: MultipoleInteraction(const double &r,const
 }
 
 //********************  INDUCTION INTERACTION  ********************************
+
+/// @brief Calculate the induction interaction between two molecules by order
+/// @param r distance between the two molecules
+/// @param t_tensors vector with the T-tensors components
+/// @return the induction interaction between the two molecules
+
 const double PotentialEnergySurface::InductionInteraction(const double &r,const vector <double> &t_tensors){
 
 
@@ -93,6 +108,13 @@ const double PotentialEnergySurface::InductionInteraction(const double &r,const 
 
   return induction_sph;
 }
+
+/// @brief Calculate the induction interaction between two molecules by order
+/// @param order order of the induction interaction
+/// @param r distance between the two molecules
+/// @param t_tensors vector with the T-tensors components
+/// @param index indicate if Im calculating pol over A or pol over B
+/// @return the induction interaction between the two molecules
 
 const double PotentialEnergySurface :: InductionOrder(const int &order,
                                                       const double &r,
@@ -122,6 +144,11 @@ const double PotentialEnergySurface :: InductionOrder(const int &order,
 
 }
 
+/// @brief Calculate the induction interaction between two molecules by components
+/// @param i,j,l1,l2 components of the induction interaction
+/// @param t_tensors vector with the T-tensors components
+/// @param index indicate if Im calculating pol over A or pol over B
+/// @return the induction interaction between the two molecules
 
 const double PotentialEnergySurface :: InductionComponent( const int &i,
                                                             const int &j,
@@ -188,6 +215,10 @@ const double PotentialEnergySurface :: InductionComponent( const int &i,
 
 // *********************  DISPERSION INTERACTION  ****************************
 
+/// @brief Calculate the dispersion interaction between two molecules by order
+/// @param r distance between the two molecules
+/// @param t_tensors vector with the T-tensors components
+/// @return the dispersion interaction between the two molecules
 
 const double PotentialEnergySurface::DispersionInteraction(const double &r,
                                                            const vector <double> &t_tensors){

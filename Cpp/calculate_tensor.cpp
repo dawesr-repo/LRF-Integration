@@ -6,34 +6,33 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <limits>
 #include <numeric>
 #include <tuple>
 
-#include "potential_energy_surface.h"
+#include "PotentialEnergySurface.h"
 
 /// @brief ar,br,cab are the projection of the local molecular frame with
 /// respect to the laboratory frame after rotation.
 /// @return
-const vector<double> ar(const vector<double> &general_coordinates) {
+std::vector<double> ar(const std::vector<double> &general_coordinates) {
   //{Az,Ax,Ay}
-  const vector<double> &vec_ar = {
+  const std::vector<double> &vec_ar = {
       cos(general_coordinates.at(1)),
       sin(general_coordinates.at(1)) * sin(general_coordinates.at(4)),
       cos(general_coordinates.at(4)) * sin(general_coordinates.at(1))};
   return vec_ar;
 }
 
-const vector<double> br(const vector<double> &general_coordinates) {
+std::vector<double> br(const std::vector<double> &general_coordinates) {
   //{Bz,Bx,By}
-  const vector<double> &vec_ar = {
+  const std::vector<double> &vec_ar = {
       -cos(general_coordinates.at(2)),
       -sin(general_coordinates.at(2)) * sin(general_coordinates.at(5)),
       -cos(general_coordinates.at(5)) * sin(general_coordinates.at(2))};
   return vec_ar;
 }
 
-const vector<double> cab(const vector<double> &general_coordinates) {
+std::vector<double> cab(const std::vector<double> &general_coordinates) {
   //{Az,Ax,Ay}
   const double cos_b1{cos(general_coordinates.at(1))};
   const double sin_b1{sin(general_coordinates.at(1))};
@@ -46,7 +45,7 @@ const vector<double> cab(const vector<double> &general_coordinates) {
   const double cos_c2{cos(general_coordinates.at(5))};
   const double sin_c2{sin(general_coordinates.at(5))};
 
-  const vector<double> &vec_cab = {
+  const std::vector<double> &vec_cab = {
 
       cos_b1 * cos_b2 + cos_phi * sin_b1 * sin_b2,  // Czz
       cos_c2 * sin_phi * sin_b1 +
@@ -102,23 +101,23 @@ int getComponent(const int &la, const int &lb, const int &ka, const int &kb) {
 /// @brief Function that pass from linear index to the real-spherical index
 /// @param i :linear index
 /// @return component of the T-tensor in real-spherical notation
-const string getSplittingComponet(const int &i) {
+std::string getSplittingComponet(const int &i) {
   return i < 0 ? "-1" : i == 0 ? "0" : i % 2 == 1 ? "c" : "s";
 }
 
 /// @brief Function that pass from real-spherical index to the linear index
-const int getTensorComponent(const int &mult_ord, const int &k1,
-                             const string &k2) {
+int getTensorComponent(const int &mult_ord, const int &k1,
+                             const std::string &k2) {
   return (k1 < 0 || mult_ord < 0 || k1 > mult_ord) ? -1
          : k1 == 0                                 ? (k2 == "0" ? 0 : -1)
                    : (k2 == "s" ? 2 * k1 : (k2 == "c" ? 2 * k1 - 1 : 0));
 }
 /// @brief Auxiliar function for recursive relation function
-tuple<int, string> nEta(const string &mu, const int &k1, const string &k2) {
-  return mu == "x"   ? (k1 <= 1 ? make_tuple(0, "0") : make_tuple(k1 - 1, k2))
-         : mu == "y" ? (k1 <= 1 ? make_tuple(0, "0")
-                                : (k2 == "c" ? make_tuple(k1 - 1, "s")
-                                             : make_tuple(k1 - 1, "c")))
+std::tuple<int, std::string> nEta(const std::string &mu, const int &k1, const std::string &k2) {
+  return mu == "x"   ? (k1 <= 1 ? std::make_tuple(0, "0") : make_tuple(k1 - 1, k2))
+         : mu == "y" ? (k1 <= 1 ? std::make_tuple(0, "0")
+                                : (k2 == "c" ? std::make_tuple(k1 - 1, "s")
+                                             : std::make_tuple(k1 - 1, "c")))
                      : make_tuple(k1, k2);
 }
 /// @brief Auxiliar function for recursive relation function
@@ -128,7 +127,7 @@ double factorial(int n) {
   return res;
 }
 /// @brief Auxiliar function for recursive relation function
-const double factorial_nn(const int &la, const int &ka1, const int &lb,
+double factorial_nn(const int &la, const int &ka1, const int &lb,
                           const int &kb1) {
   if (la < 0 || lb < 0 || ka1 < 0 || kb1 < 0 || ka1 > la || kb1 > lb) {
     return 0.0;
@@ -138,7 +137,7 @@ const double factorial_nn(const int &la, const int &ka1, const int &lb,
   }
 }
 /// @brief Auxiliar function for recursive relation function
-const double coeffM(const string &mu, const int &k1, const string &k2) {
+double coeffM(const std::string &mu, const int &k1, const std::string &k2) {
   double coeff_m = 0.0;
 
   if (mu == "x") {
@@ -174,10 +173,10 @@ const double coeffM(const string &mu, const int &k1, const string &k2) {
 /// @param 6D vector with the coordinates in the format Euler_ZXZ
 /// @return 1D-vector with the T-tensor components
 
-const vector<double> PotentialEnergySurface::CalculateTensor(
-    const vector<double> &general_coordinates) {
-  vector<string> coord{"z", "x", "y"};  //! Cartesian Axis Labels
-  const double EPS = DBL_EPSILON;
+std::vector<double> PotentialEnergySurface::CalculateTensor(
+    const std::vector<double> &general_coordinates) {
+  std::vector<std::string> coord{"z", "x", "y"};  //! Cartesian Axis Labels
+
 
   auto a = br(general_coordinates);
   auto b = br(general_coordinates);
@@ -186,7 +185,7 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
   const int cpns_per_order[15]{1,    7,    26,   70,   155,  301,  532, 876,
                                1365, 2035, 2926, 4082, 5551, 7385, 9640};
 
-  vector<double> t_tensor(cpns_per_order[max_t_tensor_order_ - 1], 0);
+  std::vector<double> t_tensor(cpns_per_order[max_t_tensor_order_ - 1], 0);
 
   int cpn{0};
   for (int order = 1; order <= max_t_tensor_order_; ++order) {
@@ -195,8 +194,8 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
       for (int ka = 0; ka <= 2 * la; ++ka) {
         for (int kb = 0; kb <= 2 * lb; ++kb) {
           // Calculating T-Tensor Component
-          const string ka2 = getSplittingComponet(ka);
-          const string kb2 = getSplittingComponet(kb);
+          const std::string ka2 = getSplittingComponet(ka);
+          const std::string kb2 = getSplittingComponet(kb);
 
           const int ka1 = floor((ka + 1.0) / 2.0);
           const int kb1 = floor((kb + 1.0) / 2.0);
@@ -214,14 +213,14 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
               for (int i = 1; i <= 3; i++) {
                 // new multipole components
                 int rk1;
-                string rk2;
+                std::string rk2;
                 tie(rk1, rk2) = nEta(coord.at(i - 1), ka1, ka2);
                 const int rk_ = getTensorComponent(la, rk1, rk2);
                 const double m = coeffM(coord.at(i - 1), ka1, ka2);
                 // coeffcient NN of the recurence
                 const double fact_nn = factorial_nn(la - 1, rk1, 0, 0);
 
-                if (abs(m) > EPS && la >= 1 && fact_nn > EPS &&
+                if (std::abs(m) > DBL_EPSILON && la >= 1 && fact_nn > DBL_EPSILON &&
                     rk_ <= 2 * (la - 1)) {
                   const int t_cpn = getComponent(la - 1, 0, rk_, 0);
                   double prod_comp = a.at(i - 1) * t_tensor.at(t_cpn);
@@ -250,14 +249,14 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
               for (int i = 1; i <= 3; i++) {
                 // new multipole components
                 int rk1;
-                string rk2;
+                std::string rk2;
                 tie(rk1, rk2) = nEta(coord.at(i - 1), kb1, kb2);
                 const int rk_ = getTensorComponent(lb, rk1, rk2);
                 const double m = coeffM(coord.at(i - 1), kb1, kb2);
                 // coeffcient NN of the recurence
                 const double fact_nn = factorial_nn(0, 0, lb - 1, rk1);
 
-                if (abs(m) > EPS && lb >= 1 && fact_nn > EPS &&
+                if (std::abs(m) > DBL_EPSILON && lb >= 1 && fact_nn > DBL_EPSILON &&
                     rk_ <= 2 * (lb - 1) && rk_ >= 0) {
                   const int t_cpn = getComponent(0, lb - 1, 0, rk_);
                   comp_lk = comp_lk + lb_fact * m * fact_nn * b.at(i - 1) *
@@ -296,7 +295,7 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
 
               for (int i = 1; i <= 3; i++) {
                 int rk1;
-                string rk2;
+                std::string rk2;
                 tie(rk1, rk2) = nEta(coord.at(i - 1), kb1, kb2);
                 const int rk_i = getTensorComponent(lb, rk1, rk2);
                 const double m = coeffM(coord.at(i - 1), kb1, kb2);
@@ -306,7 +305,7 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
                 const double const_fact =
                     l3_fact * m * factorial_nn(la, ka1, lb - 1, rk1);
 
-                if (abs(const_fact) > EPS && rk_i <= 2 * (lb - 1)) {
+                if (std::abs(const_fact) > DBL_EPSILON && rk_i <= 2 * (lb - 1)) {
                   const int t_cpn = getComponent(la, lb - 1, ka, rk_i);
                   comp_lk =
                       comp_lk + const_fact * b.at(i - 1) * t_tensor.at(t_cpn);
@@ -319,10 +318,10 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
                   const double l4_fact =
                       static_cast<double>((2.0 * la - 1.0) / lb);
                   int rka1;
-                  string rka2;
+                  std::string rka2;
                   tie(rka1, rka2) = nEta(coord.at(i - 1), ka1, ka2);
                   int rkb1;
-                  string rkb2;
+                  std::string rkb2;
                   tie(rkb1, rkb2) = nEta(coord.at(j - 1), kb1, kb2);
 
                   const int rk_i = getTensorComponent(la, rka1, rka2);
@@ -333,7 +332,7 @@ const vector<double> PotentialEnergySurface::CalculateTensor(
                   const double const_factor =
                       l4_fact * m1 * m2 *
                       factorial_nn(la - 1, rka1, lb - 1, rkb1);
-                  if (abs(const_factor) > EPS && rk_i <= 2 * (la - 1) &&
+                  if (std::abs(const_factor) > DBL_EPSILON && rk_i <= 2 * (la - 1) &&
                       rk_j <= 2 * (lb - 1)) {
                     const int t_cpn = getComponent(la - 1, lb - 1, rk_i, rk_j);
                     comp_lk = comp_lk +

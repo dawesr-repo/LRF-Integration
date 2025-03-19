@@ -10,7 +10,7 @@
 #include <limits>
 #include <numeric>
 
-#include "potential_energy_surface.h"
+#include "PotentialEnergySurface.h"
 
 /// @brief Pass from user coordinates to general coordinates
 /// @param dim integer with the number of degrees of freedom of the system
@@ -19,11 +19,11 @@
 /// @param user_coordinates R, beta1, beta2, alpha, gamma1, gamma2. R must be in
 /// Angstroms and the angles in degrees.
 /// @return the standard 6D vector in Euler_ZXZ vector.
-const vector<double> userCoordinatesToGeneralCoordinates(
-    const int &dim, const string &coordinate_format,
-    const vector<double> &user_coordinates) {
+std::vector<double> userCoordinatesToGeneralCoordinates(
+    const int &dim, const std::string &coordinate_format,
+    const std::vector<double> &user_coordinates) {
   // general_coodinates
-  vector<double> vec(6, 0);
+  std::vector<double> vec(6, 0);
   if (dim >= 2 && dim <= 6) {
     vec.at(0) = user_coordinates.at(0);  // R
     vec.at(1) = user_coordinates.at(1);  // beta1
@@ -40,7 +40,7 @@ const vector<double> userCoordinatesToGeneralCoordinates(
       vec.at(5) = user_coordinates.at(5);  // gamma2
     }
   } else {
-    cout << "Wrong dimimension: " << dim << endl;
+    std::cout << "Wrong dimimension: " << dim << std::endl;
     throw 0;
   }
 
@@ -56,7 +56,7 @@ const vector<double> userCoordinatesToGeneralCoordinates(
     vec.at(i) = vec.at(i) * (M_PI / 180.0);
   }
 
-  const vector<double> &general_coordinates_zxz = {vec};
+  const std::vector<double> &general_coordinates_zxz = {vec};
   return general_coordinates_zxz;
 }
 
@@ -65,9 +65,9 @@ const vector<double> userCoordinatesToGeneralCoordinates(
 /// @param general_coordinates 6D vector with the coordinates in the format
 /// Euler_ZXZ
 /// @return double with the total interaction energy
-const double PotentialEnergySurface::GetTotalInteractionEnergy(
-    const vector<double> &general_coordinates) {
-  const vector<double> t_tensors = CalculateTensor(general_coordinates);
+double PotentialEnergySurface::GetTotalInteractionEnergy(
+    const std::vector<double> &general_coordinates) {
+  const std::vector<double> t_tensors = CalculateTensor(general_coordinates);
   const double r = general_coordinates.at(0);
   return MultipoleInteraction(r, t_tensors) +
          InductionInteraction(r, t_tensors) +
@@ -83,15 +83,15 @@ const double PotentialEnergySurface::GetTotalInteractionEnergy(
 /// @param coordinate_format format of the coordinates(supported formats:
 /// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
 /// @return double with the total interaction energy
-const double PotentialEnergySurface::EvaluateLRF(
-    const int &dim, const vector<double> &coordinates,
-    const string &coordinate_format) {
+double PotentialEnergySurface::EvaluateLRF(
+    const int &dim, const std::vector<double> &coordinates,
+    const std::string &coordinate_format) {
   if (coordinates.size() != dim) {
-    cout << "coordinates size must be equal to dimimension" << endl;
+    std::cout << "coordinates size must be equal to dimimension" << std::endl;
     throw 0;
   }
   if (coordinates.at(0) < 1) {
-    cout << "coordinates size must be equal to dimimension" << endl;
+    std::cout << "coordinates size must be equal to dimimension" << std::endl;
     throw 0;
   }
 

@@ -5,12 +5,9 @@
 #include <cfloat>
 #include <cmath>
 #include <fstream>
-#include <iomanip>
-#include <limits>
 #include <numeric>
-#include <tuple>
 
-#include "potential_energy_surface.h"
+#include "PotentialEnergySurface.h"
 /// @brief component of the T-tensor
 /// @param la,lb,ka,kb components of the T-tensor
 /// @return Linear index component of the T-tensor
@@ -37,25 +34,21 @@ int getComponents(const int &la, const int &lb, const int &ka, const int &kb) {
 
 //********************  MULTIPOLE INTERACTION  ********************************
 /// @brief Calculate the multipole interaction between two molecules by order
-/// @param r distance between the two molecules
+/// @param order interaction order
 /// @param t_tensors vector with the T-tensors components
-/// @return the multipole interaction between the two molecules
-const double PotentialEnergySurface::MultipoleOrder(
-    const int &order, const vector<double> &t_tensors) {
+/// @return the multipole interaction energy between the two molecules
+double PotentialEnergySurface::MultipoleOrder(
+    const int &order, const std::vector<double> &t_tensors) {
   double multipole_order{0.0};
-  const double EPS = DBL_EPSILON;
+
 
   for (int i = 0; i <= order - 1; ++i) {
     const int j = order - 1 - i;
 
     for (int ci = 0; ci <= 2 * i; ++ci) {
-      const double Qai = a_mult_[i * i + ci];
-
-      if (abs(Qai) > EPS) {
+      if (const double Qai = a_mult_[i * i + ci]; std::abs(Qai) > DBL_EPSILON) {
         for (int cj = 0; cj <= 2 * j; ++cj) {
-          const double Qbj = a_mult_[j * j + cj];
-
-          if (abs(Qbj) > EPS) {
+          if (const double Qbj = a_mult_[j * j + cj]; std::abs(Qbj) > DBL_EPSILON) {
             const int t_cpn = getComponents(i, j, ci, cj);
             multipole_order = multipole_order + Qai * Qbj * t_tensors.at(t_cpn);
           }
@@ -69,8 +62,8 @@ const double PotentialEnergySurface::MultipoleOrder(
 /// @param r distance between the two molecules
 /// @param t_tensors vector with the T-tensors components
 /// @return the multipole interaction between the two molecules
-const double PotentialEnergySurface::MultipoleInteraction(
-    const double &r, const vector<double> &t_tensors) {
+double PotentialEnergySurface::MultipoleInteraction(
+    const double &r, const std::vector<double> &t_tensors) {
   double multipole_sph = 0.0;
   for (int order = 1; order <= 15; ++order) {
     if (m_fit_[order - 1] > 0) {
@@ -90,8 +83,8 @@ const double PotentialEnergySurface::MultipoleInteraction(
 /// @param t_tensors vector with the T-tensors components
 /// @return the induction interaction between the two molecules
 
-const double PotentialEnergySurface::InductionInteraction(
-    const double &r, const vector<double> &t_tensors) {
+double PotentialEnergySurface::InductionInteraction(
+    const double &r, const std::vector<double> &t_tensors) {
   double induction_sph = 0.0;
   for (int order = 1; order <= 15; ++order) {
     if (i_fit_[order - 1] > 0) {
@@ -112,8 +105,8 @@ const double PotentialEnergySurface::InductionInteraction(
 /// @param index indicate if Im calculating pol over A or pol over B
 /// @return the induction interaction between the two molecules
 
-const double PotentialEnergySurface ::InductionOrder(
-    const int &order, const double &r, const vector<double> &t_tensors,
+double PotentialEnergySurface ::InductionOrder(
+    const int &order, const double &r, const std::vector<double> &t_tensors,
     const int &index) {
   double res{0.0};
 
@@ -141,35 +134,33 @@ const double PotentialEnergySurface ::InductionOrder(
 /// @param index indicate if Im calculating pol over A or pol over B
 /// @return the induction interaction between the two molecules
 
-const double PotentialEnergySurface ::InductionComponent(
+double PotentialEnergySurface ::InductionComponent(
     const int &i, const int &j, const int &l1, const int &l2,
-    const vector<double> &t_tensors, const int &index) {
+    const std::vector<double> &t_tensors, const int &index) {
   double res{0.0};
   const int ni = 2 * i + 1;
   const int nj = 2 * j + 1;
   const int nl1 = 2 * l1 + 1;
   const int nl2 = 2 * l2 + 1;
-  const int lmin = min(l1, l2);
-  const int lmax = max(l1, l2);
-  const double EPS = DBL_EPSILON;
+  const int lmin = std::min(l1, l2);
+  const int lmax = std::max(l1, l2);
+
 
   const auto mult_cpn = index == 1 ? a_mult_ : b_mult_;
   const auto pol_arr =
       index == 1 ? b_pol_[lmin - 1][lmax - 1] : a_pol_[lmin - 1][lmax - 1];
 
   for (int ci = 1; ci <= ni; ++ci) {
-    const double qai = mult_cpn[i * i + ci - 1];
-    if (abs(qai) > EPS) {
+    if (const double qai = mult_cpn[i * i + ci - 1]; std::abs(qai) > DBL_EPSILON) {
       for (int cj = 1; cj <= nj; ++cj) {
-        const double qbj = mult_cpn[j * j + cj - 1];
-        if (abs(qbj) > EPS) {
+        if (const double qbj = mult_cpn[j * j + cj - 1]; std::abs(qbj) > DBL_EPSILON) {
           for (int k1 = 1; k1 <= nl1; ++k1) {
             for (int k2 = 1; k2 <= nl2; ++k2) {
               const int cpn = l1 > l2 ? (k2 - 1) * (2 * l1 + 1) + k1
                                       : (k1 - 1) * (2 * l2 + 1) + k2;
-              const double comp_a_k1_k2 = pol_arr.at(cpn - 1);
 
-              if (abs(comp_a_k1_k2) > EPS) {
+              if (const double comp_a_k1_k2 = pol_arr.at(cpn - 1);
+                  std::abs(comp_a_k1_k2) > DBL_EPSILON) {
                 // index indicate if Im calculating pol over A
                 //  or pol over B
                 if (index == 0) {
@@ -204,8 +195,8 @@ const double PotentialEnergySurface ::InductionComponent(
 /// @param t_tensors vector with the T-tensors components
 /// @return the dispersion interaction between the two molecules
 
-const double PotentialEnergySurface::DispersionInteraction(
-    const double &r, const vector<double> &t_tensors) {
+double PotentialEnergySurface::DispersionInteraction(
+    const double &r, const std::vector<double> &t_tensors) {
   double dispersion_sph{0.0};
 
   for (int order = 1; order <= 15; ++order) {
@@ -216,8 +207,8 @@ const double PotentialEnergySurface::DispersionInteraction(
   return dispersion_sph;
 }
 
-const double PotentialEnergySurface::DispersionOrder(
-    const double &r, const vector<double> &t_tensors, const int &order) {
+double PotentialEnergySurface::DispersionOrder(
+    const double &r, const std::vector<double> &t_tensors, const int &order) {
   double res{0.0};
 
   for (int l1 = 1; l1 <= order - 2; ++l1) {
@@ -235,15 +226,15 @@ const double PotentialEnergySurface::DispersionOrder(
   return -((C3 * C1 * pow(C2, order)) * res) / pow(r, order);
 }
 
-const double PotentialEnergySurface::DispersionComponent(
+double PotentialEnergySurface::DispersionComponent(
     const int &l1, const int &l2, const int &t1, const int &t2,
-    const vector<double> &t_tensors) {
+    const std::vector<double> &t_tensors) const {
   double res{0.0};
-  const double EPS = DBL_EPSILON;
-  const int lmin = min(l1, l2);
-  const int lmax = max(l1, l2);
-  const int tmin = min(t1, t2);
-  const int tmax = max(t1, t2);
+
+  const int lmin = std::min(l1, l2);
+  const int lmax = std::max(l1, l2);
+  const int tmin = std::min(t1, t2);
+  const int tmax = std::max(t1, t2);
   const auto disp_arr = disp_[lmin - 1][lmax - 1][tmin - 1][tmax - 1];
 
   for (int li = 0; li <= 2 * l1; ++li) {
@@ -255,11 +246,11 @@ const double PotentialEnergySurface::DispersionComponent(
                   ? lj * (2 * l1 + 1) * (2 * t2 + 1) * (2 * t1 + 1) +
                         li * (2 * t2 + 1) * (2 * t1 + 1) + tj * (2 * t1 + 1) +
                         ti + 1
-              : (l1 > l2 && t1 <= t2)
+              : (l1 > l2 )
                   ? lj * (2 * l1 + 1) * (2 * t1 + 1) * (2 * t2 + 1) +
                         li * (2 * t1 + 1) * (2 * t2 + 1) + ti * (2 * t2 + 1) +
                         tj + 1
-              : (l1 <= l2 && t1 > t2)
+              : ( t1 > t2)
                   ? li * (2 * l2 + 1) * (2 * t2 + 1) * (2 * t1 + 1) +
                         lj * (2 * t2 + 1) * (2 * t1 + 1) + tj * (2 * t1 + 1) +
                         ti + 1
@@ -269,7 +260,7 @@ const double PotentialEnergySurface::DispersionComponent(
 
           const double disp_coeff = disp_arr.at(cpn - 1);
 
-          if (abs(disp_coeff) > EPS) {
+          if (std::abs(disp_coeff) > DBL_EPSILON) {
             const int t_cpn_1 = getComponents(l1, t1, li, ti);
             const int t_cpn_2 = getComponents(l2, t2, lj, tj);
 

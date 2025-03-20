@@ -18,6 +18,9 @@ enable_testing()
 add_executable(
         TestUnit
         testRunner.cpp
+        ../Tensor.cpp
+        ../Tensor.h
+        ../helper_functions.cpp
 )
 target_link_libraries(
         TestUnit

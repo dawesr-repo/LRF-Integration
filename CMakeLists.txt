@@ -9,8 +9,9 @@ add_executable(LRF_Integration
                     Cpp/PotentialEnergySurface.h
                     Cpp/PotentialEnergySurface.cpp
                     Cpp/interactions.cpp
-        Cpp/tensor.cpp
-        Cpp/tensor.h
+        Cpp/Tensor.cpp
+        Cpp/Tensor.h
+        Cpp/helper_functions.cpp
 )
 target_link_libraries(LRF_Integration)
 

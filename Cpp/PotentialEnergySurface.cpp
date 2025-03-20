@@ -3,6 +3,8 @@
 //
 
 #include "PotentialEnergySurface.h"
+#include "Tensor.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
@@ -125,4 +127,30 @@ bool PotentialEnergySurface::ReadParameters() {
 
   infile.close();
   return true;
+}
+
+
+//************ PotentialEnergySurface Methods Definition **********************
+
+/// @brief EvaluateLRF calculates the energy of a system with a given the given
+/// set of coordinates by the user
+/// @param dim integer with the number of degrees of freedom of the system
+/// @param coordinates vector with the coordinates of the system
+/// @param coordinate_format format of the coordinates(supported formats:
+/// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
+/// @return double with the total interaction energy
+double PotentialEnergySurface::EvaluateLRF(
+    const int &dim, const std::vector<double> &coordinates,
+    const std::string &coordinate_format) {
+
+
+  auto* t_tensor = new Tensor(dim,coordinates,coordinate_format);
+  const std::vector<double> t = t_tensor->CalculateTensor(max_t_tensor_order_);
+  const double r = t_tensor->GetIntermolecularDistance();
+
+  return MultipoleInteraction(r, t) +
+         InductionInteraction(r, t) +
+         DispersionInteraction(r, t);
+
+
 }

@@ -18,8 +18,6 @@ enable_testing()
 add_executable(
         TestUnit
         testRunner.cpp
-        ../sample2.cpp
-        ../sample2.h
 )
 target_link_libraries(
         TestUnit

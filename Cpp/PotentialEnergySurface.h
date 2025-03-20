@@ -6,7 +6,6 @@
 #define POTENTIAL_ENERGY_SURFACE_H
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
 
@@ -65,10 +64,8 @@ class PotentialEnergySurface {
   double DispersionComponent(const int &l1, const int &l2, const int &t1,
                                    const int &t2,
                                    const std::vector<double> &t_tensors) const;
-  double GetTotalInteractionEnergy(
-      const std::vector<double> &general_coordinates);
-  std::vector<double> CalculateTensor(
-      const std::vector<double> &general_coordinates);
+
+
   bool ReadParameters();
 };
 

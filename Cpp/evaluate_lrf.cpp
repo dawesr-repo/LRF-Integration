@@ -7,8 +7,7 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <limits>
-#include <numeric>
+
 
 #include "PotentialEnergySurface.h"
 
@@ -51,7 +50,7 @@ std::vector<double> userCoordinatesToGeneralCoordinates(
     vec.at(4) = 90.0 - vec.at(4);
     vec.at(5) = 90.0 - vec.at(5);
   }
-  double pi = M_PI;
+
   for (int i = 1; i < 6; ++i) {
     vec.at(i) = vec.at(i) * (M_PI / 180.0);
   }

@@ -35,3 +35,5 @@
 
 *.test.txt
 .idea/
+build/
+Cpp/test/build

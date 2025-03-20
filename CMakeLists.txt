@@ -9,13 +9,14 @@ add_executable(LRF_Integration
                     Cpp/PotentialEnergySurface.h
                     Cpp/PotentialEnergySurface.cpp
                     Cpp/interactions.cpp
-                    Cpp/evaluate_lrf.cpp
-                    Cpp/calculate_tensor.cpp
-        )
+        Cpp/Tensor.cpp
+        Cpp/Tensor.h
+        Cpp/helper_functions.cpp
+)
 target_link_libraries(LRF_Integration)
 
 
 #How to run it
 #cmake -S . -B build
 #cmake --build build -j 12
-# for testing only cd build && ctest --output-on-failure -j12
+# for testing only: cd build && ctest --output-on-failure -j12

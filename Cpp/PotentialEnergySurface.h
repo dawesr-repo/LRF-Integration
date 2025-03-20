@@ -6,12 +6,10 @@
 #define POTENTIAL_ENERGY_SURFACE_H
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
-
 class PotentialEnergySurface {
-  std:: string file_name_;
+  std::string file_name_;
 
   const double C1 = 627.5095;
   const double C2 = 0.529177249;
@@ -36,42 +34,34 @@ class PotentialEnergySurface {
   // Dispersion
   std::vector<double> disp_[5][10][5][10];
 
-  public:
+ public:
   PotentialEnergySurface(const std::string &filename);
   double GetAsymptote() const { return zero_; };
   double EvaluateLRF(const int &dim, const std::vector<double> &coordinates,
-                           const std::string &coordinate_format);
+                     const std::string &coordinate_format);
 
-  private:
+ private:
   double MultipoleInteraction(const double &r,
-                                    const std::vector<double> &t_tensors);
-  double MultipoleOrder(const int &order,
                               const std::vector<double> &t_tensors);
+  double MultipoleOrder(const int &order, const std::vector<double> &t_tensors);
 
   double InductionInteraction(const double &r,
-                                    const std::vector<double> &t_tensors);
+                              const std::vector<double> &t_tensors);
   double InductionOrder(const int &order, const double &r,
-                              const std::vector<double> &t_tensors,
-                              const int &index);
+                        const std::vector<double> &t_tensors, const int &index);
   double InductionComponent(const int &i, const int &j, const int &l1,
-                                  const int &l2,
-                                  const std::vector<double> &t_tensors,
-                                  const int &index);
+                            const int &l2, const std::vector<double> &t_tensors,
+                            const int &index);
 
   double DispersionInteraction(const double &r,
-                                     const std::vector<double> &t_tensors);
+                               const std::vector<double> &t_tensors);
   double DispersionOrder(const double &r, const std::vector<double> &t_tensors,
-                               const int &order);
+                         const int &order);
   double DispersionComponent(const int &l1, const int &l2, const int &t1,
-                                   const int &t2,
-                                   const std::vector<double> &t_tensors) const;
-  double GetTotalInteractionEnergy(
-      const std::vector<double> &general_coordinates);
-  std::vector<double> CalculateTensor(
-      const std::vector<double> &general_coordinates);
+                             const int &t2,
+                             const std::vector<double> &t_tensors) const;
+
   bool ReadParameters();
 };
 
-
-
-#endif //POTENTIAL_ENERGY_SURFACE_H
+#endif  // POTENTIAL_ENERGY_SURFACE_H

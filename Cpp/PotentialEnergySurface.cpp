@@ -3,11 +3,14 @@
 //
 
 #include "PotentialEnergySurface.h"
+
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <vector>
 
+#include "Tensor.h"
 //************ Auxiliar Functions Definition **********************
 
 /// @brief function that skips nlines in the file fp
@@ -30,14 +33,13 @@ void readArray(std::ifstream &fp, T *arr, int n) {
   }
 }
 
-
 //************ PotentialEnergySurface Methods Definition **********************
 
 /// @brief Constructor of the class PotentialEnergySurface
 /// @param filename: string with the name of the file that contains the
 /// parameters of the potential energy surface.
 PotentialEnergySurface::PotentialEnergySurface(const std::string &filename)
-     : file_name_(filename) {
+    : file_name_(filename) {
   bool err = ReadParameters();
 
   if (!err) {
@@ -46,9 +48,9 @@ PotentialEnergySurface::PotentialEnergySurface(const std::string &filename)
 }
 /// @brief ReadParameters reads the multipole, polarizability and dispersion
 /// coefficients from the file exported
-///        from MATLAB and stores them in the class PotentialEnergySurface. Also
-///        it calculates the maximum order of the t-tensors that will be used in
-///        the calculations.
+///        from MATLAB and stores them in the class PotentialEnergySurface.
+///        Also, it calculates the maximum order of the t-tensors that will be
+///        used in the calculations.
 /// @return bool: true if the parameters were read successfully, false
 /// otherwise.
 bool PotentialEnergySurface::ReadParameters() {
@@ -62,8 +64,8 @@ bool PotentialEnergySurface::ReadParameters() {
   skipLines(infile, 8);
 
   infile >> tmp >> singleline;
-  char* end = nullptr;
-  zero_ = strtod(singleline.c_str(),&end);
+  char *end = nullptr;
+  zero_ = strtod(singleline.c_str(), &end);
 
   skipLines(infile, 3);
   // Multipoles
@@ -125,4 +127,24 @@ bool PotentialEnergySurface::ReadParameters() {
 
   infile.close();
   return true;
+}
+
+//************ PotentialEnergySurface Methods Definition **********************
+
+/// @brief EvaluateLRF calculates the energy of a system with a given the given
+/// set of coordinates by the user
+/// @param dim integer with the number of degrees of freedom of the system
+/// @param coordinates vector with the coordinates of the system
+/// @param coordinate_format format of the coordinates(supported formats:
+/// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
+/// @return double with the total interaction energy
+double PotentialEnergySurface::EvaluateLRF(
+    const int &dim, const std::vector<double> &coordinates,
+    const std::string &coordinate_format) {
+  auto *t_tensor = new Tensor(dim, coordinates, coordinate_format);
+  const std::vector<double> t = t_tensor->CalculateTensor(max_t_tensor_order_);
+  const double r = t_tensor->GetIntermolecularDistance();
+
+  return MultipoleInteraction(r, t) + InductionInteraction(r, t) +
+         DispersionInteraction(r, t);
 }

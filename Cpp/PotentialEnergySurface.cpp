@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iomanip>
 #include <limits>
-
+#include <vector>
 //************ Auxiliar Functions Definition **********************
 
 /// @brief function that skips nlines in the file fp
@@ -48,7 +48,7 @@ PotentialEnergySurface::PotentialEnergySurface(const std::string &filename)
 }
 /// @brief ReadParameters reads the multipole, polarizability and dispersion
 /// coefficients from the file exported
-///        from MATLAB and stores them in the class PotentialEnergySurface. Also
+///        from MATLAB and stores them in the class PotentialEnergySurface. Also,
 ///        it calculates the maximum order of the t-tensors that will be used in
 ///        the calculations.
 /// @return bool: true if the parameters were read successfully, false

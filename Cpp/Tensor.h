@@ -24,6 +24,19 @@ class Tensor {
    std::vector<double> UserCoordinatesToGeneralCoordinates() const;
    std::vector<double> CalculateTensor(const int max_t_tensor_order);
    double GetIntermolecularDistance()const {return coordinates_.at(0);}
+//Helper Functions
+  static std::vector<double> Ar(const std::vector<double> &general_coordinates);
+  static std::vector<double> Br(const std::vector<double> &general_coordinates);
+  static std::vector<double> Cab(const std::vector<double> &general_coordinates);
+  static int GetComponent(const int &la, const int &lb, const int &ka, const int &kb);
+  static std::string GetSplittingComponent(const int &i);
+  static int GetTensorComponent(const int &mult_ord, const int &k1,
+                             const std::string &k2);
+  static std::tuple<int, std::string> NEta(const std::string &mu, const int &k1, const std::string &k2);
+  static double Factorial(int n);
+  static double FactorialNN(const int &la, const int &ka1, const int &lb,
+                          const int &kb1);
+  static double CoeffM(const std::string &mu, const int &k1, const std::string &k2);
   };
 
 

@@ -3,24 +3,25 @@
 //
 
 #include "Tensor.h"
-#include <cmath>
+
 #include <cfloat>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <tuple>
 #include <vector>
 
-
-
+using Vector = std::vector<double>;
 //******************* Tensor Methods *******************************************
 
-/// @param system_dimension integer with the number of degrees of freedom of the system
+/// @param system_dimension integer with the number of degrees of freedom of the
+/// system
 /// @param coordinate_format format of the coordinates(supported formats:
 /// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
 /// @param coordinates R, beta1, beta2, alpha, gamma1, gamma2. R must be in
 /// Angstroms and the angles in degrees.
-Tensor:: Tensor(const int system_dimension,const std::vector <double> &coordinates, const std::string &coordinate_format) {
-
+Tensor::Tensor(const int system_dimension, const Vector &coordinates,
+               const std::string &coordinate_format) {
   system_dimension_ = system_dimension;
   coordinates_ = coordinates;
   coordinate_format_ = coordinate_format;
@@ -29,9 +30,9 @@ Tensor:: Tensor(const int system_dimension,const std::vector <double> &coordinat
 /// @brief Pass from user coordinates to general coordinates
 /// @return the standard 6D vector in Euler_ZXZ vector.
 ///
-std::vector<double> Tensor:: UserCoordinatesToGeneralCoordinates() const {
+Vector Tensor::UserCoordinatesToGeneralCoordinates() const {
   // general_coordinates
-  std::vector<double> vec(6, 0);
+  Vector vec(6, 0);
   if (system_dimension_ >= 2 && system_dimension_ <= 6) {
     vec.at(0) = coordinates_.at(0);  // R
     vec.at(1) = coordinates_.at(1);  // beta1
@@ -49,7 +50,7 @@ std::vector<double> Tensor:: UserCoordinatesToGeneralCoordinates() const {
     }
   } else {
     std::cout << "Wrong dimension: " << system_dimension_ << std::endl;
-    //throw 1;
+    // throw 1;
   }
 
   if (coordinate_format_ == "Euler_ZYZ") {
@@ -67,28 +68,25 @@ std::vector<double> Tensor:: UserCoordinatesToGeneralCoordinates() const {
   return vec;
 }
 
-
-
 /// @brief Calculate the T-tensor components for a given set of coordinates
 /// @param max_t_tensor_order: Maximum order to calculate the T-Tensors. It must
 ///                            be a positive integer
 ///
 /// @return 1D-vector with the T-tensor components (4-D tensor reshaped)
 
-std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
-
+Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
   std::vector<std::string> coord{"z", "x", "y"};  //! Cartesian Axis Labels
 
   if (coordinates_.size() != system_dimension_) {
     std::cout << "coordinates size must be equal to dimension" << std::endl;
-    //throw 0;
+    // throw 0;
   }
   if (coordinates_.at(0) < 1) {
     std::cout << "coordinates size must be equal to dimension" << std::endl;
-    //throw 0;
+    // throw 0;
   }
 
-  const auto general_coordinates_zxz =  UserCoordinatesToGeneralCoordinates();
+  const auto general_coordinates_zxz = UserCoordinatesToGeneralCoordinates();
 
   auto a = Ar(general_coordinates_zxz);
   auto b = Br(general_coordinates_zxz);
@@ -97,7 +95,7 @@ std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
   const int cpns_per_order[15]{1,    7,    26,   70,   155,  301,  532, 876,
                                1365, 2035, 2926, 4082, 5551, 7385, 9640};
 
-  std::vector<double> t_tensor(cpns_per_order[max_t_tensor_order - 1], 0);
+  Vector t_tensor(cpns_per_order[max_t_tensor_order - 1], 0);
 
   int cpn{0};
 
@@ -133,8 +131,8 @@ std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
                 // coefficient NN of the recurrence
                 const double fact_nn = FactorialNN(la - 1, rk1, 0, 0);
 
-                if (std::abs(m) > DBL_EPSILON && la >= 1 && fact_nn > DBL_EPSILON &&
-                    rk_ <= 2 * (la - 1)) {
+                if (std::abs(m) > DBL_EPSILON && la >= 1 &&
+                    fact_nn > DBL_EPSILON && rk_ <= 2 * (la - 1)) {
                   const int t_cpn = GetComponent(la - 1, 0, rk_, 0);
                   double prod_comp = a.at(i - 1) * t_tensor.at(t_cpn);
                   double fact_prod = la_fact * m * fact_nn;
@@ -169,8 +167,8 @@ std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
                 // coefficient NN of the recurrence
                 const double fact_nn = FactorialNN(0, 0, lb - 1, rk1);
 
-                if (std::abs(m) > DBL_EPSILON && lb >= 1 && fact_nn > DBL_EPSILON &&
-                    rk_ <= 2 * (lb - 1) && rk_ >= 0) {
+                if (std::abs(m) > DBL_EPSILON && lb >= 1 &&
+                    fact_nn > DBL_EPSILON && rk_ <= 2 * (lb - 1) && rk_ >= 0) {
                   const int t_cpn = GetComponent(0, lb - 1, 0, rk_);
                   comp_lk = comp_lk + lb_fact * m * fact_nn * b.at(i - 1) *
                                           t_tensor.at(t_cpn);
@@ -218,7 +216,8 @@ std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
                 const double const_fact =
                     l3_fact * m * FactorialNN(la, ka1, lb - 1, rk1);
 
-                if (std::abs(const_fact) > DBL_EPSILON && rk_i <= 2 * (lb - 1)) {
+                if (std::abs(const_fact) > DBL_EPSILON &&
+                    rk_i <= 2 * (lb - 1)) {
                   const int t_cpn = GetComponent(la, lb - 1, ka, rk_i);
                   comp_lk =
                       comp_lk + const_fact * b.at(i - 1) * t_tensor.at(t_cpn);
@@ -245,8 +244,8 @@ std::vector<double> Tensor::CalculateTensor(const int max_t_tensor_order) {
                   const double const_factor =
                       l4_fact * m1 * m2 *
                       FactorialNN(la - 1, rka1, lb - 1, rkb1);
-                  if (std::abs(const_factor) > DBL_EPSILON && rk_i <= 2 * (la - 1) &&
-                      rk_j <= 2 * (lb - 1)) {
+                  if (std::abs(const_factor) > DBL_EPSILON &&
+                      rk_i <= 2 * (la - 1) && rk_j <= 2 * (lb - 1)) {
                     const int t_cpn = GetComponent(la - 1, lb - 1, rk_i, rk_j);
                     comp_lk = comp_lk +
                               const_factor * cc.at(n - 1) * t_tensor.at(t_cpn);

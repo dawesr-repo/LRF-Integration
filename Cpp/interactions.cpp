@@ -41,14 +41,14 @@ double PotentialEnergySurface::MultipoleOrder(
     const int &order, const std::vector<double> &t_tensors) {
   double multipole_order{0.0};
 
-
   for (int i = 0; i <= order - 1; ++i) {
     const int j = order - 1 - i;
 
     for (int ci = 0; ci <= 2 * i; ++ci) {
       if (const double Qai = a_mult_[i * i + ci]; std::abs(Qai) > DBL_EPSILON) {
         for (int cj = 0; cj <= 2 * j; ++cj) {
-          if (const double Qbj = a_mult_[j * j + cj]; std::abs(Qbj) > DBL_EPSILON) {
+          if (const double Qbj = a_mult_[j * j + cj];
+              std::abs(Qbj) > DBL_EPSILON) {
             const int t_cpn = getComponents(i, j, ci, cj);
             multipole_order = multipole_order + Qai * Qbj * t_tensors.at(t_cpn);
           }
@@ -145,15 +145,16 @@ double PotentialEnergySurface ::InductionComponent(
   const int lmin = std::min(l1, l2);
   const int lmax = std::max(l1, l2);
 
-
   const auto mult_cpn = index == 1 ? a_mult_ : b_mult_;
   const auto pol_arr =
       index == 1 ? b_pol_[lmin - 1][lmax - 1] : a_pol_[lmin - 1][lmax - 1];
 
   for (int ci = 1; ci <= ni; ++ci) {
-    if (const double qai = mult_cpn[i * i + ci - 1]; std::abs(qai) > DBL_EPSILON) {
+    if (const double qai = mult_cpn[i * i + ci - 1];
+        std::abs(qai) > DBL_EPSILON) {
       for (int cj = 1; cj <= nj; ++cj) {
-        if (const double qbj = mult_cpn[j * j + cj - 1]; std::abs(qbj) > DBL_EPSILON) {
+        if (const double qbj = mult_cpn[j * j + cj - 1];
+            std::abs(qbj) > DBL_EPSILON) {
           for (int k1 = 1; k1 <= nl1; ++k1) {
             for (int k2 = 1; k2 <= nl2; ++k2) {
               const int cpn = l1 > l2 ? (k2 - 1) * (2 * l1 + 1) + k1
@@ -246,17 +247,15 @@ double PotentialEnergySurface::DispersionComponent(
                   ? lj * (2 * l1 + 1) * (2 * t2 + 1) * (2 * t1 + 1) +
                         li * (2 * t2 + 1) * (2 * t1 + 1) + tj * (2 * t1 + 1) +
                         ti + 1
-              : (l1 > l2 )
-                  ? lj * (2 * l1 + 1) * (2 * t1 + 1) * (2 * t2 + 1) +
-                        li * (2 * t1 + 1) * (2 * t2 + 1) + ti * (2 * t2 + 1) +
-                        tj + 1
-              : ( t1 > t2)
-                  ? li * (2 * l2 + 1) * (2 * t2 + 1) * (2 * t1 + 1) +
-                        lj * (2 * t2 + 1) * (2 * t1 + 1) + tj * (2 * t1 + 1) +
-                        ti + 1
-                  : li * (2 * l2 + 1) * (2 * t1 + 1) * (2 * t2 + 1) +
-                        lj * (2 * t1 + 1) * (2 * t2 + 1) + ti * (2 * t2 + 1) +
-                        tj + 1;
+              : (l1 > l2) ? lj * (2 * l1 + 1) * (2 * t1 + 1) * (2 * t2 + 1) +
+                                li * (2 * t1 + 1) * (2 * t2 + 1) +
+                                ti * (2 * t2 + 1) + tj + 1
+              : (t1 > t2) ? li * (2 * l2 + 1) * (2 * t2 + 1) * (2 * t1 + 1) +
+                                lj * (2 * t2 + 1) * (2 * t1 + 1) +
+                                tj * (2 * t1 + 1) + ti + 1
+                          : li * (2 * l2 + 1) * (2 * t1 + 1) * (2 * t2 + 1) +
+                                lj * (2 * t1 + 1) * (2 * t2 + 1) +
+                                ti * (2 * t2 + 1) + tj + 1;
 
           const double disp_coeff = disp_arr.at(cpn - 1);
 

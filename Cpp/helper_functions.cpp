@@ -3,9 +3,10 @@
 //
 
 #include <cmath>
+#include <iostream>
 #include <tuple>
 #include <vector>
-#include <iostream>
+
 #include "Tensor.h"
 
 /// @brief ar,br,cab are the projection of the local molecular frame with
@@ -31,7 +32,8 @@ std::vector<double> Tensor::Br(const std::vector<double> &general_coordinates) {
 
 ///
 ///
-std::vector<double> Tensor::Cab(const std::vector<double> &general_coordinates) {
+std::vector<double> Tensor::Cab(
+    const std::vector<double> &general_coordinates) {
   //{Az,Ax,Ay}
   const double cos_b1{cos(general_coordinates.at(1))};
   const double sin_b1{sin(general_coordinates.at(1))};
@@ -78,7 +80,8 @@ std::vector<double> Tensor::Cab(const std::vector<double> &general_coordinates) 
 
 /// @param la, lb, ka, kb components of the T-tensor
 /// @return linear component of the T-tensor
-int Tensor::GetComponent(const int &la, const int &lb, const int &ka, const int &kb) {
+int Tensor::GetComponent(const int &la, const int &lb, const int &ka,
+                         const int &kb) {
   int cpn{0};
   for (int order = 1; order <= 15; ++order) {
     for (int lap = 0; lap <= order - 1; ++lap) {
@@ -97,8 +100,6 @@ int Tensor::GetComponent(const int &la, const int &lb, const int &ka, const int 
   return 0;
 }
 
-
-
 /// @brief Function that pass from linear index to the real-spherical index
 /// @param i :linear index
 /// @return component of the T-tensor in real-spherical notation
@@ -108,22 +109,24 @@ std::string Tensor::GetSplittingComponent(const int &i) {
 
 /// @brief Function that pass from real-spherical index to the linear index
 int Tensor::GetTensorComponent(const int &mult_ord, const int &k1,
-                             const std::string &k2) {
+                               const std::string &k2) {
   return (k1 < 0 || mult_ord < 0 || k1 > mult_ord) ? -1
          : k1 == 0                                 ? (k2 == "0" ? 0 : -1)
                    : (k2 == "s" ? 2 * k1 : (k2 == "c" ? 2 * k1 - 1 : 0));
 }
 /// @brief Auxiliar function for recursive relation function
-std::tuple<int, std::string> Tensor::NEta(const std::string &mu, const int &k1, const std::string &k2) {
-  return mu == "x"   ? (k1 <= 1 ? std::make_tuple(0, "0") : make_tuple(k1 - 1, k2))
+std::tuple<int, std::string> Tensor::NEta(const std::string &mu, const int &k1,
+                                          const std::string &k2) {
+  return mu == "x"
+             ? (k1 <= 1 ? std::make_tuple(0, "0") : make_tuple(k1 - 1, k2))
          : mu == "y" ? (k1 <= 1 ? std::make_tuple(0, "0")
                                 : (k2 == "c" ? std::make_tuple(k1 - 1, "s")
                                              : std::make_tuple(k1 - 1, "c")))
                      : make_tuple(k1, k2);
 }
 /// @brief Auxiliar function for recursive relation function
-double Tensor:: Factorial(int n) {
-  if (n<0) {
+double Tensor::Factorial(int n) {
+  if (n < 0) {
     return 0.0;
   }
   double res = 1.0;
@@ -132,16 +135,17 @@ double Tensor:: Factorial(int n) {
 }
 /// @brief Auxiliar function for recursive relation function
 double Tensor::FactorialNN(const int &la, const int &ka1, const int &lb,
-                          const int &kb1) {
+                           const int &kb1) {
   if (la < 0 || lb < 0 || ka1 < 0 || kb1 < 0 || ka1 > la || kb1 > lb) {
     return 0.0;
   } else {
     return std::sqrt((Factorial(la + ka1) / Factorial(la - ka1)) *
-                (Factorial(lb + kb1) / Factorial(lb - kb1)));
+                     (Factorial(lb + kb1) / Factorial(lb - kb1)));
   }
 }
 /// @brief Auxiliar function for recursive relation function
-double Tensor:: CoeffM(const std::string &mu, const int &k1, const std::string &k2) {
+double Tensor::CoeffM(const std::string &mu, const int &k1,
+                      const std::string &k2) {
   double coeff_m = 0.0;
 
   if (mu == "x") {

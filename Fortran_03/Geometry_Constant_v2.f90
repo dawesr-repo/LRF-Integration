@@ -12,9 +12,8 @@ module Geometry_Constant_v2
     real (kind=8) , dimension(11):: cal_coord_v2
     real (kind=8) :: t_tensor_v2(L,2*L+1,L,2*L+1)
 
-    private :: L, ar_v2, br_v2, cc_v2, cal_coord_v2, t_tensor_v2 ! variables can not be called out of the module
-    private ::  tensors_initialization_v2 ,&
-                calculate_tensor,&
+    private :: L, ar_v2, br_v2, cc_v2, cal_coord_v2 ! variables can not be called out of the module
+    private ::  calculate_tensor,&
                 t_lk_iter,&
                 factorial,&
                 factorial_nn,&
@@ -30,13 +29,14 @@ module Geometry_Constant_v2
                 dispersion_order,&
                 dispersion_l1l2_t1t2,&
                 get_dispersion_cpn
-
+                !tensors_initialization_v2 
+    public :: t_tensor_v2
     public :: get_total_interaction_energy,&
             ! Testing Only * to be used when debugging individual components
               multipole_sph_v3,&
               induction_sph_v3,&
-              dispersion_sph_v3
-
+              dispersion_sph_v3,&
+              tensors_initialization_v2  
 
 contains
 

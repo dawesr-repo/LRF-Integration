@@ -58,6 +58,55 @@ contains
 
 
     ! TEST Functions
+
+    subroutine t_tensor_test()
+        use Geometry_Constant_v2, only: tensors_initialization_v2,t_tensor_v2
+        implicit none
+        integer (kind=4):: i,j,ntest=1,cpn=1,order=15,la,lb,ka,kb
+        real (kind=8):: general_coordinates_ZXZ(6),r(6),T(9640)
+        logical (kind=1):: pass
+        real (kind=8), parameter :: PII = DACOS(-1.d0)
+
+
+        
+        do i=1,ntest
+          
+            CALL RANDOM_NUMBER(r)
+
+            general_coordinates_ZXZ(1) = 10d0+r(1)*10d0!R
+            general_coordinates_ZXZ(2) = r(2)*180d0!b1
+            general_coordinates_ZXZ(3) = r(3)*180d0!b2
+            general_coordinates_ZXZ(4) = r(4)*360d0!b2
+            general_coordinates_ZXZ(5) = r(5)*360d0!b2
+            general_coordinates_ZXZ(6) = r(6)*360d0!b2
+            
+            ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convension
+            call tensors_initialization_v2(15,general_coordinates_ZXZ)
+            write (*,*)"Hello: ",t_tensor_v2(1,1,1,1)
+            open (unit=10,file="../testing_datafiles/t_tensors/t_tensors_test.txt",action="write")
+           
+            do order = 1, 15
+                do la = 0,order - 1
+                lb = order - la - 1;
+                do  ka = 0, 2 * la
+                    do kb = 0,2 * lb
+
+                        T(cpn) = t_tensor_v2(la+1,ka+1,lb+1,kb+1)
+                        cpn = cpn + 1;
+                         
+                    end do
+                end do
+                end do
+            end do
+
+        write (10,*) general_coordinates_ZXZ, T
+
+        end do
+
+        
+        close (10)
+
+    end  subroutine t_tensor_test    
     subroutine check_energy_MATLAB(system_name,xdim,verbose,fileoutput_number)
 
         implicit none

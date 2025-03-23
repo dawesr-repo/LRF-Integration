@@ -1,7 +1,7 @@
  !******************************************************************************
  !      Compilation Day and Time
- !      Month / Day / Year:            3 /          12 /        2025
- !      Hr    / Min / Sec :            2 :          24 :          32
+ !      Month / Day / Year:            3 /          23 /        2025
+ !      Hr    / Min / Sec :           15 :          31 :          35
  !      LRF MATLAB  v4.1.1
  !      LRF_Fortran v4.1.1
  !******************************************************************************
@@ -103,11 +103,10 @@
  
                  this%max_t_tensor_order = maxval([iord-2,mord,dord-3])
  
- 
-                 read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult
-                 read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult
- 
- 
+                 if (mord>0) then
+                     read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult
+                     read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult
+                 end if
  
                  if (iord>=4) then
                      do i=1,iord-3
@@ -316,7 +315,7 @@
      implicit none
      real (kind=8), parameter ::  C1=627.5095d0
      real (kind=8), parameter ::  C2=0.529177249d0
-     real (kind=8), parameter ::  C3=349.757d0
+     real (kind=8), parameter ::  C3=349.755088236337d0
      integer (kind=4),parameter::L = 15
      real (kind=8) , dimension(3):: ar_v2
      real (kind=8) , dimension(3):: br_v2
@@ -1302,3 +1301,5 @@
      return
  
  end subroutine evaluate_LRF
+ 
+ 

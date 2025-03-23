@@ -36,5 +36,8 @@
 *.test.txt
 .idea/
 build/
-Cpp/test/build
-testing_datafiles/
+Cpp/test/build/
+
+testing_datafiles/coefficients/
+testing_datafiles/datasets/
+testing_datafiles/output.test.txt

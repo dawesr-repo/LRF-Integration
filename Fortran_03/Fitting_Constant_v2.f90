@@ -95,11 +95,10 @@ module Fitting_Constant_v2
 
                 this%max_t_tensor_order = maxval([iord-2,mord,dord-3])
 
-
-                read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult
-                read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult
-
-
+                if (mord>0) then
+                    read(10, *)row, this%A_Mult(1:mord**2)  !A_Mult
+                    read(10, *)row, this%B_Mult(1:mord**2)  !B_Mult
+                end if
 
                 if (iord>=4) then
                     do i=1,iord-3

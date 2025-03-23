@@ -64,7 +64,7 @@ contains
         character(len=*),intent(in) :: system_name
         integer (kind=4),intent(in):: xdim,verbose
         integer (kind=4),optional:: fileoutput_number
-        integer (kind=4):: i,j,ntest=1000
+        integer (kind=4):: i,j,ntest=1
         real (kind=8):: E0,E1,rmse,Emax,E0_maxval,Erel
         real (kind=8):: coord_from_file(xdim+2)
         real (kind=8), allocatable:: coord(:)

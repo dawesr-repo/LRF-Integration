@@ -18,19 +18,17 @@ program testing_subroutine
         type(var_str) :: sys(50)
         type(var_str) :: symmetries(15)
         integer (kind=4):: i,k,h,count
-        integer (kind=4),dimension(7):: xdim = [3,3,3,3,2,2,0]
+        integer (kind=4),dimension(5):: xdim = [3,3,2,2,0]
 
         symmetries(1)%label  = "C1(1)"
-        symmetries(2)%label  = "T(2)"
-        symmetries(3)%label  = "Ih(2)"
-        symmetries(4)%label  = "Cs(1)"
-        symmetries(5)%label  = "D_inf_h(1)"
-        symmetries(6)%label  = "C_inf_v(1)"
-        symmetries(7)%label  = "Spherical(1)"
+        symmetries(2)%label  = "Cs(1)"
+        symmetries(3)%label  = "D_inf_h(1)"
+        symmetries(4)%label  = "C_inf_v(1)"
+        symmetries(5)%label  = "Spherical(1)"
 
         count = 1
-        do k=1,7
-                do h=1,7
+        do k=1,5
+                do h=1,5
                         if (xdim(k) >= xdim(h)) then
                                 sys(count)%label = symmetries(k)%label//"_"//symmetries(h)%label
                                 xdim_arr(count) = xdim(k)+ xdim(h)
@@ -52,9 +50,9 @@ program testing_subroutine
         write(fileout_number,*)  "Month / Day / Year: ",date_time(2),"/",date_time(3),"/",date_time(1)
         write(fileout_number,*)  "Hr    / Min / Sec : ",date_time(5),":",date_time(6),":",date_time(7)
 
-        call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt',fileout_number)
+        !call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt',fileout_number)
 
-        do i=1,5!count-1
+        do i=1,12
                 call check_energy_MATLAB( sys(i)%label,&
                                           xdim_arr(i),&
                                           0,&

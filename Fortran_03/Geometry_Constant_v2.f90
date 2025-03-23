@@ -4,7 +4,7 @@ module Geometry_Constant_v2
     implicit none
     real (kind=8), parameter ::  C1=627.5095d0
     real (kind=8), parameter ::  C2=0.529177249d0
-    real (kind=8), parameter ::  C3=349.757d0
+    real (kind=8), parameter ::  C3=349.755088236337d0
     integer (kind=4),parameter::L = 15
     real (kind=8) , dimension(3):: ar_v2
     real (kind=8) , dimension(3):: br_v2

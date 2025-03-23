@@ -14,17 +14,18 @@ program min_example
 
  implicit none
 
- integer (kind=4), parameter:: XDIM=6  ! Coordinates Dimensions
+ integer (kind=4), parameter:: XDIM=4  ! Coordinates Dimensions
  character (len=*,kind=1), parameter:: COORDINATE_FORMAT = "Euler_ZYZ"   ! Coordinate Format
- character (len=*,kind=1), parameter:: PATH_TO_COEFFICIENTS = "../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt"
+ character (len=*,kind=1), parameter:: PATH_TO_COEFFICIENTS = "../testing_datafiles/coefficients/D_inf_h(1)_Spherical(1)_Coeff.txt"
 
  real (kind=8):: energy    ! Interaction Energy
- real (kind=8), dimension(XDIM):: coordinates = [10.27d0,& ! R
-                                                  30d0,&    ! beta1
-                                                  20d0,&    ! beta2
-                                                  120d0,&   ! alpha
-                                                  0d0,&     ! gamma1
-                                                  0d0]     ! gamma2
+ real (kind=8), dimension(XDIM):: coordinates = [9.224922190454659d0,& ! R
+                                                  DACOS(-0.516833742198944d0)*180d0/DACOS(-1.d0),&    ! beta1
+                                                  DACOS(0.761164535894394d0)*180d0/DACOS(-1.d0),&    ! beta2
+                                                  0.081548803182827*180d0/DACOS(-1d0)];
+                                                  ! ,&   ! alpha
+                                                  ! 0d0,&     ! gamma1
+                                                  ! 0d0]     ! gamma2
 
 
  ! Evaluate the Potential Energy Surface in the Long-Range region

@@ -5,7 +5,7 @@
 #include <cfloat>
 #include <cmath>
 #include <fstream>
-#include <numeric>
+
 
 #include "PotentialEnergySurface.h"
 /// @brief component of the T-tensor
@@ -20,9 +20,9 @@ int getComponents(const int &la, const int &lb, const int &ka, const int &kb) {
         for (int kbp = 0; kbp <= 2 * lbp; ++kbp) {
           if (la == lap && lb == lbp && ka == kap && kb == kbp) {
             return cpn;
-          } else {
-            cpn++;
           }
+          cpn++;
+
         }
       }
     }
@@ -38,7 +38,7 @@ int getComponents(const int &la, const int &lb, const int &ka, const int &kb) {
 /// @param t_tensors vector with the T-tensors components
 /// @return the multipole interaction energy between the two molecules
 double PotentialEnergySurface::MultipoleOrder(
-    const int &order, const std::vector<double> &t_tensors) {
+    const int &order, const std::vector<double> &t_tensors) const {
   double multipole_order{0.0};
 
   for (int i = 0; i <= order - 1; ++i) {
@@ -63,7 +63,7 @@ double PotentialEnergySurface::MultipoleOrder(
 /// @param t_tensors vector with the T-tensors components
 /// @return the multipole interaction between the two molecules
 double PotentialEnergySurface::MultipoleInteraction(
-    const double &r, const std::vector<double> &t_tensors) {
+    const double &r, const std::vector<double> &t_tensors) const {
   double multipole_sph = 0.0;
   for (int order = 1; order <= 15; ++order) {
     if (m_fit_[order - 1] > 0) {
@@ -84,14 +84,13 @@ double PotentialEnergySurface::MultipoleInteraction(
 /// @return the induction interaction between the two molecules
 
 double PotentialEnergySurface::InductionInteraction(
-    const double &r, const std::vector<double> &t_tensors) {
+    const double &r, const std::vector<double> &t_tensors) const {
   double induction_sph = 0.0;
   for (int order = 1; order <= 15; ++order) {
     if (i_fit_[order - 1] > 0) {
-      induction_sph =
-          induction_sph +
-          InductionOrder(order, r, t_tensors, 1);  // induction of B over A
-      +InductionOrder(order, r, t_tensors, 0);     // induction of A over B
+      induction_sph = induction_sph +
+          InductionOrder(order, r, t_tensors, 1)  // induction of B over A
+        +InductionOrder(order, r, t_tensors, 0);     // induction of A over B
     }
   }
 
@@ -102,12 +101,12 @@ double PotentialEnergySurface::InductionInteraction(
 /// @param order order of the induction interaction
 /// @param r distance between the two molecules
 /// @param t_tensors vector with the T-tensors components
-/// @param index indicate if Im calculating pol over A or pol over B
+/// @param index indicate if I'm calculating pol over A or pol over B
 /// @return the induction interaction between the two molecules
 
 double PotentialEnergySurface ::InductionOrder(
     const int &order, const double &r, const std::vector<double> &t_tensors,
-    const int &index) {
+    const int &index) const {
   double res{0.0};
 
   for (int l1 = 1; l1 <= order - 3; ++l1) {
@@ -131,12 +130,12 @@ double PotentialEnergySurface ::InductionOrder(
 /// components
 /// @param i,j,l1,l2 components of the induction interaction
 /// @param t_tensors vector with the T-tensors components
-/// @param index indicate if Im calculating pol over A or pol over B
+/// @param index indicate if I'm calculating pol over A or pol over B
 /// @return the induction interaction between the two molecules
 
 double PotentialEnergySurface ::InductionComponent(
     const int &i, const int &j, const int &l1, const int &l2,
-    const std::vector<double> &t_tensors, const int &index) {
+    const std::vector<double> &t_tensors, const int &index) const {
   double res{0.0};
   const int ni = 2 * i + 1;
   const int nj = 2 * j + 1;
@@ -162,7 +161,7 @@ double PotentialEnergySurface ::InductionComponent(
 
               if (const double comp_a_k1_k2 = pol_arr.at(cpn - 1);
                   std::abs(comp_a_k1_k2) > DBL_EPSILON) {
-                // index indicate if Im calculating pol over A
+                // index indicate if I'm calculating pol over A
                 //  or pol over B
                 if (index == 0) {
                   const int t_cpn_1 = getComponents(l1, i, k1 - 1, ci - 1);
@@ -197,7 +196,7 @@ double PotentialEnergySurface ::InductionComponent(
 /// @return the dispersion interaction between the two molecules
 
 double PotentialEnergySurface::DispersionInteraction(
-    const double &r, const std::vector<double> &t_tensors) {
+    const double &r, const std::vector<double> &t_tensors) const {
   double dispersion_sph{0.0};
 
   for (int order = 1; order <= 15; ++order) {
@@ -209,7 +208,7 @@ double PotentialEnergySurface::DispersionInteraction(
 }
 
 double PotentialEnergySurface::DispersionOrder(
-    const double &r, const std::vector<double> &t_tensors, const int &order) {
+    const double &r, const std::vector<double> &t_tensors, const int &order) const {
   double res{0.0};
 
   for (int l1 = 1; l1 <= order - 2; ++l1) {

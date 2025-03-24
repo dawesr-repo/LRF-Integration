@@ -9,12 +9,13 @@ add_executable(LRF_Integration
                     Cpp/PotentialEnergySurface.h
                     Cpp/PotentialEnergySurface.cpp
                     Cpp/interactions.cpp
-        Cpp/Tensor.cpp
-        Cpp/Tensor.h
-        Cpp/helper_functions.cpp
+                    Cpp/Tensor.cpp
+                    Cpp/Tensor.h
+                    Cpp/helper_functions.cpp
+        Cpp/AuxiliarFunctions.h
 )
 target_link_libraries(LRF_Integration)
-
+add_subdirectory(Cpp/test)
 
 #How to run it
 #cmake -S . -B build

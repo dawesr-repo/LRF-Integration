@@ -18,6 +18,9 @@ std::vector<double> Tensor::Ar(const std::vector<double> &general_coordinates) {
       cos(general_coordinates.at(1)),
       sin(general_coordinates.at(1)) * sin(general_coordinates.at(4)),
       cos(general_coordinates.at(4)) * sin(general_coordinates.at(1))};
+  std::cout<<general_coordinates[1]<<std::endl;
+  std::cout<<general_coordinates[4]<<std::endl;
+
   return vec_ar;
 }
 

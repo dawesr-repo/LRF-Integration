@@ -21,6 +21,7 @@ add_executable(
         ../Tensor.cpp
         ../Tensor.h
         ../helper_functions.cpp
+        ../AuxiliarFunctions.h
 )
 target_link_libraries(
         TestUnit

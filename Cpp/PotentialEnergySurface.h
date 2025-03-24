@@ -38,25 +38,25 @@ class PotentialEnergySurface {
   PotentialEnergySurface(const std::string &filename);
   double GetAsymptote() const { return zero_; };
   double EvaluateLRF(const int &dim, const std::vector<double> &coordinates,
-                     const std::string &coordinate_format);
+                     const std::string &coordinate_format) const;
 
  private:
   double MultipoleInteraction(const double &r,
-                              const std::vector<double> &t_tensors);
-  double MultipoleOrder(const int &order, const std::vector<double> &t_tensors);
+                              const std::vector<double> &t_tensors) const;
+  double MultipoleOrder(const int &order, const std::vector<double> &t_tensors) const;
 
   double InductionInteraction(const double &r,
-                              const std::vector<double> &t_tensors);
+                              const std::vector<double> &t_tensors) const;
   double InductionOrder(const int &order, const double &r,
-                        const std::vector<double> &t_tensors, const int &index);
+                        const std::vector<double> &t_tensors, const int &index) const;
   double InductionComponent(const int &i, const int &j, const int &l1,
                             const int &l2, const std::vector<double> &t_tensors,
-                            const int &index);
+                            const int &index) const;
 
   double DispersionInteraction(const double &r,
-                               const std::vector<double> &t_tensors);
+                               const std::vector<double> &t_tensors) const;
   double DispersionOrder(const double &r, const std::vector<double> &t_tensors,
-                         const int &order);
+                         const int &order) const;
   double DispersionComponent(const int &l1, const int &l2, const int &t1,
                              const int &t2,
                              const std::vector<double> &t_tensors) const;

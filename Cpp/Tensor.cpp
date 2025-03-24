@@ -32,26 +32,28 @@ Tensor::Tensor(const int system_dimension, const Vector &coordinates,
 ///
 Vector Tensor::UserCoordinatesToGeneralCoordinates() const {
   // general_coordinates
+
   Vector vec(6, 0);
   if (system_dimension_ >= 2 && system_dimension_ <= 6) {
     vec.at(0) = coordinates_.at(0);  // R
     vec.at(1) = coordinates_.at(1);  // beta1
     if (system_dimension_ == 3) {
       vec.at(4) = coordinates_.at(2);  // gamma1
-    } else if (system_dimension_ >= 4) {
+    } else {
       vec.at(2) = coordinates_.at(2);  // beta2
       vec.at(3) = coordinates_.at(3);  // alpha
-    }
-    if (system_dimension_ == 5) {
-      vec.at(4) = coordinates_.at(4);  // gamma1
-    }
-    if (system_dimension_ == 6) {
-      vec.at(5) = coordinates_.at(5);  // gamma2
+      if (system_dimension_ >= 5) {
+        vec.at(4) = coordinates_.at(4);  // gamma1
+      }
+      if (system_dimension_ == 6) {
+        vec.at(5) = coordinates_.at(5);  // gamma2
+      }
     }
   } else {
     std::cout << "Wrong dimension: " << system_dimension_ << std::endl;
     // throw 1;
   }
+
 
   if (coordinate_format_ == "Euler_ZYZ") {
     vec.at(4) = vec.at(4) - 90.0;
@@ -82,7 +84,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
     // throw 0;
   }
   if (coordinates_.at(0) < 1) {
-    std::cout << "coordinates size must be equal to dimension" << std::endl;
+    std::cout << "R must be positive" << std::endl;
     // throw 0;
   }
 

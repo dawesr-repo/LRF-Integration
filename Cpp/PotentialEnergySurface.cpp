@@ -7,31 +7,9 @@
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
-#include <limits>
 #include <vector>
-
 #include "Tensor.h"
-//************ Auxiliar Functions Definition **********************
-
-/// @brief function that skips nlines in the file fp
-/// @param fp   ifstream object
-/// @param nlines integer with the number of lines to skip
-void skipLines(std::ifstream &fp, int nlines) {
-  for (int i = 0; i < nlines; ++i) {
-    fp.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  }
-}
-
-/// @brief function that reads an array of n elements from the file fp
-/// @param fp   ifstream object
-/// @param arr  pointer to the array where the elements will be stored
-/// @param n    integer with the number of elements to read
-template <class T>
-void readArray(std::ifstream &fp, T *arr, int n) {
-  for (int i = 0; i < n; ++i) {
-    fp >> arr[i];
-  }
-}
+#include "AuxiliarFunctions.h"
 
 //************ PotentialEnergySurface Methods Definition **********************
 
@@ -61,24 +39,25 @@ bool PotentialEnergySurface::ReadParameters() {
     return false;
   }
 
-  skipLines(infile, 8);
+
+  AuxiliarFunctions<double>::skipLines(infile, 8);
 
   infile >> tmp >> singleline;
   char *end = nullptr;
   zero_ = strtod(singleline.c_str(), &end);
 
-  skipLines(infile, 3);
+  AuxiliarFunctions<double>::skipLines(infile, 3);
   // Multipoles
   infile >> tmp;
-  readArray(infile, m_fit_, 15);
+  AuxiliarFunctions<int>::readArray(infile, m_fit_, 15);
   infile >> tmp;
-  readArray(infile, i_fit_, 15);
+  AuxiliarFunctions<int>::readArray(infile, i_fit_, 15);
   infile >> tmp;
-  readArray(infile, d_fit_, 15);
+  AuxiliarFunctions<int>::readArray(infile, d_fit_, 15);
   infile >> tmp;
-  readArray(infile, a_mult_, 225);
+  AuxiliarFunctions<double>::readArray(infile, a_mult_, 225);
   infile >> tmp;
-  readArray(infile, b_mult_, 225);
+  AuxiliarFunctions<double>::readArray(infile, b_mult_, 225);
 
   const int iord = *std::max_element(i_fit_, i_fit_ + 15);
   const int temp = *std::max_element(m_fit_, m_fit_ + 15);
@@ -95,12 +74,12 @@ bool PotentialEnergySurface::ReadParameters() {
           std::vector<double> &arr1 = a_pol_[i - 1][j - 1];
           arr1.resize(ln, 0);
           infile >> tmp;
-          readArray(infile, arr1.data(), ln);
+          AuxiliarFunctions<double>::readArray(infile, arr1.data(), ln);
 
           std::vector<double> &arr2 = b_pol_[i - 1][j - 1];
           arr2.resize(ln, 0);
           infile >> tmp;
-          readArray(infile, arr2.data(), ln);
+          AuxiliarFunctions<double>::readArray(infile, arr2.data(), ln);
         }
       }
     }
@@ -117,7 +96,7 @@ bool PotentialEnergySurface::ReadParameters() {
               std::vector<double> &arr = disp_[l1 - 1][l2 - 1][t1 - 1][t2 - 1];
               arr.resize(ln, 0);
               infile >> tmp;
-              readArray(infile, arr.data(), ln);
+              AuxiliarFunctions<double>::readArray(infile, arr.data(), ln);
             }
           }
         }
@@ -140,7 +119,7 @@ bool PotentialEnergySurface::ReadParameters() {
 /// @return double with the total interaction energy
 double PotentialEnergySurface::EvaluateLRF(
     const int &dim, const std::vector<double> &coordinates,
-    const std::string &coordinate_format) {
+    const std::string &coordinate_format) const {
   auto *t_tensor = new Tensor(dim, coordinates, coordinate_format);
   const std::vector<double> t = t_tensor->CalculateTensor(max_t_tensor_order_);
   const double r = t_tensor->GetIntermolecularDistance();

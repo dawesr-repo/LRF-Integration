@@ -33,7 +33,7 @@ PotentialEnergySurface::PotentialEnergySurface(const std::string &filename)
 /// otherwise.
 bool PotentialEnergySurface::ReadParameters() {
   std::ifstream infile(file_name_);
-  std::string singleline, tmp;
+  std::string single_line, tmp;
   if (!infile) {
     std::cerr << "Failed to open file: " << file_name_ << std::endl;
     return false;
@@ -42,9 +42,9 @@ bool PotentialEnergySurface::ReadParameters() {
 
   AuxiliarFunctions<double>::skipLines(infile, 8);
 
-  infile >> tmp >> singleline;
+  infile >> tmp >> single_line;
   char *end = nullptr;
-  zero_ = strtod(singleline.c_str(), &end);
+  zero_ = strtod(single_line.c_str(), &end);
 
   AuxiliarFunctions<double>::skipLines(infile, 3);
   // Multipoles
@@ -114,7 +114,7 @@ bool PotentialEnergySurface::ReadParameters() {
 /// set of coordinates by the user
 /// @param dim integer with the number of degrees of freedom of the system
 /// @param coordinates vector with the coordinates of the system
-/// @param coordinate_format format of the coordinates(supported formats:
+/// @param coordinate_format format of the coordinates (supported formats:
 /// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
 /// @return double with the total interaction energy
 double PotentialEnergySurface::EvaluateLRF(

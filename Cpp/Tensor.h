@@ -8,8 +8,8 @@
 #include <iostream>
 #include <vector>
 
-/// @param dim integer with the number of degrees of freedom of the system
-/// @param coordinate_format format of the coordinates(supported formats:
+/// @param dim integer with the degrees of freedom of the system
+/// @param coordinate_format format of the coordinates (supported formats:
 /// "Euler_ZXZ", "Euler_ZYZ" and "Spherical")
 /// @param coordinates R, beta1, beta2, alpha, gamma1, gamma2. R must be in
 /// Angstroms and the angles in degrees.
@@ -21,16 +21,13 @@ class Tensor {
  public:
   Tensor(int system_dimension, const std::vector<double> &coordinates,
          const std::string &coordinate_format);
-  std::vector<double> UserCoordinatesToGeneralCoordinates() const;
+  [[nodiscard]] std::vector<double> UserCoordinatesToGeneralCoordinates() const;
   std::vector<double> CalculateTensor(int max_t_tensor_order);
-  double GetIntermolecularDistance() const { return coordinates_.at(0); }
+  [[nodiscard]] double GetIntermolecularDistance() const { return coordinates_.at(0); }
   // Helper Functions
   static std::vector<double> Ar(const std::vector<double> &general_coordinates);
   static std::vector<double> Br(const std::vector<double> &general_coordinates);
-  static std::vector<double> Cab(
-      const std::vector<double> &general_coordinates);
-  static int GetComponent(const int &la, const int &lb, const int &ka,
-                          const int &kb);
+  static std::vector<double> Cab(const std::vector<double> &general_coordinates);
   static std::string GetSplittingComponent(const int &i);
   static int GetTensorComponent(const int &mult_ord, const int &k1,
                                 const std::string &k2);

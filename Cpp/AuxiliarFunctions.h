@@ -7,14 +7,15 @@
 #include <fstream>
 #include <limits>
 #include <cmath>
-#include <numeric>
 
+
+/// @brief AuxiliarFunctions groups all handy functions that are not associated with any class,
+/// or they are used in different classes
 
 template<typename T>
 class AuxiliarFunctions {
-  /// @brief function that skips n lines in the file fp
-  /// @param fp   ifstream object
-  /// @param n_lines integer with the number of lines to skip
+  static constexpr int components_per_order_[16]{0, 1,    7,    26,   70,   155,  301,  532, 876,
+                               1365, 2035, 2926, 4082, 5551, 7385, 9640};
 public:
   static void skipLines(std::ifstream &fp,int n_lines);
   static void readArray(std::ifstream &fp, T *arr,int n);
@@ -95,10 +96,9 @@ int AuxiliarFunctions<T>::getComponents(const int &la, const int &lb, const int 
 /// @return the equivalent component in a linear array.
 template <class T>
 int AuxiliarFunctions<T>::getComponents_v2(const int &la, const int &lb, const int &ka, const int &kb) {
-  const int cpns_per_order[16]{0, 1,    7,    26,   70,   155,  301,  532, 876,
-                               1365, 2035, 2926, 4082, 5551, 7385, 9640};
+
   const int order = la+lb+1;
-  return  cpns_per_order[order-1] +
+  return  components_per_order_[order-1] +
             2*(order-1)*(la-1)*la +
             (2*order-1)*la -
             2*(la-1)*la*(2*la-1)/3 +

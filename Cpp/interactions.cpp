@@ -52,7 +52,7 @@ double PotentialEnergySurface::MultipoleInteraction(
       // std::cout<<"multipole Order: "<<order<<std::endl;
       // std::cout<<std::setprecision(12)<<MultipoleOrder(order, t_tensors)<<std::endl;
 
-      const double term = (C3 * C1 * pow(C2, order)) *
+      const double term = (C3_ * C1_ * pow(C2_, order)) *
                                           MultipoleOrder(order, t_tensors) /
                                           pow(r, order);
       multipole_sph = multipole_sph + term;
@@ -109,12 +109,12 @@ double PotentialEnergySurface ::InductionOrder(
     }
   }
 
-  return (-0.5 * (C3 * C1 * pow(C2, order)) * res) / (pow(r, order));
+  return (-0.5 * (C3_ * C1_ * pow(C2_, order)) * res) / (pow(r, order));
 }
 
 /// @brief Calculate the induction interaction between two molecules by
-/// components
-/// @param i,j,l1,l2 components of the induction interaction
+/// components.
+/// @param i, j, l1, l2 components of the induction interaction
 /// @param t_tensors vector with the T-tensors components
 /// @param index indicate if I'm calculating pol over A or pol over B
 /// @return the induction interaction between the two molecules
@@ -209,7 +209,7 @@ double PotentialEnergySurface::DispersionOrder(
     }
   }
 
-  return -((C3 * C1 * pow(C2, order)) * res) / pow(r, order);
+  return -((C3_ * C1_ * pow(C2_, order)) * res) / pow(r, order);
 }
 
 double PotentialEnergySurface::DispersionComponent(

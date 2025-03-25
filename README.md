@@ -46,25 +46,33 @@ end program example
    ```
 ### C++
 ```c++
-#include "potential_energy_surface.h"
-using namespace std;
 
-int main(){
-  const string path_file_pes1 = "../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt";
-  PotentialEnergySurface pes1(path_file_pes1);
 
-  const int system_dimension = 6;
-  const vector <double> coordinates {12.00,10,20,30,40,50};
-  const string coordinate_format = "Euler_ZYZ";
+#include <iostream>
+#include <ostream>
+#include <string>
 
-  const double energy = pes1.EvaluateLRF( system_dimension,
-                                          coordinates,
-                                          coordinate_format);
+#include "PotentialEnergySurface.h"
 
-  const double asymptote = pes1.GetAsymptote( );
+int main() {
+  const std::string path_file_pes1 =
+      "../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt";
+  const auto* pes1 = new PotentialEnergySurface(path_file_pes1);
+  constexpr int system_dimension = 6;
+  const std::vector<double> coordinates{10.27, 30.0, 20.0, 120.0, 0.0, 0.0};
+  const std::string coordinate_format = "Euler_ZYZ";
+
+  const double energy =
+      pes1->EvaluateLRF(system_dimension, coordinates, coordinate_format);
+
+  const double asymptote = pes1->GetAsymptote();
+
+  std::cout << "Energy: " << energy << " (cm^-1)" << std::endl;
+  std::cout << "Asymptote: " << asymptote << " (cm^-1)" << std::endl;
 
   return 0;
 }
+
    ```
 To obtain the coefficients file, go to the LRF software Dashboard tab and click on the “Export Coefficients” button in the bottom-left corner of the window.  
 ![alt text](./LRF_Export.png)

@@ -8,7 +8,7 @@ A software package "Long-Range-Fit" (LRF) was developed, implementing a physical
 
 
 ## Installation and Usage
-### -Fortran
+### Fortran
 Go to the folder "Fortran-03", download the file named "LRF.f90" and place it in the project directory. Below is a minimal Fortran example demonstrating how to invoke evaluate_LRF (evaluate_LR returns the Potential Energy for a given set of coefficients exported employing LRF v4.x)
 evaluate_LR needs as function parameters:
 - Energy (Output, Real): Interaction energy between the monomers (in cm^-1).

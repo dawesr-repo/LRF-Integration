@@ -13,7 +13,7 @@ class PotentialEnergySurface {
 
   const double C1 = 627.5095;
   const double C2 = 0.529177249;
-  const double C3 = 349.757;
+  const double C3 = 349.755088236337;
 
   int max_t_tensor_order_;
   int m_fit_[15];
@@ -39,22 +39,23 @@ class PotentialEnergySurface {
   double GetAsymptote() const { return zero_; };
   double EvaluateLRF(const int &dim, const std::vector<double> &coordinates,
                      const std::string &coordinate_format) const;
-
- private:
   double MultipoleInteraction(const double &r,
-                              const std::vector<double> &t_tensors) const;
-  double MultipoleOrder(const int &order, const std::vector<double> &t_tensors) const;
-
+                            const std::vector<double> &t_tensors) const;
   double InductionInteraction(const double &r,
                               const std::vector<double> &t_tensors) const;
+  double DispersionInteraction(const double &r,
+                             const std::vector<double> &t_tensors) const;
+
+  const double *getMultipoleCoefficients(const std::string &label) const {return label=="A"? a_mult_:b_mult_;}
+ private:
+
+  double MultipoleOrder(const int &order, const std::vector<double> &t_tensors) const;
+
   double InductionOrder(const int &order, const double &r,
                         const std::vector<double> &t_tensors, const int &index) const;
   double InductionComponent(const int &i, const int &j, const int &l1,
                             const int &l2, const std::vector<double> &t_tensors,
                             const int &index) const;
-
-  double DispersionInteraction(const double &r,
-                               const std::vector<double> &t_tensors) const;
   double DispersionOrder(const double &r, const std::vector<double> &t_tensors,
                          const int &order) const;
   double DispersionComponent(const int &l1, const int &l2, const int &t1,
@@ -62,6 +63,7 @@ class PotentialEnergySurface {
                              const std::vector<double> &t_tensors) const;
 
   bool ReadParameters();
+
 };
 
 #endif  // POTENTIAL_ENERGY_SURFACE_H

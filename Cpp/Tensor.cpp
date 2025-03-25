@@ -3,7 +3,7 @@
 //
 
 #include "Tensor.h"
-
+#include "AuxiliarFunctions.h"
 #include <cfloat>
 #include <cmath>
 #include <fstream>
@@ -106,6 +106,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
       int lb = order - la - 1;
       for (int ka = 0; ka <= 2 * la; ++ka) {
         for (int kb = 0; kb <= 2 * lb; ++kb) {
+
           // Calculating T-Tensor Component
           const std::string ka2 = GetSplittingComponent(ka);
           const std::string kb2 = GetSplittingComponent(kb);
@@ -119,15 +120,14 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
             // recursive relation for lb = 0
             if (lb == 0) {
               // initializing component
-              double comp_lk{0};
+              double comp_lk {0};
               const auto la_fact = static_cast<double>((2.0 * la - 1.0) / la);
+
 
               // loop though every coordinate axis
               for (int i = 1; i <= 3; i++) {
                 // new multipole components
-                int rk1;
-                std::string rk2;
-                tie(rk1, rk2) = NEta(coord.at(i - 1), ka1, ka2);
+                auto [rk1, rk2] = NEta(coord.at(i - 1), ka1, ka2);
                 const int rk_ = GetTensorComponent(la, rk1, rk2);
                 const double m = CoeffM(coord.at(i - 1), ka1, ka2);
                 // coefficient NN of the recurrence
@@ -135,7 +135,8 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
 
                 if (std::abs(m) > DBL_EPSILON && la >= 1 &&
                     fact_nn > DBL_EPSILON && rk_ <= 2 * (la - 1)) {
-                  const int t_cpn = GetComponent(la - 1, 0, rk_, 0);
+
+                  const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la - 1, 0, rk_, 0);
                   double prod_comp = a.at(i - 1) * t_tensor.at(t_cpn);
                   double fact_prod = la_fact * m * fact_nn;
                   comp_lk = comp_lk + fact_prod * prod_comp;
@@ -145,7 +146,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
               if (la >= 2 && ka <= 2 * (la - 2) && ka >= 0) {
                 const auto la2_fact = static_cast<double>((la - 1.0) / la);
 
-                const int t_cpn = GetComponent(la - 2, 0, ka, 0);
+                const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la - 2, 0, ka, 0);
                 comp_lk = comp_lk - la2_fact * FactorialNN(la - 2, ka1, 0, 0) *
                                         t_tensor.at(t_cpn);
               }
@@ -161,9 +162,8 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
               // loop though every coordinate axis
               for (int i = 1; i <= 3; i++) {
                 // new multipole components
-                int rk1;
-                std::string rk2;
-                tie(rk1, rk2) = NEta(coord.at(i - 1), kb1, kb2);
+
+                auto [rk1, rk2] = NEta(coord.at(i - 1), kb1, kb2);
                 const int rk_ = GetTensorComponent(lb, rk1, rk2);
                 const double m = CoeffM(coord.at(i - 1), kb1, kb2);
                 // coefficient NN of the recurrence
@@ -171,15 +171,17 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
 
                 if (std::abs(m) > DBL_EPSILON && lb >= 1 &&
                     fact_nn > DBL_EPSILON && rk_ <= 2 * (lb - 1) && rk_ >= 0) {
-                  const int t_cpn = GetComponent(0, lb - 1, 0, rk_);
+
+                  const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(0, lb - 1, 0, rk_);
                   comp_lk = comp_lk + lb_fact * m * fact_nn * b.at(i - 1) *
                                           t_tensor.at(t_cpn);
                 }
+
               }
               // Second term of the recurrence
               if (lb >= 2 && kb <= 2 * (lb - 2) && kb >= 0) {
                 const auto lb2_fact = static_cast<double>((lb - 1.0) / lb);
-                const int t_cpn = GetComponent(0, lb - 2, 0, kb);
+                const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(0, lb - 2, 0, kb);
                 comp_lk = comp_lk - lb2_fact * FactorialNN(0, 0, lb - 2, kb1) *
                                         t_tensor.at(t_cpn);
               }
@@ -192,7 +194,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
               double comp_lk{0};
 
               if (ka <= 2 * (la - 2)) {
-                const int t_cpn = GetComponent(la - 2, lb, ka, kb);
+                const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la - 2, lb, ka, kb);
                 comp_lk = comp_lk + FactorialNN(la - 2, ka1, lb, kb1) *
                                         t_tensor.at(t_cpn);
               }
@@ -200,16 +202,15 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
               if (kb <= 2 * (lb - 2)) {
                 const auto l2_fact =
                     static_cast<double>((2.0 * la + lb - 1.0) / lb);
-                const int t_cpn = GetComponent(la, lb - 2, ka, kb);
+                const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la, lb - 2, ka, kb);
                 comp_lk =
                     comp_lk - (l2_fact * FactorialNN(la, ka1, lb - 2, kb1)) *
                                   t_tensor.at(t_cpn);
               }
 
               for (int i = 1; i <= 3; i++) {
-                int rk1;
-                std::string rk2;
-                tie(rk1, rk2) = NEta(coord.at(i - 1), kb1, kb2);
+
+                auto [rk1, rk2] = NEta(coord.at(i - 1), kb1, kb2);
                 const int rk_i = GetTensorComponent(lb, rk1, rk2);
                 const double m = CoeffM(coord.at(i - 1), kb1, kb2);
 
@@ -220,7 +221,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
 
                 if (std::abs(const_fact) > DBL_EPSILON &&
                     rk_i <= 2 * (lb - 1)) {
-                  const int t_cpn = GetComponent(la, lb - 1, ka, rk_i);
+                  const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la, lb - 1, ka, rk_i);
                   comp_lk =
                       comp_lk + const_fact * b.at(i - 1) * t_tensor.at(t_cpn);
                 }
@@ -231,12 +232,9 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
                   const int n = 3 * (i - 1) + j;
                   const auto l4_fact =
                       static_cast<double>((2.0 * la - 1.0) / lb);
-                  int rka1;
-                  std::string rka2;
-                  tie(rka1, rka2) = NEta(coord.at(i - 1), ka1, ka2);
-                  int rkb1;
-                  std::string rkb2;
-                  tie(rkb1, rkb2) = NEta(coord.at(j - 1), kb1, kb2);
+
+                  auto [rka1, rka2] = NEta(coord.at(i - 1), ka1, ka2);
+                  auto [rkb1, rkb2] =  NEta(coord.at(j - 1), kb1, kb2);
 
                   const int rk_i = GetTensorComponent(la, rka1, rka2);
                   const int rk_j = GetTensorComponent(lb, rkb1, rkb2);
@@ -248,7 +246,7 @@ Vector Tensor::CalculateTensor(const int max_t_tensor_order) {
                       FactorialNN(la - 1, rka1, lb - 1, rkb1);
                   if (std::abs(const_factor) > DBL_EPSILON &&
                       rk_i <= 2 * (la - 1) && rk_j <= 2 * (lb - 1)) {
-                    const int t_cpn = GetComponent(la - 1, lb - 1, rk_i, rk_j);
+                    const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(la - 1, lb - 1, rk_i, rk_j);
                     comp_lk = comp_lk +
                               const_factor * cc.at(n - 1) * t_tensor.at(t_cpn);
                   }

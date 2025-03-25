@@ -18,8 +18,6 @@ std::vector<double> Tensor::Ar(const std::vector<double> &general_coordinates) {
       cos(general_coordinates.at(1)),
       sin(general_coordinates.at(1)) * sin(general_coordinates.at(4)),
       cos(general_coordinates.at(4)) * sin(general_coordinates.at(1))};
-  std::cout<<general_coordinates[1]<<std::endl;
-  std::cout<<general_coordinates[4]<<std::endl;
 
   return vec_ar;
 }
@@ -56,7 +54,6 @@ std::vector<double> Tensor::Cab(
           (-cos_phi * cos_b2 * sin_b1 + cos_b1 * sin_b2) * sin_c2,  // Czx
       -cos_phi * cos_b2 * cos_c2 * sin_b1 + cos_b1 * cos_c2 * sin_b2 -
           sin_phi * sin_b1 * sin_c2,  // Czy
-
       cos_b2 * sin_b1 * sin_c1 -
           sin_b2 * (cos_c1 * sin_phi + cos_phi * cos_b1 * sin_c1),  // Cxz
       -cos_b1 * cos_c2 * sin_phi * sin_c1 +
@@ -81,27 +78,6 @@ std::vector<double> Tensor::Cab(
   return vec_cab;
 }
 
-/// @param la, lb, ka, kb components of the T-tensor
-/// @return linear component of the T-tensor
-int Tensor::GetComponent(const int &la, const int &lb, const int &ka,
-                         const int &kb) {
-  int cpn{0};
-  for (int order = 1; order <= 15; ++order) {
-    for (int lap = 0; lap <= order - 1; ++lap) {
-      int lbp = order - lap - 1;
-      for (int kap = 0; kap <= 2 * lap; ++kap) {
-        for (int kbp = 0; kbp <= 2 * lbp; ++kbp) {
-          if (la == lap && lb == lbp && ka == kap && kb == kbp) {
-            return cpn;
-          } else {
-            cpn++;
-          }
-        }
-      }
-    }
-  }
-  return 0;
-}
 
 /// @brief Function that pass from linear index to the real-spherical index
 /// @param i :linear index
@@ -120,12 +96,32 @@ int Tensor::GetTensorComponent(const int &mult_ord, const int &k1,
 /// @brief Auxiliar function for recursive relation function
 std::tuple<int, std::string> Tensor::NEta(const std::string &mu, const int &k1,
                                           const std::string &k2) {
-  return mu == "x"
-             ? (k1 <= 1 ? std::make_tuple(0, "0") : make_tuple(k1 - 1, k2))
-         : mu == "y" ? (k1 <= 1 ? std::make_tuple(0, "0")
-                                : (k2 == "c" ? std::make_tuple(k1 - 1, "s")
-                                             : std::make_tuple(k1 - 1, "c")))
-                     : make_tuple(k1, k2);
+  if (k1==0){
+    return  std::make_tuple(0, "0");
+  }
+  if (mu == "x") {
+    if (k1 <= 1) {
+      return std::make_tuple(0, "0");
+    }
+    return std::make_tuple(k1-1, k2);
+
+  }
+  if (mu == "y"){
+    if (k1 <= 1) {
+      return std::make_tuple(0, "0");
+    }
+    if (k2 == "c") {
+      return std::make_tuple(k1-1, "s");
+    }
+    if (k2 == "s") {
+      return std::make_tuple(k1-1, "c");
+    }
+    //return std::make_tuple(k1-1, "0");
+  }
+
+  return std::make_tuple(k1, k2);
+
+
 }
 /// @brief Auxiliar function for recursive relation function
 double Tensor::Factorial(int n) {

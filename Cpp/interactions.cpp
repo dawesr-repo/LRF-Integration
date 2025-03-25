@@ -8,27 +8,7 @@
 
 
 #include "PotentialEnergySurface.h"
-/// @brief component of the T-tensor
-/// @param la,lb,ka,kb components of the T-tensor
-/// @return Linear index component of the T-tensor
-int getComponents(const int &la, const int &lb, const int &ka, const int &kb) {
-  int cpn{0};
-  for (int order = 1; order <= 15; ++order) {
-    for (int lap = 0; lap <= order - 1; ++lap) {
-      int lbp = order - lap - 1;
-      for (int kap = 0; kap <= 2 * lap; ++kap) {
-        for (int kbp = 0; kbp <= 2 * lbp; ++kbp) {
-          if (la == lap && lb == lbp && ka == kap && kb == kbp) {
-            return cpn;
-          }
-          cpn++;
-
-        }
-      }
-    }
-  }
-  return 0;
-}
+#include "AuxiliarFunctions.h"
 
 //************ PotentialEnergySurface Methods Definition **********************
 
@@ -47,9 +27,11 @@ double PotentialEnergySurface::MultipoleOrder(
     for (int ci = 0; ci <= 2 * i; ++ci) {
       if (const double Qai = a_mult_[i * i + ci]; std::abs(Qai) > DBL_EPSILON) {
         for (int cj = 0; cj <= 2 * j; ++cj) {
-          if (const double Qbj = a_mult_[j * j + cj];
+          if (const double Qbj = b_mult_[j * j + cj];
               std::abs(Qbj) > DBL_EPSILON) {
-            const int t_cpn = getComponents(i, j, ci, cj);
+            const int t_cpn = AuxiliarFunctions<int>::getComponents_v2(i, j, ci, cj);
+            // std::cout<<"Order :"<<order<<"; "<<i<<" , "<<ci<<" ; "<<j<<" , "<<cj<<std::endl;
+            // std::cout<<std::setprecision(12)<<Qai<<" ; "<<Qbj<<" ; "<<t_tensors.at(t_cpn)<<std::endl;
             multipole_order = multipole_order + Qai * Qbj * t_tensors.at(t_cpn);
           }
         }
@@ -64,12 +46,16 @@ double PotentialEnergySurface::MultipoleOrder(
 /// @return the multipole interaction between the two molecules
 double PotentialEnergySurface::MultipoleInteraction(
     const double &r, const std::vector<double> &t_tensors) const {
-  double multipole_sph = 0.0;
+  double multipole_sph {0.0};
   for (int order = 1; order <= 15; ++order) {
     if (m_fit_[order - 1] > 0) {
-      multipole_sph = multipole_sph + (C3 * C1 * pow(C2, order)) *
+      // std::cout<<"multipole Order: "<<order<<std::endl;
+      // std::cout<<std::setprecision(12)<<MultipoleOrder(order, t_tensors)<<std::endl;
+
+      const double term = (C3 * C1 * pow(C2, order)) *
                                           MultipoleOrder(order, t_tensors) /
                                           pow(r, order);
+      multipole_sph = multipole_sph + term;
     }
   }
 
@@ -164,15 +150,15 @@ double PotentialEnergySurface ::InductionComponent(
                 // index indicate if I'm calculating pol over A
                 //  or pol over B
                 if (index == 0) {
-                  const int t_cpn_1 = getComponents(l1, i, k1 - 1, ci - 1);
-                  const int t_cpn_2 = getComponents(l2, j, k2 - 1, cj - 1);
+                  const int t_cpn_1 = AuxiliarFunctions<int>::getComponents_v2(l1, i, k1 - 1, ci - 1);
+                  const int t_cpn_2 = AuxiliarFunctions<int>::getComponents_v2(l2, j, k2 - 1, cj - 1);
                   res =
                       res + qai * qbj * comp_a_k1_k2 *
                                 (t_tensors.at(t_cpn_1) * t_tensors.at(t_cpn_2));
 
                 } else {
-                  const int t_cpn_1 = getComponents(i, l1, ci - 1, k1 - 1);
-                  const int t_cpn_2 = getComponents(j, l2, cj - 1, k2 - 1);
+                  const int t_cpn_1 = AuxiliarFunctions<int>::getComponents_v2(i, l1, ci - 1, k1 - 1);
+                  const int t_cpn_2 = AuxiliarFunctions<int>::getComponents_v2(j, l2, cj - 1, k2 - 1);
                   res =
                       res + qai * qbj * comp_a_k1_k2 *
                                 (t_tensors.at(t_cpn_1) * t_tensors.at(t_cpn_2));
@@ -259,8 +245,8 @@ double PotentialEnergySurface::DispersionComponent(
           const double disp_coeff = disp_arr.at(cpn - 1);
 
           if (std::abs(disp_coeff) > DBL_EPSILON) {
-            const int t_cpn_1 = getComponents(l1, t1, li, ti);
-            const int t_cpn_2 = getComponents(l2, t2, lj, tj);
+            const int t_cpn_1 = AuxiliarFunctions<int>::getComponents_v2(l1, t1, li, ti);
+            const int t_cpn_2 = AuxiliarFunctions<int>::getComponents_v2(l2, t2, lj, tj);
 
             res = res +
                   disp_coeff * t_tensors.at(t_cpn_1) * t_tensors.at(t_cpn_2);

@@ -19,10 +19,10 @@ class Tensor {
   std::string coordinate_format_ = "Euler_ZYZ";
 
  public:
-  Tensor(const int system_dimension, const std::vector<double> &coordinates,
+  Tensor(int system_dimension, const std::vector<double> &coordinates,
          const std::string &coordinate_format);
   std::vector<double> UserCoordinatesToGeneralCoordinates() const;
-  std::vector<double> CalculateTensor(const int max_t_tensor_order);
+  std::vector<double> CalculateTensor(int max_t_tensor_order);
   double GetIntermolecularDistance() const { return coordinates_.at(0); }
   // Helper Functions
   static std::vector<double> Ar(const std::vector<double> &general_coordinates);
@@ -41,6 +41,8 @@ class Tensor {
                             const int &kb1);
   static double CoeffM(const std::string &mu, const int &k1,
                        const std::string &k2);
+
+
 };
 
 #endif  // TENSOR_H

@@ -22,6 +22,9 @@ add_executable(
         ../Tensor.h
         ../helper_functions.cpp
         ../AuxiliarFunctions.h
+        ../PotentialEnergySurface.cpp
+        ../interactions.cpp
+        ../PotentialEnergySurface.h
 )
 target_link_libraries(
         TestUnit

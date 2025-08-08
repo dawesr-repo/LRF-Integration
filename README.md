@@ -6,6 +6,8 @@ The study of intermolecular forces is essential for predicting and understanding
 
 A software package "Long-Range-Fit" (LRF) was developed, implementing a physically rigorous description of interactions in the long-range region, namely electrostatic, induction, and dispersion. An interactive user-friendly interface connects the user to the underlying sophisticated high-order mathematical treatment. Moreover, the accompanying source code, LRF-Integration, allows users to merge the long-range model from LRF with any independent short-range approach by utilizing the coefficients file exported by LRF.
 
+## Requirements
+  _ Fortran: Fortran Compiler
 
 ## Installation and Usage
 ### Fortran

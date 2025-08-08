@@ -8,12 +8,12 @@ subroutine coordinate_transformation(new_coordinates,coordinates,coord_format)
     new_coordinates=coordinates;
     
     if (coord_format == "Euler_ZYZ") then
-        new_coordinates(5) = coordinates(5) - 90
-        new_coordinates(6) = coordinates(6) - 90
+        new_coordinates(5) = coordinates(5) - 90d0
+        new_coordinates(6) = coordinates(6) - 90d0
     end if
     if (coord_format == "Spherical") then
-        new_coordinates(5) = 90 - coordinates(5)
-        new_coordinates(6) = 90 -coordinates(6)
+        new_coordinates(5) = 90d0 - coordinates(5)
+        new_coordinates(6) = 90d0 -coordinates(6)
     end if
 
 end  subroutine coordinate_transformation

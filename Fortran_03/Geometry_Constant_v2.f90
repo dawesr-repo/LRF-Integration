@@ -588,7 +588,7 @@ contains
 
 
         do order=1,15
-            if ( get_coeff_Fit(ind,order,"I") > 0) then
+            if ( get_coeff_Fit(ind,order,"I") > 0d0) then
                 induction_sph_v3 = induction_sph_v3 + induction_order(order,ind,1)& ! induction of B over A
                                                     + induction_order(order,ind,0)  ! induction of A over B
             end if

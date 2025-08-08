@@ -22,7 +22,7 @@ program min_example
  real (kind=8), dimension(XDIM):: coordinates = [9.224922190454659d0,& ! R
                                                   DACOS(-0.516833742198944d0)*180d0/DACOS(-1.d0),&    ! beta1
                                                   DACOS(0.761164535894394d0)*180d0/DACOS(-1.d0),&    ! beta2
-                                                  0.081548803182827*180d0/DACOS(-1d0)];
+                                                  0.081548803182827d0*180d0/DACOS(-1d0)];
                                                   ! ,&   ! alpha
                                                   ! 0d0,&     ! gamma1
                                                   ! 0d0]     ! gamma2

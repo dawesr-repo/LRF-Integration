@@ -523,15 +523,18 @@ contains
         real (kind=8) :: multipole_sph_v3           ! returned Energy
         integer (kind=4)::order
         real (kind=8) :: R
+        real (kind=8) :: C2R, C13
         
         R = cal_coord_v2(1)
         multipole_sph_v3 = 0d0
+        C2R = C2 / R
+        C13 = C3 * C1
         
         do order = 1, 15
 
             if ( get_coeff_Fit(ind,order,"M") > 0) then
-                multipole_sph_v3 =  multipole_sph_v3 + (C3 * C1 * (C2 ** order)) * multipole_order(ind,order) &
-                                                        / R ** order
+                multipole_sph_v3 =  multipole_sph_v3 + (C13 * (C2R ** order)) * multipole_order(ind,order)
+                                                       
 
             end if
         end do
@@ -585,12 +588,18 @@ contains
         integer(kind=4) , intent(in) :: ind
         real (kind=8) :: induction_sph_v3
         integer(kind=4) :: order
+        real (kind=8) :: R
+        real (kind=8) :: C2R, C13
 
+        R = cal_coord_v2(1)
+        C2R = C2 / R
+        C13 = C3 * C1
 
         do order=1,15
             if ( get_coeff_Fit(ind,order,"I") > 0d0) then
-                induction_sph_v3 = induction_sph_v3 + induction_order(order,ind,1)& ! induction of B over A
-                                                    + induction_order(order,ind,0)  ! induction of A over B
+                induction_sph_v3 =  induction_sph_v3 + -0.5d0*C13*(C2R**order)*(&
+                                    induction_order(order,ind,1)+& ! induction of B over A
+                                    induction_order(order,ind,0))  ! induction of A over B
             end if
         end do
     end function induction_sph_v3
@@ -600,11 +609,10 @@ contains
         implicit none
         integer (kind=4) , intent(in) :: order,index,ind
         real (kind=8)  :: induction_order
-        real (kind=8) :: R
         integer (kind=4) :: l1,l2,i,j,lmin,lmax
         real (kind=8) :: res
 
-        R = cal_coord_v2(1)
+        
 
         res = 0d0
 
@@ -625,8 +633,7 @@ contains
             end do
         end do
 
-        induction_order =  ( -0.5d0 * (C3 * C1 * ( C2 ** order )) * res)&
-                            /( R ** order)
+        induction_order =  res
 
     end function induction_order
 

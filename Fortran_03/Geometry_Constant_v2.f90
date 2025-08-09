@@ -187,7 +187,7 @@ contains
                             .and. fact_nn>EPS       &
                             .and. rk_ <= 2*(la-1) )then
 
-                        comp_t =  t_tensor_v3( tensor_linear_cpn(la-1+1, rk_+1, 1, 1))
+                        comp_t =  tensor_v3_get(la-1+1, rk_+1, 1, 1)
                         prod_comp =  ar_v2(i)*comp_t
                         fact_prod = la_fact*m*fact_nn
                         comp_lk = comp_lk + fact_prod*prod_comp
@@ -198,7 +198,7 @@ contains
 
                     la2_fact = (la-1d0)/(1d0*la)
                     comp_lk = comp_lk - la2_fact * factorial_nn(la-2, ka1, 0, 0 ) *&
-                                        t_tensor_v3(tensor_linear_cpn(la-2+1, ka_+1, 1, 1))
+                                        tensor_v3_get(la-2+1, ka_+1, 1, 1)
                 end if
 
                 res = comp_lk/factorial_nn(la, ka1, lb, kb1)
@@ -227,7 +227,7 @@ contains
                             .and. rk_ >= 0) then
 
                         comp_lk = comp_lk+ lb_fact*m*fact_nn* br_v2(i)* &
-                                t_tensor_v3( tensor_linear_cpn(1, 1, lb-1+1 , rk_+1))
+                                tensor_v3_get(1, 1, lb-1+1 , rk_+1)
                     end if
                 end do
 
@@ -235,7 +235,7 @@ contains
 
                     lb2_fact = (lb-1d0)/(1d0*lb)
                     comp_lk = comp_lk - lb2_fact * factorial_nn( 0, 0, lb-2, kb1)* &
-                            t_tensor_v3(tensor_linear_cpn (1, 1, lb-2+1, kb_+1))
+                            tensor_v3_get(1, 1, lb-2+1, kb_+1)
                 end if
 
                 res = comp_lk/factorial_nn(la, ka1, lb, kb1)
@@ -248,7 +248,7 @@ contains
                 if (ka_ <= 2*(la-2))then
 
                     comp_lk = comp_lk + factorial_nn( la-2, ka1, lb, kb1) *&
-                                        t_tensor_v3( tensor_linear_cpn (la-2+1, ka_+1, lb+1, kb_+1 ))
+                                        tensor_v3_get(la-2+1, ka_+1, lb+1, kb_+1 )
                 end if
 
                 if (kb_ <= 2*(lb-2)) then
@@ -256,7 +256,7 @@ contains
                     l2_fact = (2d0*la +lb-1d0)/(1d0*lb)
 
                     comp_lk = comp_lk - (l2_fact * factorial_nn(la, ka1, lb-2, kb1)) *&
-                                         t_tensor_v3( tensor_linear_cpn (la+1, ka_+1, lb-2+1, kb_+1 ))
+                                         tensor_v3_get(la+1, ka_+1, lb-2+1, kb_+1 )
                 end if
 
                 do i=1,3
@@ -267,7 +267,7 @@ contains
                     const = l3_fact*m*factorial_nn(la, ka1,lb-1, rk1)
 
                     if (dabs(const) > EPS .and. rk_i <= 2*(lb-1)) then
-                        comp_lk = comp_lk + const*br_v2(i)*t_tensor_v3(tensor_linear_cpn (la+1, ka_+1, lb-1+1, rk_i+1))
+                        comp_lk = comp_lk + const*br_v2(i)*tensor_v3_get(la+1, ka_+1, lb-1+1, rk_i+1)
                     end if
                 end do
 
@@ -289,7 +289,7 @@ contains
                                 .and. rk_i <= 2*(la-1) &
                                 .and. rk_j <= 2*(lb-1)) then
 
-                            comp_lk = comp_lk + const*cc_v2(n)*t_tensor_v3(tensor_linear_cpn (la-1+1, rk_i+1, lb-1+1, rk_j+1))
+                            comp_lk = comp_lk + const*cc_v2(n)*tensor_v3_get(la-1+1, rk_i+1, lb-1+1, rk_j+1)
                         end if
                     enddo
                 enddo
@@ -624,7 +624,7 @@ contains
 
                         if ( dabs(Qbj) > EPS ) then
                             multipole_order = multipole_order + Qai * Qbj *&
-                             t_tensor_v3(tensor_linear_cpn (i+1,ci+1,j+1,cj+1))
+                                            tensor_v3_get(i+1,ci+1,j+1,cj+1)
                         end if
 
                     end do
@@ -747,16 +747,16 @@ contains
                                     if ( index == 0 )   then
                                         res = res + Qai * Qbj * comp_a_k1_k2 * &
                                                     ( &
-                                                    t_tensor_v3(tensor_linear_cpn (l1+1,k1,i+1,ci))*&
-                                                    t_tensor_v3(tensor_linear_cpn (l2+1,k2,j+1,cj))&
+                                                    tensor_v3_get(l1+1,k1,i+1,ci)*&
+                                                    tensor_v3_get(l2+1,k2,j+1,cj)&
                                                     )
 
                                     else
 
 
                                         res = res + Qai * Qbj * comp_a_k1_k2 * &
-                                                (t_tensor_v3(tensor_linear_cpn (i+1,ci,l1+1,k1))&
-                                                 * t_tensor_v3(tensor_linear_cpn (j+1,cj,l2+1,k2)))
+                                                (tensor_v3_get(i+1,ci,l1+1,k1)&
+                                                 * tensor_v3_get(j+1,cj,l2+1,k2))
 
                                     end if
 
@@ -871,8 +871,8 @@ contains
                         if ( dabs(disp_coeff) > EPS ) then
                             
                             res = res + disp_coeff * &
-                                    t_tensor_v3(tensor_linear_cpn (l1+1,li+1,t1+1,ti+1)) *&
-                                                t_tensor_v3(tensor_linear_cpn (l2+1,lj+1,t2+1,tj+1))
+                                    tensor_v3_get(l1+1,li+1,t1+1,ti+1) *&
+                                                tensor_v3_get(l2+1,lj+1,t2+1,tj+1)
 
                         end if
 

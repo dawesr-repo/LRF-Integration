@@ -1,6 +1,8 @@
 
 !********************************************************
 module Geometry_Constant_v2
+    use iso_fortran_env, only: int32,real64
+
     implicit none
     real (kind=8), parameter ::  C1=627.5095d0
     real (kind=8), parameter ::  C2=0.529177249d0
@@ -10,10 +12,11 @@ module Geometry_Constant_v2
     real (kind=8) , dimension(3):: br_v2
     real (kind=8) , dimension(9):: cc_v2
     real (kind=8) , dimension(11):: cal_coord_v2
-    real (kind=8) :: t_tensor_v2(L,2*L+1,L,2*L+1)
+ 
+    real (kind=8) :: t_tensor_v3(int(L*(L+1)*(L*(L+1)+1)/6) -1)
 
     private :: L, ar_v2, br_v2, cc_v2, cal_coord_v2 ! variables can not be called out of the module
-    private ::  calculate_tensor,&
+    private ::  calculate_tensor_v2,&
                 t_lk_iter,&
                 factorial,&
                 factorial_nn,&
@@ -29,30 +32,81 @@ module Geometry_Constant_v2
                 dispersion_order,&
                 dispersion_l1l2_t1t2,&
                 get_dispersion_cpn
-                !tensors_initialization_v2 
-    public :: t_tensor_v2
+    public :: t_tensor_v3
     public :: get_total_interaction_energy,&
             ! Testing Only * to be used when debugging individual components
               multipole_sph_v3,&
               induction_sph_v3,&
               dispersion_sph_v3,&
-              tensors_initialization_v2  
+              tensors_initialization_v3  
 
 contains
 
-    subroutine tensors_initialization_v2(maxlevel,coordinates)
+    function tensor_v3_get(LA, KA, LB, KB) result(val)
+        integer(int32), intent(in) :: LA, KA, LB, KB      ! 1-based
+        real(real64)               :: val
+        integer(int32)             :: idx
+     
+        call check_ranges(LA,KA,LB,KB)
+        idx = tensor_linear_cpn(LA,KA,LB,KB)
+        if (idx < lbound(t_tensor_v3,1) .or. idx > ubound(t_tensor_v3,1)) &
+            error stop 'tensor_v3_get: index out of bounds'
+        val = t_tensor_v3(idx)
+    end function
+
+    subroutine tensor_assign(value, LA, KA, LB, KB)
+        real(real64), intent(in)    :: value
+        integer(int32), intent(in)  :: LA, KA, LB, KB
+        integer(int32) :: idx
+
+        call check_ranges(LA, KA, LB, KB)
+        idx = tensor_linear_cpn(LA, KA, LB, KB)
+
+        ! Bounds check against the passed-in vector
+        if (idx < lbound(t_tensor_v3,1) .or. idx > ubound(t_tensor_v3,1)) then
+        error stop 'tensor_assign: index out of bounds for "tensor"'
+        end if
+
+        t_tensor_v3( int(idx) ) = value   ! cast to default INTEGER for the subscript
+    end subroutine tensor_assign
+
+    pure subroutine check_ranges(LA, KA, LB, KB)
+        integer(int32), intent(in) :: LA, KA, LB, KB
+        if (LA < 1_int32 .or. LB < 1_int32) error stop "LA/LB must be >= 1"
+        if (KA < 1_int32 .or. KA > 2_int32*LA - 1_int32) error stop "KA out of range"
+        if (KB < 1_int32 .or. KB > 2_int32*LB - 1_int32) error stop "KB out of range"
+    end subroutine check_ranges
+
+    pure integer(int32) function tensor_linear_cpn(LA, KA, LB, KB) result(idx1)
+        integer(int32), intent(in) :: LA, KA, LB, KB
+        integer(int32) :: m, Nprev, Spref, B, LA1
+
+        m    = LA + LB - 1_int32
+        LA1  = LA - 1_int32
+        B    = 2_int32*LB - 1_int32
+
+        ! N(m-1) = (m-1)*m*((m-1)*m + 1)/6
+        Nprev = (m-1_int32)*m * ( (m-1_int32)*m + 1_int32 ) / 6_int32
+
+        ! S(LA-1; m) = (LA-1)*(-4(LA-1)^2 + 6(LA-1)*m + 1)/3
+        Spref = LA1 * ( -4_int32*LA1*LA1 + 6_int32*LA1*m + 1_int32 ) / 3_int32
+
+        idx1 = Nprev + Spref + (KA-1_int32)*B + (KB-1_int32) + 1_int32
+    end function tensor_linear_cpn
+
+    subroutine tensors_initialization_v3(maxlevel,coordinates)
         implicit none
         integer (kind=4), intent(in) :: maxlevel
         real (kind=8) ,dimension(6), intent(in)  :: coordinates ! the angles are in degree
 
-        t_tensor_v2  = 0d0
+        t_tensor_v3  = 0d0
         
         call generate_coordenates_v2(coordinates)
-        call calculate_tensor(maxlevel);
+        call calculate_tensor_v2(maxlevel);
 
-    end subroutine tensors_initialization_v2
+    end subroutine tensors_initialization_v3
 
-    subroutine calculate_tensor(maxlevel)
+    subroutine calculate_tensor_v2(maxlevel)
         ! % """Calculate all components of t_tensor up to maxlevel
         ! %
         ! % ar_v2gs
@@ -77,7 +131,7 @@ contains
         end do
 
 
-    end subroutine calculate_tensor
+    end subroutine calculate_tensor_v2
 
     subroutine t_lk_iter(la, ka_, lb, kb_)
         ! % """Based on the t-tensor recursive relationship with bottom-down
@@ -92,16 +146,16 @@ contains
         ! % """
         implicit none
         integer (kind=4), intent(in) :: la, ka_, lb, kb_
-        real (kind=8),parameter:: EPS = epsilon(t_tensor_v2(1,1,1,1))
+        real (kind=8),parameter:: EPS = epsilon(t_tensor_v3(1))
 
         real (kind=8):: res,comp_lk,comp_t,prod_comp,fact_prod,la_fact,l2_fact,l3_fact,l4_fact
-        real (kind=8):: lb_fact,la2_fact,fact_nn_1,fact_nn_2,cij,const,fact_nn,lb2_fact,m1,m2,m
-        real (kind=8):: r_comp
+        real (kind=8):: lb_fact,la2_fact,const,fact_nn,lb2_fact,m1,m2,m
+
 
 
         integer (kind=4):: ka1,rka1, kb1,rkb1,  rk1, rk_, rk_i, rk_j, i, j,n
         character(len = 1), dimension(3):: coord = ["z", "x", "y"]! Cartesian Axis Labels
-        character(len = 1):: str_comp,rka2,rkb2,ka2, kb2,rk2
+        character(len = 1):: rka2,rkb2,ka2, kb2,rk2
 
         ka2 = get_splitting_componet(ka_)
         kb2 = get_splitting_componet(kb_)
@@ -133,7 +187,7 @@ contains
                             .and. fact_nn>EPS       &
                             .and. rk_ <= 2*(la-1) )then
 
-                        comp_t =  t_tensor_v2(la-1+1, rk_+1, 1, 1)
+                        comp_t =  t_tensor_v3( tensor_linear_cpn(la-1+1, rk_+1, 1, 1))
                         prod_comp =  ar_v2(i)*comp_t
                         fact_prod = la_fact*m*fact_nn
                         comp_lk = comp_lk + fact_prod*prod_comp
@@ -144,7 +198,7 @@ contains
 
                     la2_fact = (la-1d0)/(1d0*la)
                     comp_lk = comp_lk - la2_fact * factorial_nn(la-2, ka1, 0, 0 ) *&
-                                        t_tensor_v2(la-2+1, ka_+1, 1, 1)
+                                        t_tensor_v3(tensor_linear_cpn(la-2+1, ka_+1, 1, 1))
                 end if
 
                 res = comp_lk/factorial_nn(la, ka1, lb, kb1)
@@ -173,7 +227,7 @@ contains
                             .and. rk_ >= 0) then
 
                         comp_lk = comp_lk+ lb_fact*m*fact_nn* br_v2(i)* &
-                                t_tensor_v2( 1, 1, lb-1+1 , rk_+1)
+                                t_tensor_v3( tensor_linear_cpn(1, 1, lb-1+1 , rk_+1))
                     end if
                 end do
 
@@ -181,7 +235,7 @@ contains
 
                     lb2_fact = (lb-1d0)/(1d0*lb)
                     comp_lk = comp_lk - lb2_fact * factorial_nn( 0, 0, lb-2, kb1)* &
-                            t_tensor_v2( 1, 1, lb-2+1, kb_+1)
+                            t_tensor_v3(tensor_linear_cpn (1, 1, lb-2+1, kb_+1))
                 end if
 
                 res = comp_lk/factorial_nn(la, ka1, lb, kb1)
@@ -194,7 +248,7 @@ contains
                 if (ka_ <= 2*(la-2))then
 
                     comp_lk = comp_lk + factorial_nn( la-2, ka1, lb, kb1) *&
-                                        t_tensor_v2( la-2+1, ka_+1, lb+1, kb_+1 )
+                                        t_tensor_v3( tensor_linear_cpn (la-2+1, ka_+1, lb+1, kb_+1 ))
                 end if
 
                 if (kb_ <= 2*(lb-2)) then
@@ -202,7 +256,7 @@ contains
                     l2_fact = (2d0*la +lb-1d0)/(1d0*lb)
 
                     comp_lk = comp_lk - (l2_fact * factorial_nn(la, ka1, lb-2, kb1)) *&
-                                         t_tensor_v2( la+1, ka_+1, lb-2+1, kb_+1 )
+                                         t_tensor_v3( tensor_linear_cpn (la+1, ka_+1, lb-2+1, kb_+1 ))
                 end if
 
                 do i=1,3
@@ -213,7 +267,7 @@ contains
                     const = l3_fact*m*factorial_nn(la, ka1,lb-1, rk1)
 
                     if (dabs(const) > EPS .and. rk_i <= 2*(lb-1)) then
-                        comp_lk = comp_lk + const*br_v2(i)*t_tensor_v2(la+1, ka_+1, lb-1+1, rk_i+1)
+                        comp_lk = comp_lk + const*br_v2(i)*t_tensor_v3(tensor_linear_cpn (la+1, ka_+1, lb-1+1, rk_i+1))
                     end if
                 end do
 
@@ -235,7 +289,7 @@ contains
                                 .and. rk_i <= 2*(la-1) &
                                 .and. rk_j <= 2*(lb-1)) then
 
-                            comp_lk = comp_lk + const*cc_v2(n)*t_tensor_v2(la-1+1, rk_i+1, lb-1+1, rk_j+1)
+                            comp_lk = comp_lk + const*cc_v2(n)*t_tensor_v3(tensor_linear_cpn (la-1+1, rk_i+1, lb-1+1, rk_j+1))
                         end if
                     enddo
                 enddo
@@ -244,9 +298,10 @@ contains
             end if
         end if
 
-
-        t_tensor_v2( la+1, ka_+1, lb+1, kb_+1) = res
+        call tensor_assign(res, la+1, ka_+1, lb+1, kb_+1)
+       
     end subroutine t_lk_iter
+
 
     function factorial(n)
         implicit none
@@ -568,7 +623,8 @@ contains
                         Qbj = B_Mult(j**2 +1+cj);
 
                         if ( dabs(Qbj) > EPS ) then
-                            multipole_order = multipole_order + Qai * Qbj * t_tensor_v2(i+1,ci+1,j+1,cj+1);
+                            multipole_order = multipole_order + Qai * Qbj *&
+                             t_tensor_v3(tensor_linear_cpn (i+1,ci+1,j+1,cj+1))
                         end if
 
                     end do
@@ -609,7 +665,7 @@ contains
         implicit none
         integer (kind=4) , intent(in) :: order,index,ind
         real (kind=8)  :: induction_order
-        integer (kind=4) :: l1,l2,i,j,lmin,lmax
+        integer (kind=4) :: l1,l2,i,j
         real (kind=8) :: res
 
         
@@ -644,7 +700,7 @@ contains
         implicit none
         integer (kind=4), intent(in) :: i,j,l1,l2,index,ind
         real (kind=8):: induction_ij_l1l2
-        real (kind=8) :: Qai,Qbj,comp_a_k1_k2,T_l1_i,T_l2_j,res
+        real (kind=8) :: Qai,Qbj,comp_a_k1_k2,res
         integer (kind=4) :: ci,cj,k1,k2,cpn,ni,nj,nl1,nl2,lmin,lmax
         real (kind=8), allocatable :: Qa_cpn(:),Qb_cpn(:),pol_arr(:)
         real (kind=8),parameter :: EPS = epsilon(induction_ij_l1l2)
@@ -690,13 +746,17 @@ contains
                                     ! or pol over B
                                     if ( index == 0 )   then
                                         res = res + Qai * Qbj * comp_a_k1_k2 * &
-                                                ( t_tensor_v2(l1+1,k1,i+1,ci)* t_tensor_v2(l2+1,k2,j+1,cj));
+                                                    ( &
+                                                    t_tensor_v3(tensor_linear_cpn (l1+1,k1,i+1,ci))*&
+                                                    t_tensor_v3(tensor_linear_cpn (l2+1,k2,j+1,cj))&
+                                                    )
 
                                     else
 
 
                                         res = res + Qai * Qbj * comp_a_k1_k2 * &
-                                                (t_tensor_v2(i+1,ci,l1+1,k1) * t_tensor_v2(j+1,cj,l2+1,k2));
+                                                (t_tensor_v3(tensor_linear_cpn (i+1,ci,l1+1,k1))&
+                                                 * t_tensor_v3(tensor_linear_cpn (j+1,cj,l2+1,k2)))
 
                                     end if
 
@@ -741,7 +801,6 @@ contains
         integer (kind=4), intent(in) :: ind
         real (kind=8)  :: dispersion_sph_v3
         integer (kind=4) :: order
-        real (kind=8) :: temp
 
         dispersion_sph_v3  = 0d0
         
@@ -811,8 +870,9 @@ contains
 
                         if ( dabs(disp_coeff) > EPS ) then
                             
-                            res = res + disp_coeff * t_tensor_v2(l1+1,li+1,t1+1,ti+1) *&
-                                                     t_tensor_v2(l2+1,lj+1,t2+1,tj+1)
+                            res = res + disp_coeff * &
+                                    t_tensor_v3(tensor_linear_cpn (l1+1,li+1,t1+1,ti+1)) *&
+                                                t_tensor_v3(tensor_linear_cpn (l2+1,lj+1,t2+1,tj+1))
 
                         end if
 
@@ -855,7 +915,7 @@ contains
         integer(kind=4) :: max_t_tensor_order
 
         max_t_tensor_order = get_coeff_max_t_tensor_order(coeff_index)
-        call tensors_initialization_v2(max_t_tensor_order,general_coordinates_ZXZ)
+        call tensors_initialization_v3(max_t_tensor_order,general_coordinates_ZXZ)
 
         get_total_interaction_energy =  multipole_sph_v3(coeff_index) +&
                                         induction_sph_v3(coeff_index) +&

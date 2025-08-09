@@ -50,7 +50,7 @@ PROGRAM build_production
 
 
     implicit none
-    integer(kind = 4), parameter :: WRITING_UNIT = 101
+    integer(kind = 4), parameter :: WRITING_UNIT = 1010
 
     type string
         character(:), allocatable :: s

@@ -60,7 +60,7 @@ contains
     ! TEST Functions
 
     subroutine t_tensor_test()
-        use Geometry_Constant_v2, only: tensors_initialization_v2,t_tensor_v2
+        use Geometry_Constant_v2, only: tensors_initialization_v3,t_tensor_v3
         implicit none
         integer (kind=4):: i,j,ntest=1,cpn=1,order=15,la,lb,ka,kb
         real (kind=8):: general_coordinates_ZXZ(6),r(6),T(9640)
@@ -81,8 +81,8 @@ contains
             general_coordinates_ZXZ(6) = r(6)*360d0!b2
             
             ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convension
-            call tensors_initialization_v2(15,general_coordinates_ZXZ)
-            write (*,*)"Hello: ",t_tensor_v2(1,1,1,1)
+            call tensors_initialization_v3(15,general_coordinates_ZXZ)
+            write (*,*)"Hello: ",t_tensor_v3(1,1,1,1)
             open (unit=1000,file="../testing_datafiles/t_tensors/t_tensors_test.txt",action="write")
            
             do order = 1, 15
@@ -91,7 +91,7 @@ contains
                 do  ka = 0, 2 * la
                     do kb = 0,2 * lb
 
-                        T(cpn) = t_tensor_v2(la+1,ka+1,lb+1,kb+1)
+                        T(cpn) = t_tensor_v3(la+1,ka+1,lb+1,kb+1)
                         cpn = cpn + 1;
                          
                     end do

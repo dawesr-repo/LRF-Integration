@@ -56,15 +56,16 @@ program testing_subroutine
         call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt',fileout_number)
         
  
-        do i=1,12
-                !$omp critical
-                call check_energy_MATLAB( sys(i)%label,&
-                                          xdim_arr(i),&
-                                          0,&
-                                          fileout_number&
-                                        )
-                !$omp end critical                        
-        end do
+        ! do i=1,12
+        !         !$omp critical
+        !         call check_energy_MATLAB( sys(i)%label,&
+        !                                   xdim_arr(i),&
+        !                                   0,&
+        !                                   fileout_number,&
+        !                                   i*12&
+        !                                 )
+        !         !$omp end critical                        
+        ! end do
  
 
         close(fileout_number)

@@ -113,7 +113,7 @@ contains
         character(len=*),intent(in) :: system_name
         integer (kind=4),intent(in):: xdim,verbose
         integer (kind=4),optional:: fileoutput_number
-        integer (kind=4):: i,j,ntest=1000
+        integer (kind=4):: i,j,ntest=1000,lu
         real (kind=8):: E0,E1,rmse,Emax,E0_maxval,Erel
         real (kind=8):: coord_from_file(xdim+2)
         real (kind=8), allocatable:: coord(:)
@@ -127,11 +127,12 @@ contains
         Erel = 0d0
         pass = .false.
 
-        open( 17, file = '../testing_datafiles/datasets/'//system_name//'.txt' )
+        
+        open(newunit=lu, file = '../testing_datafiles/datasets/'//system_name//'.txt', status='old')
         allocate(coord(xdim))
 
         do i=1,ntest
-            read(17,*)coord_from_file
+            read(lu,*)coord_from_file
             E0 = coord_from_file(xdim+2);
 
             coord(1) = coord_from_file(2)!R
@@ -166,7 +167,7 @@ contains
         Erel = Erel/ntest
 
 
-        close(17)
+        close(lu)
 
         write(*,*)"*********************************************************************"
         if (verbose == 1) then

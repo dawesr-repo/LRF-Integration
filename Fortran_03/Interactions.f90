@@ -50,4 +50,26 @@ contains
     end do
   end function multipole_order_fast
 
+
+  pure function multipole_sph_v3_fast(R, C1, C2, C3, A_mult, B_mult, Mmask) result(E)
+    real(rk), intent(in) :: R, C1, C2, C3
+    real(rk), intent(in) :: A_mult(:), B_mult(:)     ! length 225 each
+    logical, intent(in)  :: Mmask(maxl)              ! active orders
+    real(rk) :: E
+    integer  :: order
+    real(rk) :: base, ratio, powo
+
+    E     = 0.0_rk
+    base  = C3*C1
+    ratio = C2 / R
+    powo  = ratio
+
+    do order = 1, maxl
+       if (Mmask(order)) then
+          E = E + base * powo * multipole_order_fast(order, A_mult, B_mult)
+       end if
+       powo = powo * ratio
+    end do
+  end function multipole_sph_v3_fast
+
 end module multipole_impl_omp

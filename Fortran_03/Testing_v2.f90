@@ -83,7 +83,7 @@ contains
             ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convension
             call tensors_initialization_v2(15,general_coordinates_ZXZ)
             write (*,*)"Hello: ",t_tensor_v2(1,1,1,1)
-            open (unit=10,file="../testing_datafiles/t_tensors/t_tensors_test.txt",action="write")
+            open (unit=1000,file="../testing_datafiles/t_tensors/t_tensors_test.txt",action="write")
            
             do order = 1, 15
                 do la = 0,order - 1
@@ -99,21 +99,21 @@ contains
                 end do
             end do
 
-        write (10,*) general_coordinates_ZXZ, T
+        write (1000,*) general_coordinates_ZXZ, T
 
         end do
 
         
-        close (10)
+        close (1000)
 
     end  subroutine t_tensor_test    
-    subroutine check_energy_MATLAB(system_name,xdim,verbose,fileoutput_number)
+    subroutine check_energy_MATLAB(system_name,xdim,verbose,fileoutput_number,lu)
 
         implicit none
         character(len=*),intent(in) :: system_name
-        integer (kind=4),intent(in):: xdim,verbose
+        integer (kind=4),intent(in):: xdim,verbose,lu
         integer (kind=4),optional:: fileoutput_number
-        integer (kind=4):: i,j,ntest=1000,lu
+        integer (kind=4):: i,j,ntest=1000
         real (kind=8):: E0,E1,rmse,Emax,E0_maxval,Erel
         real (kind=8):: coord_from_file(xdim+2)
         real (kind=8), allocatable:: coord(:)
@@ -128,7 +128,7 @@ contains
         pass = .false.
 
         
-        open(newunit=lu, file = '../testing_datafiles/datasets/'//system_name//'.txt', status='old')
+        open(lu, file = '../testing_datafiles/datasets/'//system_name//'.txt', status='old')
         allocate(coord(xdim))
 
         do i=1,ntest

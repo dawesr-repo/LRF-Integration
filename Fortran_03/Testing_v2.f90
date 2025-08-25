@@ -1,195 +1,186 @@
 ! Created by albpl on 3/11/2025.
 
 module Testing_v2
+  use iso_fortran_env, only : real64, int32
 contains
 
-    subroutine file_checking(file_name,num)
+  subroutine file_checking(file_name, num)
+    implicit none
+    character(*), intent(in) :: file_name
+    integer(int32), intent(in) :: num
+    logical :: exist
 
-        implicit none
-        character(*),intent(in)::file_name
-        Integer,intent(in)::num
-        logical :: exist
+    inquire(file=file_name, exist=exist)
+    if (exist) then
+      open(num, file=file_name, status="old", position="append", action="write")
+    else
+      open(num, file=file_name, status="new", action="write")
+    end if
+  end subroutine file_checking
 
-        inquire(file=file_name, exist=exist)
-        if (exist) then
-            open(num, file=file_name, status="old", position="append", action="write")
-        else
-            open(num, file=file_name, status="new", action="write")
-        end if
+  ! TEST Functions
+  subroutine running_time_performance(coeff_file_name, fileoutput_number)
+    implicit none
+    character(len=*), intent(in) :: coeff_file_name
+    integer(int32), optional :: fileoutput_number
+    real(real64) :: energy
+    character(len=9), parameter :: COORD_FORMAT = "Euler_ZYZ"
+    integer(int32), parameter :: xdim = 6
+    integer(int32) :: i, ntest
+    real(real64) :: start, finish
+    real(real64), dimension(6) :: coordinates_set_6D
 
-    END subroutine file_checking
+    ntest = 1000_int32
+    coordinates_set_6D = [ 10.27_real64,  & ! R
+                           30.0_real64,  & ! beta1
+                           20.0_real64,  & ! beta2
+                           120.0_real64, & ! alpha
+                           40.0_real64,  & ! gamma1
+                           50.0_real64 ]   ! gamma2
 
-    ! TEST Functions
-    subroutine running_time_performance(coeff_file_name,fileoutput_number)
+    call cpu_time(start)
 
-        implicit none
-        character(len=*),intent(in) :: coeff_file_name
-        integer (kind=4),optional:: fileoutput_number
-        real (kind=8):: energy
-        character (len=9),parameter :: COORD_FORMAT = "Euler_ZYZ"
-        integer (kind=4), parameter:: xdim=6
-        integer (kind=4):: i,ntest=1000
-        real (kind=8):: start, finish
-        real (kind=8),dimension(6):: coordinates_set_6D = [ 10.27d0,& !R
-                                                            30d0,&  !beta1
-                                                            20d0,&  !beta2
-                                                            120d0,& !alpha
-                                                            40d0,&  !gamma1
-                                                            50d0]   !gamma2
+    do i = 1, ntest
+      call evaluate_LRF( energy,          &
+                         xdim,            &
+                         coordinates_set_6D, &
+                         COORD_FORMAT,    &
+                         coeff_file_name )
+    end do
 
+    call cpu_time(finish)
 
-        call cpu_time(start)
-        
-        do i=1,ntest
-            call evaluate_LRF( energy,&
-                              xdim,&
-                              coordinates_set_6D,&
-                              COORD_FORMAT,&
-                              coeff_file_name)
-        end do
-
-        call cpu_time(finish)
-        
-        write(*,*)"*********************************************************************"
-        write(*,*)"* PERFORMANCE for 6D: ",ntest," /time: ",finish-start," *"
-        write(*,*)"*********************************************************************"
-
-    end  subroutine running_time_performance
+    write(*,*)"*********************************************************************"
+    write(*,*)"* PERFORMANCE for 6D: ", ntest, " /time: ", finish - start, " *"
+    write(*,*)"*********************************************************************"
+  end subroutine running_time_performance
 
 
-    ! TEST Functions
+  ! TEST Functions
+  subroutine t_tensor_test()
+    use Geometry_Constant_v2, only : tensors_initialization_v2, t_tensor_v2
+    implicit none
+    integer(int32) :: i, j, ntest, cpn, order, la, lb, ka, kb
+    real(real64) :: general_coordinates_ZXZ(6), r(6), T(9640)
+    real(real64), parameter :: PII = acos(-1.0_real64)
 
-    subroutine t_tensor_test()
-        use Geometry_Constant_v2, only: tensors_initialization_v2,t_tensor_v2
-        implicit none
-        integer (kind=4):: i,j,ntest=1,cpn=1,order=15,la,lb,ka,kb
-        real (kind=8):: general_coordinates_ZXZ(6),r(6),T(9640)
-        logical (kind=1):: pass
-        real (kind=8), parameter :: PII = DACOS(-1.d0)
+    ntest = 1_int32
+    cpn   = 1_int32
 
+    do i = 1, ntest
 
-        
-        do i=1,ntest
-          
-            CALL RANDOM_NUMBER(r)
+      call random_number(r)
 
-            general_coordinates_ZXZ(1) = 10d0+r(1)*10d0!R
-            general_coordinates_ZXZ(2) = r(2)*180d0!b1
-            general_coordinates_ZXZ(3) = r(3)*180d0!b2
-            general_coordinates_ZXZ(4) = r(4)*360d0!b2
-            general_coordinates_ZXZ(5) = r(5)*360d0!b2
-            general_coordinates_ZXZ(6) = r(6)*360d0!b2
-            
-            ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convension
-            call tensors_initialization_v2(15,general_coordinates_ZXZ)
-            write (*,*)"Hello: ",t_tensor_v2(1,1,1,1)
-            open (unit=10,file="../testing_datafiles/t_tensors/t_tensors_test.txt",action="write")
-           
-            do order = 1, 15
-                do la = 0,order - 1
-                lb = order - la - 1;
-                do  ka = 0, 2 * la
-                    do kb = 0,2 * lb
+      general_coordinates_ZXZ(1) = 10.0_real64 + r(1)*10.0_real64 ! R
+      general_coordinates_ZXZ(2) = r(2)*180.0_real64              ! b1
+      general_coordinates_ZXZ(3) = r(3)*180.0_real64              ! b2
+      general_coordinates_ZXZ(4) = r(4)*360.0_real64              ! phi
+      general_coordinates_ZXZ(5) = r(5)*360.0_real64              ! c1
+      general_coordinates_ZXZ(6) = r(6)*360.0_real64              ! c2
 
-                        T(cpn) = t_tensor_v2(la+1,ka+1,lb+1,kb+1)
-                        cpn = cpn + 1;
-                         
-                    end do
-                end do
-                end do
+      ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convention
+      call tensors_initialization_v2(15_int32, general_coordinates_ZXZ)
+      write(*,*)"Hello: ", t_tensor_v2(1,1,1,1)
+      open(unit=10, file="../testing_datafiles/t_tensors/t_tensors_test.txt", action="write")
+
+      do order = 1, 15
+        do la = 0, order - 1
+          lb = order - la - 1
+          do ka = 0, 2*la
+            do kb = 0, 2*lb
+              T(cpn) = t_tensor_v2(la+1, ka+1, lb+1, kb+1)
+              cpn = cpn + 1
             end do
-
-        write (10,*) general_coordinates_ZXZ, T
-
+          end do
         end do
+      end do
 
-        
-        close (10)
+      write(10,*) general_coordinates_ZXZ, T
 
-    end  subroutine t_tensor_test    
-    subroutine check_energy_MATLAB(system_name,xdim,verbose,fileoutput_number)
+    end do
 
-        implicit none
-        character(len=*),intent(in) :: system_name
-        integer (kind=4),intent(in):: xdim,verbose
-        integer (kind=4),optional:: fileoutput_number
-        integer (kind=4):: i,j,ntest=1000
-        real (kind=8):: E0,E1,rmse,Emax,E0_maxval,Erel
-        real (kind=8):: coord_from_file(xdim+2)
-        real (kind=8), allocatable:: coord(:)
-        logical (kind=1):: pass
-        real (kind=8), parameter :: PII = DACOS(-1.d0)
-        character (len=9),parameter :: COORD_FORMAT = "Euler_ZYZ"
-        
-        rmse=0d0
-        Emax = 0d0
-        E0_maxval = 0d0
-        Erel = 0d0
-        pass = .false.
-
-        open( 17, file = '../testing_datafiles/datasets/'//system_name//'.txt' )
-        allocate(coord(xdim))
-
-        do i=1,ntest
-            read(17,*)coord_from_file
-            E0 = coord_from_file(xdim+2);
-
-            coord(1) = coord_from_file(2)!R
-            coord(2) = DACOS(coord_from_file(3))*180d0/PII
-            if (xdim==3) then
-                coord(3) = coord_from_file(4)*180d0/PII + 90d0
-            else
-                coord(3) = DACOS(coord_from_file(4))*180d0/PII
-                coord(4) = coord_from_file(5)*180d0/PII
-                if (xdim>=5) then
-                    coord(5) = coord_from_file(6)*180d0/PII + 90d0
-                endif
-                if (xdim==6) then
-                    coord(6) = coord_from_file(7)*180d0/PII + 90d0
-                endif
-            end if
-
-            call evaluate_LRF(E1,&
-                    xdim,&
-                    coord,&
-                    COORD_FORMAT,&
-                    '../testing_datafiles/coefficients/'//system_name//'_Coeff.txt'&
-                    )
-
-            rmse = rmse+dabs(E0-E1)**2
-            Emax = maxval([Emax,dabs(E0-E1)])
-            Erel = Erel+dabs(E0-E1)/dabs(E0)
-            E0_maxval = maxval([E0_maxval,dabs(E0)])
-        end do
-
-        rmse = dsqrt(rmse/ntest)
-        Erel = Erel/ntest
+    close(10)
+  end subroutine t_tensor_test
 
 
-        close(17)
+  subroutine check_energy_MATLAB(system_name, xdim, verbose, fileoutput_number)
+    implicit none
+    character(len=*), intent(in) :: system_name
+    integer(int32),   intent(in) :: xdim, verbose
+    integer(int32),   optional   :: fileoutput_number
+    integer(int32) :: i, j, ntest
+    real(real64)  :: E0, E1, rmse, Emax, E0_maxval, Erel
+    real(real64)  :: coord_from_file(xdim+2)
+    real(real64), allocatable :: coord(:)
+    real(real64), parameter :: PII = acos(-1.0_real64)
+    character(len=9), parameter :: COORD_FORMAT = "Euler_ZYZ"
 
-        write(*,*)"*********************************************************************"
-        if (verbose == 1) then
-            write(*,*)"* System: ",system_name,' - ',xdim," *"
-            !write(*,*)"* E0_maxval: ",E0_maxval," *"
-            if ((rmse+Erel)/2d0 <= 10d0**(-7)) then
-                write(*,*)"* Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
-            else
-                write(*,*)"* Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
-            end if
-            write(*,*)"* Emax: ",Emax," *"
-            write(*,*)"* E0_maxval: ",E0_maxval," *"
-            write(*,*)"* Erel: ",Erel," *"
-            write(*,*)"* rmse: ",rmse," *"
-        else
-            if ((rmse+Erel)/2d0 <= 10d0**(-7)) then
-                write(*,*)"* System: ",system_name," - Test: ",char(27)//"[32m"//"Passed!"//char(27)//"[0m"
-            else
-                write(*,*)"* System: ",system_name," - Test: ",char(27)//"[31m"//"Failure"//char(27)//"[0m"
-            end if
+    ntest = 1000_int32
+    rmse = 0.0_real64
+    Emax = 0.0_real64
+    E0_maxval = 0.0_real64
+    Erel = 0.0_real64
 
+    open(17, file='../testing_datafiles/datasets/'//system_name//'.txt')
+    allocate(coord(xdim))
+
+    do i = 1, ntest
+      read(17,*) coord_from_file
+      E0 = coord_from_file(xdim+2)
+
+      coord(1) = coord_from_file(2)                                       ! R
+      coord(2) = acos(coord_from_file(3))*180.0_real64/PII                ! b1
+      if (xdim == 3) then
+        coord(3) = coord_from_file(4)*180.0_real64/PII + 90.0_real64      ! c1
+      else
+        coord(3) = acos(coord_from_file(4))*180.0_real64/PII              ! b2
+        coord(4) = coord_from_file(5)*180.0_real64/PII                    ! phi
+        if (xdim >= 5) then
+          coord(5) = coord_from_file(6)*180.0_real64/PII + 90.0_real64    ! c1
         end if
-        deallocate(coord)
-    end  subroutine check_energy_MATLAB
+        if (xdim == 6) then
+          coord(6) = coord_from_file(7)*180.0_real64/PII + 90.0_real64    ! c2
+        end if
+      end if
+
+      call evaluate_LRF( E1,                               &
+                         xdim,                             &
+                         coord,                            &
+                         COORD_FORMAT,                     &
+                         '../testing_datafiles/coefficients/'//system_name//'_Coeff.txt' )
+
+      rmse = rmse + abs(E0 - E1)**2
+      Emax = maxval([Emax, abs(E0 - E1)])
+      Erel = Erel + abs(E0 - E1) / abs(E0)
+      E0_maxval = maxval([E0_maxval, abs(E0)])
+    end do
+
+    rmse = sqrt(rmse/real(ntest, real64))
+    Erel = Erel / real(ntest, real64)
+
+    close(17)
+
+    write(*,*)"*********************************************************************"
+    if (verbose == 1) then
+      write(*,*)"* System: ", system_name, ' - ', xdim, " *"
+      if ((rmse + Erel)/2.0_real64 <= 10.0_real64**(-7)) then
+        write(*,*)"* Test: ", char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+      else
+        write(*,*)"* Test: ", char(27)//"[31m"//"Failure"//char(27)//"[0m"
+      end if
+      write(*,*)"* Emax: ", Emax, " *"
+      write(*,*)"* E0_maxval: ", E0_maxval, " *"
+      write(*,*)"* Erel: ", Erel, " *"
+      write(*,*)"* rmse: ", rmse, " *"
+    else
+      if ((rmse + Erel)/2.0_real64 <= 10.0_real64**(-7)) then
+        write(*,*)"* System: ", system_name, " - Test: ", char(27)//"[32m"//"Passed!"//char(27)//"[0m"
+      else
+        write(*,*)"* System: ", system_name, " - Test: ", char(27)//"[31m"//"Failure"//char(27)//"[0m"
+      end if
+    end if
+
+    deallocate(coord)
+  end subroutine check_energy_MATLAB
 
 end module Testing_v2

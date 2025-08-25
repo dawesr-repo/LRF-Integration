@@ -1,136 +1,102 @@
-subroutine coordinate_transformation(new_coordinates,coordinates,coord_format)
-    
-    implicit none
-    real (kind=8) ,dimension(6), intent(in):: coordinates
-    character(*), intent(in) :: coord_format
-    real (kind=8) , dimension(6), intent(out) :: new_coordinates
 
-    new_coordinates=coordinates;
-    
-    if (coord_format == "Euler_ZYZ") then
-        new_coordinates(5) = coordinates(5) - 90d0
-        new_coordinates(6) = coordinates(6) - 90d0
-    end if
-    if (coord_format == "Spherical") then
-        new_coordinates(5) = 90d0 - coordinates(5)
-        new_coordinates(6) = 90d0 -coordinates(6)
-    end if
+subroutine coordinate_transformation(new_coordinates, coordinates, coord_format)
+  use iso_fortran_env, only : real64
+  implicit none
+  real(real64), intent(in)  :: coordinates(6)
+  character(*),  intent(in) :: coord_format
+  real(real64), intent(out) :: new_coordinates(6)
 
-end  subroutine coordinate_transformation
+  new_coordinates = coordinates
+
+  if (coord_format == "Euler_ZYZ") then
+    new_coordinates(5) = coordinates(5) - 90.0_real64
+    new_coordinates(6) = coordinates(6) - 90.0_real64
+  else if (coord_format == "Spherical") then
+    new_coordinates(5) = 90.0_real64 - coordinates(5)
+    new_coordinates(6) = 90.0_real64 - coordinates(6)
+  end if
+end subroutine coordinate_transformation
+
 
 !********************************************************
-subroutine general_coordinates_format(general_coodinates,dim, old_coordinates)
-    
-    implicit none
-    integer (kind=4),intent(in) ::  dim
-    real (kind=8) , dimension (dim),intent(in) :: old_coordinates
-    real (kind=8) , dimension(6), intent(out) ::general_coodinates
+subroutine general_coordinates_format(general_coordinates, dim, old_coordinates)
+  use iso_fortran_env, only : real64, int32
+  implicit none
+  integer(int32), intent(in) :: dim
+  real(real64),   intent(in) :: old_coordinates(dim)
+  real(real64),   intent(out):: general_coordinates(6)
 
-    general_coodinates = 0d0
-    if (dim==2) then
-        general_coodinates(1) = old_coordinates(1)  !R
-        general_coodinates(2) = old_coordinates(2)  !b1
-        general_coodinates(3) = 0d0  !b2
-        general_coodinates(4) = 0d0  !phi
-        general_coodinates(5) = 0d0  !c1
-        general_coodinates(6) = 0d0  !c2
+  general_coordinates = 0.0_real64
 
-    elseif (dim==3) then
-        general_coodinates(1) = old_coordinates(1)  !R
-        general_coodinates(2) = old_coordinates(2)  !b1
-        general_coodinates(3) = 0d0  !b2
-        general_coodinates(4) = 0d0  !phi
-        general_coodinates(5) = old_coordinates(3)  !c1
-        general_coodinates(6) = 0d0  !c2
-
-    elseif (dim==4) then
-        general_coodinates(1) = old_coordinates(1)  !R
-        general_coodinates(2) = old_coordinates(2)  !b1
-        general_coodinates(3) = old_coordinates(3)  !b2
-        general_coodinates(4) = old_coordinates(4)  !phi
-        general_coodinates(5) = 0d0  !c1
-        general_coodinates(6) = 0d0  !c2
-
-    elseif (dim==5) then
-        general_coodinates(1) = old_coordinates(1)  !R
-        general_coodinates(2) = old_coordinates(2)  !b1
-        general_coodinates(3) = old_coordinates(3)  !b2
-        general_coodinates(4) = old_coordinates(4)  !phi
-        general_coodinates(5) = old_coordinates(5)  !c1
-        general_coodinates(6) = 0d0  !c2
-    elseif (dim==6) then
-        general_coodinates(1) = old_coordinates(1)  !R
-        general_coodinates(2) = old_coordinates(2)  !b1
-        general_coodinates(3) = old_coordinates(3)  !b2
-        general_coodinates(4) = old_coordinates(4)  !phi
-        general_coodinates(5) = old_coordinates(5)  !c1
-        general_coodinates(6) = old_coordinates(6)  !c2
-
-    end if
-
-    RETURN
+  select case (dim)
+  case (2)
+    general_coordinates(1) = old_coordinates(1)  ! R
+    general_coordinates(2) = old_coordinates(2)  ! b1
+  case (3)
+    general_coordinates(1) = old_coordinates(1)  ! R
+    general_coordinates(2) = old_coordinates(2)  ! b1
+    general_coordinates(5) = old_coordinates(3)  ! c1
+  case (4)
+    general_coordinates(1:4) = old_coordinates(1:4)  ! R, b1, b2, phi
+  case (5)
+    general_coordinates(1:5) = old_coordinates(1:5)  ! + c1
+  case (6)
+    general_coordinates(1:6) = old_coordinates(1:6)  ! + c2
+  case default
+    ! optional: handle invalid dim
+  end select
 end subroutine general_coordinates_format
 
-subroutine user_coordinates_to_general_coordinates(general_coordinates_ZXZ,xdim,coord_format,user_coordinates)
 
-    implicit none
-    integer (kind=4),intent(in) ::  xdim
-    real (kind=8), dimension (xdim),intent(in) :: user_coordinates
-    character(*), intent(in) :: coord_format
-    real (kind=8),dimension (6),intent(out):: general_coordinates_ZXZ
-    real (kind=8) ,dimension(6):: general_coordenates
+!********************************************************
+subroutine user_coordinates_to_general_coordinates(general_coordinates_ZXZ, xdim, coord_format, user_coordinates)
+  use iso_fortran_env, only : real64, int32
+  implicit none
+  integer(int32), intent(in) :: xdim
+  real(real64),   intent(in) :: user_coordinates(xdim)
+  character(*),   intent(in) :: coord_format
+  real(real64),   intent(out):: general_coordinates_ZXZ(6)
 
+  real(real64) :: general_coordinates(6)
 
-    call general_coordinates_format(general_coordenates,xdim, user_coordinates)
-    call coordinate_transformation(general_coordinates_ZXZ,general_coordenates,coord_format)
-
+  call general_coordinates_format(general_coordinates, xdim, user_coordinates)
+  call coordinate_transformation(general_coordinates_ZXZ, general_coordinates, coord_format)
 end subroutine user_coordinates_to_general_coordinates
-! Arg 1 [coordinates] : a coordinate vector [ R , b1, b2, phi] *the angles should be in degrees
-! Arg 2 [coeff_Address] address of the file which contains the longe range expansion coefficients
-! Arg 3 [total_energy]   Total Energy calculated
 
 
+!********************************************************
 ! version 4.0
+subroutine evaluate_LRF(total_energy, xdim, coordinates, coord_format, filename)
+  use iso_fortran_env,      only : real64, int32
+  use Fitting_Constant_v2,  only : get_coeff_zero, get_coeff_index
+  use Geometry_Constant_v2, only : get_total_interaction_energy
+  implicit none
+  real(real64),   intent(out) :: total_energy
+  integer(int32), intent(in)  :: xdim
+  real(real64),   intent(in)  :: coordinates(xdim)
+  character(*),   intent(in)  :: coord_format
+  character(*),   intent(in)  :: filename
 
+  real(real64)   :: general_coordinates_ZXZ(6)
+  integer(int32) :: i, coeff_index
+  real(real64)   :: x1
 
-subroutine evaluate_LRF(total_energy,xdim,coordinates,coord_format,filename)
+  coeff_index = get_coeff_index(filename)
 
-    use Fitting_Constant_v2, only: get_coeff_zero, get_coeff_index
-    use Geometry_Constant_v2, only: get_total_interaction_energy
+  x1 = 0.0_real64
+  do i = 1, xdim
+    x1 = x1 + abs(coordinates(i))
+  end do
 
-    implicit none
-    real (kind=8), intent(out) :: total_energy
-    integer (kind=4), intent(in) :: xdim
-    real (kind=8) ,dimension(:), intent(in):: coordinates(xdim)
-    character(*), intent(in) :: coord_format
-    character(*), intent(in) ::  filename
-    
-    real (kind=8) ,dimension(6):: general_coordinates_ZXZ
-    integer (kind=4) :: i,coeff_index
-    real (kind=8) :: x1
-
-    coeff_index = get_coeff_index(filename)
-
-    x1 = 0d0
-    do i=1,xdim
-        x1=x1+dabs(coordinates(i))
-    enddo
-
-    ! if the user coordinate array is set to zero, then
-    ! the function will return the dissociation energy (asymptotic energy)
-    if (x1 <= 1d-10) then
-        total_energy = get_coeff_zero(coeff_index)
-        return
-    endif
-
-    ! Passing to the user coordinates to the 6D coordinates under Euler-ZXZ convension
-    call user_coordinates_to_general_coordinates(general_coordinates_ZXZ,xdim,coord_format,coordinates)
-
-    ! Evaluating the expansion in the general coordinates
-    ! total energy is the sum of the individual contibutions
-    total_energy = get_total_interaction_energy(coeff_index,general_coordinates_ZXZ)
+  ! If the user coordinate array is set to zero, return dissociation energy (asymptote)
+  if (x1 <= 1.0e-10_real64) then
+    total_energy = get_coeff_zero(coeff_index)
     return
+  end if
 
+  ! Convert user coordinates to 6D general (Euler-ZXZ) coordinates
+  call user_coordinates_to_general_coordinates(general_coordinates_ZXZ, xdim, coord_format, coordinates)
+
+  ! Evaluate expansion in general coordinates (sum of contributions)
+  total_energy = get_total_interaction_energy(coeff_index, general_coordinates_ZXZ)
 end subroutine evaluate_LRF
-
-

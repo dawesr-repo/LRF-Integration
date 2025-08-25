@@ -36,11 +36,14 @@ run-prod-test : $(OBJS_PROD_Test)
 	$(F90) $(OBJS_PROD_Test) -o ejec_test_prod.x
 	./ejec_test_prod.x
 
-clean:
+clean_win:
 	del *.exe
 	del *.x
 	del *.o
 	del *.mod
+
+clean:
+	rm -f *.exe *.x *.o *.mod
 
 $(OBJS) :
 .f90.o:

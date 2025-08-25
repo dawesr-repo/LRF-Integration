@@ -65,7 +65,6 @@ module Fitting_Constant_v2
             character(len = 200) :: row
             integer (kind=4)::iord,mord,dord
             integer (kind=4)::i,j,l1,l2,t1,t2,ln
-            real (kind=8) :: polarr(195)
 
             if (this%initflag==1)then
 
@@ -187,7 +186,7 @@ module Fitting_Constant_v2
             implicit none
             character(*), intent(in) :: filename
             integer (kind=4) :: get_coeff_index
-            integer (kind=4)::ind,last_index
+            integer (kind=4)::ind
 
             call find_coeff_set(filename,ind)
 

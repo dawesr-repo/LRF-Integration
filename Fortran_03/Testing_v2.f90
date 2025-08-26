@@ -1,14 +1,12 @@
 ! Created by albpl on 3/11/2025.
-
 module Testing_v2
-  use iso_fortran_env,      only : real64, int32
-  use Fitting_Constant_v2,  only : t_index, ensure_t_index_map_ready, tmap_NNZ
-  use Geometry_Constant_v2, only : tensors_initialization_v2, t_tensor_v3
+  use iso_fortran_env, only : real64, int32
+  use LRF_API,         only : evaluate_LRF, user_coordinates_to_general_coordinates
 contains
 
   subroutine file_checking(file_name, num)
     implicit none
-    character(*),   intent(in) :: file_name
+    character(*), intent(in) :: file_name
     integer(int32), intent(in) :: num
     logical :: exist
 
@@ -20,32 +18,12 @@ contains
     end if
   end subroutine file_checking
 
-  ! ---------- helpers you asked about ----------
-  pure real(real64) function tval(la,ka,lb,kb) result(v)
-    integer(int32), intent(in) :: la,ka,lb,kb   ! 1-based indices
-    v = t_tensor_v3( t_index(la,ka,lb,kb) )
-  end function tval
-
-  subroutine assert_close(name, a, b, tol)
-    character(*),  intent(in) :: name
-    real(real64),  intent(in) :: a, b, tol
-    real(real64) :: diff
-    diff = abs(a-b)
-    if (diff > tol) then
-      write(*,'(A,": FAIL | a=",ES24.16," b=",ES24.16," |diff|=",ES12.3)') trim(name), a, b, diff
-    else
-      write(*,'(A,": OK   | value=",ES24.16," |diff|=",ES12.3)') trim(name), a, diff
-    end if
-  end subroutine assert_close
-  ! --------------------------------------------
-
-  ! PERF test (unchanged: still calls your evaluate_LRF wrapper from elsewhere)
   subroutine running_time_performance(coeff_file_name, fileoutput_number)
     implicit none
     character(len=*), intent(in) :: coeff_file_name
-    integer(int32), optional :: fileoutput_number
+    integer(int32), optional     :: fileoutput_number
     real(real64) :: energy
-    character(len=9), parameter :: COORD_FORMAT = "Euler_ZYZ"
+    character(len=*), parameter :: COORD_FORMAT = "Euler_ZYZ"
     integer(int32), parameter :: xdim = 6
     integer(int32) :: i, ntest
     real(real64) :: start, finish
@@ -56,7 +34,11 @@ contains
 
     call cpu_time(start)
     do i = 1, ntest
-      call evaluate_LRF( energy, xdim, coordinates_set_6D, COORD_FORMAT, coeff_file_name )
+      call evaluate_LRF( energy,          &
+                         xdim,            &
+                         coordinates_set_6D, &
+                         COORD_FORMAT,    &
+                         coeff_file_name )
     end do
     call cpu_time(finish)
 
@@ -65,44 +47,37 @@ contains
     write(*,*)"*********************************************************************"
   end subroutine running_time_performance
 
-
-  ! T-tensor test (UPDATED to flattened storage)
   subroutine t_tensor_test()
+    use Geometry_Constant_v2, only : tensors_initialization_v2, t_tensor_v3
+    use Fitting_Constant_v2,  only : t_index, ensure_t_index_map_ready
     implicit none
     integer(int32) :: i, j, ntest, cpn, order, la, lb, ka, kb
-    real(real64) :: general_coordinates_ZXZ(6), r(6)
-    real(real64), allocatable :: T(:)
-    integer(int32), parameter :: L = 15
+    real(real64) :: general_coordinates_ZXZ(6), r(6), T(9640)
+    real(real64), parameter :: PII = acos(-1.0_real64)
 
     ntest = 1_int32
-
-    ! Build the global index map once (safe to call multiple times)
-    call ensure_t_index_map_ready(L)
+    cpn   = 1_int32
+    call ensure_t_index_map_ready(15_int32)
 
     do i = 1, ntest
       call random_number(r)
+      general_coordinates_ZXZ(1) = 10.0_real64 + r(1)*10.0_real64
+      general_coordinates_ZXZ(2) = r(2)*180.0_real64
+      general_coordinates_ZXZ(3) = r(3)*180.0_real64
+      general_coordinates_ZXZ(4) = r(4)*360.0_real64
+      general_coordinates_ZXZ(5) = r(5)*360.0_real64
+      general_coordinates_ZXZ(6) = r(6)*360.0_real64
 
-      general_coordinates_ZXZ(1) = 10.0_real64 + r(1)*10.0_real64 ! R
-      general_coordinates_ZXZ(2) = r(2)*180.0_real64              ! b1
-      general_coordinates_ZXZ(3) = r(3)*180.0_real64              ! b2
-      general_coordinates_ZXZ(4) = r(4)*360.0_real64              ! phi
-      general_coordinates_ZXZ(5) = r(5)*360.0_real64              ! c1
-      general_coordinates_ZXZ(6) = r(6)*360.0_real64              ! c2
-
-      call tensors_initialization_v2(L, general_coordinates_ZXZ)
-
-      ! allocate exactly as many as used by the map (9640 for L=15)
-      allocate(T(tmap_NNZ))
-      cpn = 1
+      call tensors_initialization_v2(15_int32, general_coordinates_ZXZ)
 
       open(unit=10, file="../testing_datafiles/t_tensors/t_tensors_test.txt", action="write")
 
-      do order = 1, L
+      do order = 1, 15
         do la = 0, order - 1
           lb = order - la - 1
           do ka = 0, 2*la
             do kb = 0, 2*lb
-              T(cpn) = t_tensor_v3( t_index(la+1, ka+1, lb+1, kb+1) )
+              T(cpn) = t_tensor_v3(t_index(la+1,ka+1,lb+1,kb+1))
               cpn = cpn + 1
             end do
           end do
@@ -111,10 +86,8 @@ contains
 
       write(10,*) general_coordinates_ZXZ, T
       close(10)
-      deallocate(T)
     end do
   end subroutine t_tensor_test
-
 
   subroutine check_energy_MATLAB(system_name, xdim, verbose, fileoutput_number)
     implicit none
@@ -126,13 +99,10 @@ contains
     real(real64)  :: coord_from_file(xdim+2)
     real(real64), allocatable :: coord(:)
     real(real64), parameter :: PII = acos(-1.0_real64)
-    character(len=9), parameter :: COORD_FORMAT = "Euler_ZYZ"
+    character(len=*), parameter :: COORD_FORMAT = "Euler_ZYZ"
 
     ntest = 1000_int32
-    rmse = 0.0_real64
-    Emax = 0.0_real64
-    E0_maxval = 0.0_real64
-    Erel = 0.0_real64
+    rmse = 0.0_real64; Emax = 0.0_real64; E0_maxval = 0.0_real64; Erel = 0.0_real64
 
     open(17, file='../testing_datafiles/datasets/'//system_name//'.txt')
     allocate(coord(xdim))
@@ -141,24 +111,23 @@ contains
       read(17,*) coord_from_file
       E0 = coord_from_file(xdim+2)
 
-      coord(1) = coord_from_file(2)                                       ! R
-      coord(2) = acos(coord_from_file(3))*180.0_real64/PII                ! b1
+      coord(1) = coord_from_file(2)
+      coord(2) = acos(coord_from_file(3))*180.0_real64/PII
       if (xdim == 3) then
-        coord(3) = coord_from_file(4)*180.0_real64/PII + 90.0_real64      ! c1
+        coord(3) = coord_from_file(4)*180.0_real64/PII + 90.0_real64
       else
-        coord(3) = acos(coord_from_file(4))*180.0_real64/PII              ! b2
-        coord(4) = coord_from_file(5)*180.0_real64/PII                    ! phi
+        coord(3) = acos(coord_from_file(4))*180.0_real64/PII
+        coord(4) = coord_from_file(5)*180.0_real64/PII
         if (xdim >= 5) coord(5) = coord_from_file(6)*180.0_real64/PII + 90.0_real64
         if (xdim == 6) coord(6) = coord_from_file(7)*180.0_real64/PII + 90.0_real64
       end if
 
-      call evaluate_LRF( E1, xdim, coord, COORD_FORMAT,                    &
-                         '../testing_datafiles/coefficients/'//system_name//'_Coeff.txt' )
+      call evaluate_LRF( E1, xdim, coord, COORD_FORMAT, '../testing_datafiles/coefficients/'//system_name//'_Coeff.txt' )
 
-      rmse      = rmse + abs(E0 - E1)**2
-      Emax      = maxval([Emax, abs(E0 - E1)])
-      Erel      = Erel + abs(E0 - E1) / abs(E0)
-      E0_maxval = maxval([E0_maxval, abs(E0)])
+      rmse = rmse + abs(E0 - E1)**2
+      Emax = max(Emax, abs(E0 - E1))
+      Erel = Erel + abs(E0 - E1) / abs(E0)
+      E0_maxval = max(E0_maxval, abs(E0))
     end do
 
     rmse = sqrt(rmse/real(ntest, real64))

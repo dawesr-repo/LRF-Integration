@@ -1,6 +1,8 @@
 !********************************************************
 module Geometry_Constant_v2
     use, intrinsic :: iso_fortran_env, only: int32, real64
+    ! bring the global indexer & its setup from Fitting_Constant_v2
+    use Fitting_Constant_v2, only: t_index, ensure_t_index_map_ready, tmap_NNZ
     implicit none
     private
     ! ---- kinds & constants
@@ -16,7 +18,9 @@ module Geometry_Constant_v2
     real(RK), dimension(3)  :: br_v2
     real(RK), dimension(9)  :: cc_v2
     real(RK), dimension(11) :: cal_coord_v2
-    real(RK) :: t_tensor_v2(L, 2*L+1, L, 2*L+1)
+
+    ! flattened tensor
+    real(RK), allocatable :: t_tensor_v3(:)
 
     private :: L, ar_v2, br_v2, cc_v2, cal_coord_v2
     private ::  calculate_tensor,&
@@ -35,7 +39,8 @@ module Geometry_Constant_v2
                 dispersion_order,&
                 dispersion_l1l2_t1t2,&
                 get_dispersion_cpn
-    public  :: t_tensor_v2
+
+    public  :: t_tensor_v3
     public  :: get_total_interaction_energy,&
                multipole_sph_v3,&
                induction_sph_v3,&
@@ -49,7 +54,16 @@ contains
         integer(I4), intent(in) :: maxlevel
         real(RK),    intent(in) :: coordinates(6) ! angles in degrees
 
-        t_tensor_v2  = 0d0
+        ! make sure the global mapping exists (L=15 as requested)
+        call ensure_t_index_map_ready(L)
+
+        if (.not. allocated(t_tensor_v3)) then
+            allocate(t_tensor_v3(tmap_NNZ))
+        else if (size(t_tensor_v3,1) /= tmap_NNZ) then
+            deallocate(t_tensor_v3)
+            allocate(t_tensor_v3(tmap_NNZ))
+        end if
+        t_tensor_v3  = 0.0_RK
 
         call generate_coordenates_v2(coordinates)
         call calculate_tensor(maxlevel)
@@ -75,15 +89,13 @@ contains
     subroutine t_lk_iter(la, ka_, lb, kb_)
         implicit none
         integer(I4), intent(in) :: la, ka_, lb, kb_
-        real(RK), parameter :: EPS = epsilon(t_tensor_v2(1,1,1,1))
+        real(RK), parameter :: EPS = epsilon(1.0_RK)
 
         real(RK) :: res, comp_lk, comp_t, prod_comp, fact_prod, la_fact, l2_fact, l3_fact, l4_fact
-        real(RK) :: lb_fact, la2_fact, fact_nn_1, fact_nn_2, cij, const, fact_nn, lb2_fact, m1, m2, m
-        real(RK) :: r_comp
-
+        real(RK) :: lb_fact, la2_fact, fact_nn, lb2_fact, m1, m2, m, const
         integer(I4) :: ka1, rka1, kb1, rkb1, rk1, rk_, rk_i, rk_j, i, j, n
         character(len=1), dimension(3) :: coord = ["z", "x", "y"]
-        character(len=1) :: str_comp, rka2, rkb2, ka2, kb2, rk2
+        character(len=1) :: rka2, rkb2, ka2, kb2, rk2
 
         ka2 = get_splitting_componet(ka_)
         kb2 = get_splitting_componet(kb_)
@@ -105,7 +117,7 @@ contains
                     fact_nn = factorial_nn(la-1, rk1, 0, 0)
 
                     if ( dabs(m) > EPS .and. la >= 1 .and. fact_nn > EPS .and. rk_ <= 2*(la-1) ) then
-                        comp_t    = t_tensor_v2(la-1+1, rk_+1, 1, 1)
+                        comp_t    = t_tensor_v3(t_index(la,     rk_+1, 1, 1))        ! la-1+1 = la
                         prod_comp = ar_v2(i) * comp_t
                         fact_prod = la_fact * m * fact_nn
                         comp_lk   = comp_lk + fact_prod * prod_comp
@@ -115,7 +127,7 @@ contains
                 if (la >= 2 .and. ka_ <= 2*(la-2) .and. ka_ >= 0) then
                     la2_fact = (la-1d0)/(1d0*la)
                     comp_lk = comp_lk - la2_fact * factorial_nn(la-2, ka1, 0, 0) * &
-                                        t_tensor_v2(la-2+1, ka_+1, 1, 1)
+                                        t_tensor_v3(t_index(la-1,  ka_+1, 1, 1))     ! la-2+1 = la-1
                 end if
 
                 res = comp_lk / factorial_nn(la, ka1, lb, kb1)
@@ -132,14 +144,14 @@ contains
 
                     if ( dabs(m) > EPS .and. lb >= 1 .and. fact_nn > EPS .and. rk_ <= 2*(lb-1) .and. rk_ >= 0) then
                         comp_lk = comp_lk + lb_fact * m * fact_nn * br_v2(i) * &
-                                  t_tensor_v2(1, 1, lb-1+1, rk_+1)
+                                  t_tensor_v3(t_index(1, 1, lb, rk_+1))               ! lb-1+1 = lb
                     end if
                 end do
 
                 if (lb >= 2 .and. kb_ <= 2*(lb-2) .and. kb_ >= 0) then
                     lb2_fact = (lb-1d0)/(1d0*lb)
                     comp_lk = comp_lk - lb2_fact * factorial_nn(0, 0, lb-2, kb1) * &
-                                        t_tensor_v2(1, 1, lb-2+1, kb_+1)
+                                        t_tensor_v3(t_index(1, 1, lb-1, kb_+1))       ! lb-2+1 = lb-1
                 end if
 
                 res = comp_lk / factorial_nn(la, ka1, lb, kb1)
@@ -149,13 +161,13 @@ contains
 
                 if (ka_ <= 2*(la-2)) then
                     comp_lk = comp_lk + factorial_nn(la-2, ka1, lb, kb1) * &
-                                        t_tensor_v2(la-2+1, ka_+1, lb+1, kb_+1)
+                                        t_tensor_v3(t_index(la-1, ka_+1, lb+1, kb_+1))
                 end if
 
                 if (kb_ <= 2*(lb-2)) then
                     l2_fact = (2d0*la + lb - 1d0)/(1d0*lb)
                     comp_lk = comp_lk - (l2_fact * factorial_nn(la, ka1, lb-2, kb1)) * &
-                                        t_tensor_v2(la+1, ka_+1, lb-2+1, kb_+1)
+                                        t_tensor_v3(t_index(la+1, ka_+1, lb-1, kb_+1))
                 end if
 
                 do i=1,3
@@ -166,7 +178,8 @@ contains
                     const = l3_fact * m * factorial_nn(la, ka1, lb-1, rk1)
 
                     if ( dabs(const) > EPS .and. rk_i <= 2*(lb-1) ) then
-                        comp_lk = comp_lk + const * br_v2(i) * t_tensor_v2(la+1, ka_+1, lb-1+1, rk_i+1)
+                        comp_lk = comp_lk + const * br_v2(i) * &
+                                  t_tensor_v3(t_index(la+1, ka_+1, lb, rk_i+1))      ! lb-1+1 = lb
                     end if
                 end do
 
@@ -184,7 +197,8 @@ contains
 
                         const = l4_fact * m1 * m2 * factorial_nn(la-1, rka1, lb-1, rkb1)
                         if ( dabs(const) > EPS .and. rk_i <= 2*(la-1) .and. rk_j <= 2*(lb-1) ) then
-                            comp_lk = comp_lk + const * cc_v2(n) * t_tensor_v2(la-1+1, rk_i+1, lb-1+1, rk_j+1)
+                            comp_lk = comp_lk + const * cc_v2(n) * &
+                                      t_tensor_v3(t_index(la, rk_i+1, lb, rk_j+1))    ! la-1+1=la; lb-1+1=lb
                         end if
                     end do
                 end do
@@ -193,7 +207,7 @@ contains
             end if
         end if
 
-        t_tensor_v2(la+1, ka_+1, lb+1, kb_+1) = res
+        t_tensor_v3(t_index(la+1, ka_+1, lb+1, kb_+1)) = res
     end subroutine t_lk_iter
 
     function factorial(n)
@@ -411,7 +425,7 @@ contains
         integer(I4), intent(in) :: order, ind
         real(RK) :: multipole_order
         integer(I4) :: i, j, ci, cj
-        real(RK), parameter :: EPS = epsilon(multipole_order)
+        real(RK), parameter :: EPS = epsilon(1.0_RK)
         real(RK) :: Qai, Qbj
         real(RK), dimension(225) :: A_Mult, B_Mult
 
@@ -427,7 +441,8 @@ contains
                     do cj = 0, 2*j
                         Qbj = B_Mult(j**2 + 1 + cj)
                         if ( dabs(Qbj) > EPS ) then
-                            multipole_order = multipole_order + Qai*Qbj*t_tensor_v2(i+1,ci+1,j+1,cj+1)
+                            multipole_order = multipole_order + Qai*Qbj* &
+                                t_tensor_v3(t_index(i+1,ci+1,j+1,cj+1))
                         end if
                     end do
                 end if
@@ -485,10 +500,10 @@ contains
         implicit none
         integer(I4), intent(in) :: i, j, l1, l2, index, ind
         real(RK) :: induction_ij_l1l2
-        real(RK) :: Qai, Qbj, comp_a_k1_k2, T_l1_i, T_l2_j, res
+        real(RK) :: Qai, Qbj, comp_a_k1_k2, res
         integer(I4) :: ci, cj, k1, k2, cpn, ni, nj, nl1, nl2, lmin, lmax
         real(RK), allocatable :: Qa_cpn(:), Qb_cpn(:), pol_arr(:)
-        real(RK), parameter :: EPS = epsilon(induction_ij_l1l2)
+        real(RK), parameter :: EPS = epsilon(1.0_RK)
 
         res = 0d0
         ni = 2*i + 1
@@ -523,10 +538,10 @@ contains
                                 if ( dabs(comp_a_k1_k2) > EPS ) then
                                     if ( index == 0 ) then
                                         res = res + Qai*Qbj*comp_a_k1_k2 * &
-                                            ( t_tensor_v2(l1+1,k1,i+1,ci) * t_tensor_v2(l2+1,k2,j+1,cj) )
+                                            ( t_tensor_v3(t_index(l1+1,k1,i+1,ci)) * t_tensor_v3(t_index(l2+1,k2,j+1,cj)) )
                                     else
                                         res = res + Qai*Qbj*comp_a_k1_k2 * &
-                                            ( t_tensor_v2(i+1,ci,l1+1,k1) * t_tensor_v2(j+1,cj,l2+1,k2) )
+                                            ( t_tensor_v3(t_index(i+1,ci,l1+1,k1)) * t_tensor_v3(t_index(j+1,cj,l2+1,k2)) )
                                     end if
                                 end if
                             end do
@@ -604,7 +619,7 @@ contains
         real(RK) :: disp_arr((2*l1+1)*(2*l2+1)*(2*t1+1)*(2*t2+1))
         real(RK) :: EPS
 
-        EPS = epsilon(res)
+        EPS = epsilon(1.0_RK)
         res = 0d0
 
         disp_arr = get_coeff_dispersion_by_index(ind, l1,l2,t1,t2)
@@ -616,8 +631,8 @@ contains
                         cpn = get_dispersion_cpn(l1,l2,t1,t2,li,lj,ti,tj)
                         disp_coeff = disp_arr(cpn)
                         if ( dabs(disp_coeff) > EPS ) then
-                            res = res + disp_coeff * t_tensor_v2(l1+1,li+1,t1+1,ti+1) * &
-                                                 t_tensor_v2(l2+1,lj+1,t2+1,tj+1)
+                            res = res + disp_coeff * t_tensor_v3(t_index(l1+1,li+1,t1+1,ti+1)) * &
+                                                 t_tensor_v3(t_index(l2+1,lj+1,t2+1,tj+1))
                         end if
                     end do
                 end do

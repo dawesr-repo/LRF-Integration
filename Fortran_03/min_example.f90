@@ -1,6 +1,6 @@
 ! version: LRF_Fortran v4
 ! *********************************************************************************************************************
-! Minimal example of how to call evaluate_LR for a given set of coefficients exported by: LRF MATLAB  v4.x
+! Minimal example of how to call evaluate_LR for a given set of coefficients exported by: LRF MATLAB v4.x
 ! evaluate_LR needs as function parameters:
 !  Energy (Output, Real): Interaction energy between the monomers (in cm^-1).
 !  XDIM (Input, Integer): Number of degrees of freedom in the system.
@@ -11,42 +11,30 @@
 ! *********************************************************************************************************************
 
 program min_example
+  use iso_fortran_env, only : real64, int32
+  implicit none
 
- implicit none
+  integer(int32),       parameter :: XDIM = 4_int32       ! Coordinates Dimensions
+  character(len=*),     parameter :: COORDINATE_FORMAT = "Euler_ZYZ"   ! Coordinate Format
+  character(len=*),     parameter :: PATH_TO_COEFFICIENTS = "../testing_datafiles/coefficients/D_inf_h(1)_Spherical(1)_Coeff.txt"
 
- integer (kind=4), parameter:: XDIM=4  ! Coordinates Dimensions
- character (len=*,kind=1), parameter:: COORDINATE_FORMAT = "Euler_ZYZ"   ! Coordinate Format
- character (len=*,kind=1), parameter:: PATH_TO_COEFFICIENTS = "../testing_datafiles/coefficients/D_inf_h(1)_Spherical(1)_Coeff.txt"
+  real(real64)                      :: energy    ! Interaction Energy
+  real(real64), dimension(XDIM)     :: coordinates
+  real(real64), parameter           :: PI = acos(-1.0_real64)
 
- real (kind=8):: energy    ! Interaction Energy
- real (kind=8), dimension(XDIM):: coordinates = [9.224922190454659d0,& ! R
-                                                  DACOS(-0.516833742198944d0)*180d0/DACOS(-1.d0),&    ! beta1
-                                                  DACOS(0.761164535894394d0)*180d0/DACOS(-1.d0),&    ! beta2
-                                                  0.081548803182827d0*180d0/DACOS(-1d0)];
-                                                  ! ,&   ! alpha
-                                                  ! 0d0,&     ! gamma1
-                                                  ! 0d0]     ! gamma2
+  coordinates = [ 9.224922190454659_real64,                                 & ! R
+                  acos(-0.516833742198944_real64) * 180.0_real64 / PI,      & ! beta1
+                  acos( 0.761164535894394_real64) * 180.0_real64 / PI,      & ! beta2
+                  0.081548803182827_real64 * 180.0_real64 / PI ]              ! alpha
+  ! For XDIM=6 you could extend with gamma1, gamma2 terms.
 
+  ! Evaluate the Potential Energy Surface in the Long-Range region
+  call evaluate_LRF( energy,                 &
+                     XDIM,                   &
+                     coordinates,            &
+                     COORDINATE_FORMAT,      &
+                     PATH_TO_COEFFICIENTS )
 
- ! Evaluate the Potential Energy Surface in the Long-Range region
- call evaluate_LRF( energy,&
-                    XDIM,&
-                    coordinates,&
-                    COORDINATE_FORMAT,&
-                    PATH_TO_COEFFICIENTS&
-                  )
-
- ! printing the Interaction Energy in the console
- write(*,*) "Interaction Energy : ", Energy, " (cm^-1)"
-
+  ! printing the Interaction Energy in the console
+  write(*,*) "Interaction Energy : ", energy, " (cm^-1)"
 end program min_example
-
-
-
-
-
-
-
-
-
-

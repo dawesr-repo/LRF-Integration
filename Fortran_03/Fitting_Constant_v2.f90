@@ -54,6 +54,16 @@ module Fitting_Constant_v2
 
     integer(int32), allocatable :: t_index_map(:,:,:,:)  ! (L,2L+1,L,2L+1), 1-based
 
+    !=======================  Precomputed factorial_nn  =======================
+    ! Precomputed sqrt-factorial combination map:
+    !   fact_nn(la,ka1,lb,kb1) = sqrt( ( (la+ka1)!/(la-ka1)! ) * ( (lb+kb1)!/(lb-kb1)! ) )
+    ! Indices are 0-based and valid only when ka1<=la and kb1<=lb; otherwise 0.
+    !========================================================
+    integer(int32), save :: fnn_L = 0
+    logical,        save :: fnn_ready = .false.
+    real(real64),   allocatable, save :: fac_tbl(:)                 ! 0..2*L
+    real(real64),   allocatable, save :: fact_nn_map(:,:,:,:)       ! (0:L,0:L,0:L,0:L)
+
     private :: coeff
     public :: find_coeff_set, &
               get_coeff_index, &
@@ -66,12 +76,66 @@ module Fitting_Constant_v2
               get_coeff_dispersion_by_index, &
               ! expose the index infra
               t_index, t_index_map, tmap_L, tmap_NNZ, ensure_t_index_map_ready
-
+    public :: fact_nn, ensure_fact_nn_ready
+              
 contains
 
     !========================================================
     ! t-index map helpers
     !========================================================
+
+    subroutine ensure_fact_nn_ready(Lin)
+        use iso_fortran_env, only: real64, int32
+        implicit none
+        integer(int32), intent(in), optional :: Lin
+        integer(int32) :: L, la, lb, ka1, kb1, m
+        real(real64), allocatable :: fact_arr(:)  ! factorials 0..2L
+
+        L = merge(Lin, TMAP_L_CONST, present(Lin))  ! default to your max (e.g. 15)
+
+        if (fnn_ready .and. fnn_L == L) return
+
+        if (allocated(fact_nn_map)) deallocate(fact_nn_map)
+        allocate(fact_nn_map(L+1, L+1, L+1, L+1))  ! store at (la+1,ka1+1,lb+1,kb1+1)
+
+        ! precompute factorials 0..2L in double
+        allocate(fact_arr(0:2*L))
+        fact_arr(0) = 1.0_real64
+        do m = 1, 2*L
+            fact_arr(m) = fact_arr(m-1) * real(m, real64)
+        end do
+
+        do la = 0, L
+            do lb = 0, L
+            do ka1 = 0, L
+                do kb1 = 0, L
+                if (ka1 <= la .and. kb1 <= lb) then
+                    fact_nn_map(la+1,ka1+1,lb+1,kb1+1) = &
+                    dsqrt( (fact_arr(la+ka1)/fact_arr(la-ka1)) * &
+                            (fact_arr(lb+kb1)/fact_arr(lb-kb1)) )
+                else
+                    fact_nn_map(la+1,ka1+1,lb+1,kb1+1) = 0.0_real64
+                end if
+                end do
+            end do
+            end do
+        end do
+
+        deallocate(fact_arr)
+        fnn_L = L
+        fnn_ready = .true.
+    end subroutine ensure_fact_nn_ready
+
+    ! Elemental accessor so callers can write:  fn = fact_nn(la+1,ka1+1,lb+1,kb1+1)
+    pure real(real64) function fact_nn(la1,ka11,lb1,kb11) result(fn)
+        use iso_fortran_env, only: real64, int32
+        implicit none
+        integer(int32), intent(in) :: la1, ka11, lb1, kb11   ! 1-based indices
+        ! ASSUMES ensure_fact_nn_ready() has been called already.
+        fn = fact_nn_map(la1, ka11, lb1, kb11)
+    end function fact_nn
+
+
     subroutine ensure_t_index_map_ready(Lin)
         integer(int32), intent(in), optional :: Lin
         integer(int32) :: Luse

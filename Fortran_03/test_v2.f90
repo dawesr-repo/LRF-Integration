@@ -15,7 +15,7 @@ program testing_subroutine
   end type var_str
 
   type(var_str)             :: sys(50)
-  type(var_str)             :: symmetries(15)
+  type(var_str)             :: symmetries(5)
   integer(int32)            :: i, k, h, count
   integer(int32), dimension(5) :: xdim
 
@@ -54,8 +54,13 @@ program testing_subroutine
   write(fileout_number,*)  "Month / Day / Year: ", date_time(2), "/", date_time(3), "/", date_time(1)
   write(fileout_number,*)  "Hr    / Min / Sec : ", date_time(5), ":", date_time(6), ":", date_time(7)
 
+  ! Performance run (adjust ARGS in Make to pass a different coeff file if needed)
   call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt', fileout_number)
 
+  ! Optional: generate one t-tensor dump using the new flattened storage
+  ! call t_tensor_test()
+
+  ! Compare energies vs MATLAB datasets for the first 12 systems generated above
   do i = 1, 12
     call check_energy_MATLAB( sys(i)%label, &
                               xdim_arr(i),   &

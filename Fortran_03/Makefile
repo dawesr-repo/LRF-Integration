@@ -1,16 +1,18 @@
 # -------- Makefile --------
 # Usage:
-#   make test            # build (release) and run ./ejec_test.x
-#   make release         # build only (O3, native, LTO)
-#   make ofast           # build only (Ofast, native, LTO)
-#   make test-ofast      # build Ofast and run
-#   make debug           # debug build (O0, bounds checks)
-#   make test-debug      # build debug and run
-#   make pgo-gen         # instrumented build for PGO
-#   make pgo-use         # use collected profiles
+#   make test                # build (release) and run ./ejec_test.x
+#   make release             # build only (O3, native, LTO)
+#   make ofast               # build only (Ofast, native, LTO)
+#   make test-ofast          # build Ofast and run
+#   make debug               # debug build (O0, bounds checks)
+#   make test-debug          # build debug and run
+#   make pgo-gen             # instrumented build for PGO
+#   make pgo-use             # use collected profiles
+#   make vec-report          # build with vectorization reports
 #   make clean
 #
-# To pass args to the program: make test ARGS="...your args..."
+# To pass args to the program:  make test ARGS="...your args..."
+# To enable OpenMP threading:   make test OMP=1   (and set OMP_NUM_THREADS)
 
 FC      ?= gfortran
 TARGET  ?= ejec_test.x
@@ -25,15 +27,22 @@ VEC     ?= -funroll-loops -floop-nest-optimize
 FPMATH  ?= -ffp-contract=fast -fno-math-errno -fno-trapping-math
 WARN    ?=
 
-ODBG    := -O0 -g -fcheck=bounds -fbacktrace
-OREL    := -O3 $(ARCH) $(LTO) $(VEC) -fomit-frame-pointer $(FPMATH)
-OFAST   := -Ofast $(ARCH) $(LTO) $(VEC) -fomit-frame-pointer $(FPMATH)
+# Optional OpenMP toggle
+ifeq ($(OMP),1)
+  OMPFLAGS := -fopenmp
+else
+  OMPFLAGS :=
+endif
+
+ODBG    := -O0 -g -fcheck=bounds -fbacktrace $(OMPFLAGS)
+OREL    := -O3 $(ARCH) $(LTO) $(VEC) -fomit-frame-pointer $(FPMATH) $(OMPFLAGS)
+OFAST   := -Ofast $(ARCH) $(LTO) $(VEC) -fomit-frame-pointer $(FPMATH) $(OMPFLAGS)
 
 PGODIR  ?= pgodata
 PGOGEN  := -fprofile-generate=$(PGODIR)
 PGOUSE  := -fprofile-use=$(PGODIR) -fprofile-correction
 
-.PHONY: all release debug ofast clean pgo-gen pgo-use test test-ofast test-debug run vec-report
+.PHONY: all release debug ofast clean pgo-gen pgo-use test test-ofast test-debug vec-report
 
 all: release
 

@@ -1,11 +1,18 @@
+!********************************************************
 ! FittingConstant is the module in charge of all constants related with the fit
 ! It can handle several coefficient files at the same time
-
+!
+! Also provides a global index map (t_index_map) and an indexing function (t_index)
+! to flatten t-tensor components (L,2L+1,L,2L+1) -> [1..NNZ] in a stable, precomputed way.
+!********************************************************
 module Fitting_Constant_v2
     use iso_fortran_env, only : real64, int32
     implicit none
     save
 
+    !========================================================
+    ! Types and data for fitted constants
+    !========================================================
     type fit_contant
         character(:), allocatable :: filename
         real(real64) :: Zero
@@ -20,9 +27,11 @@ module Fitting_Constant_v2
         real(real64), dimension(225) :: A_Mult, B_Mult
 
         ! Polarizability
+        ! A_Pol(lmin,lmax, (2*lmin+1)*(2*lmax+1)) stored in first ln entries
         real(real64), dimension(6,12,195) :: A_Pol, B_Pol
 
         ! Dispersion
+        ! Disp(lmin,lmax,tmin,tmax, (2*l1+1)*(2*l2+1)*(2*t1+1)*(2*t2+1)) in first ln entries
         real(real64), dimension(5,10,5,10,3087) :: Disp
 
     contains
@@ -33,6 +42,18 @@ module Fitting_Constant_v2
     integer(int32), parameter :: NARRAY = 5
     type(fit_contant) :: coeff(NARRAY)
 
+    !========================================================
+    ! Global t-tensor index map (1-based like the original 4D array)
+    ! idx = t_index_map(la+1,ka+1,lb+1,kb+1)
+    !========================================================
+    integer(int32), parameter :: TMAP_L_CONST = 15_int32
+
+    integer(int32) :: tmap_L     = 0         ! maxlevel used to build map
+    integer(int32) :: tmap_NNZ   = 0         ! number of valid components
+    logical :: tmap_ready = .false.
+
+    integer(int32), allocatable :: t_index_map(:,:,:,:)  ! (L,2L+1,L,2L+1), 1-based
+
     private :: coeff
     public :: find_coeff_set, &
               get_coeff_index, &
@@ -42,10 +63,54 @@ module Fitting_Constant_v2
               get_coeff_multipole, &
               get_coeff_multipole_by_index, &
               get_coeff_polarizability_by_index, &
-              get_coeff_dispersion_by_index
+              get_coeff_dispersion_by_index, &
+              ! expose the index infra
+              t_index, t_index_map, tmap_L, tmap_NNZ, ensure_t_index_map_ready
 
 contains
 
+    !========================================================
+    ! t-index map helpers
+    !========================================================
+    subroutine ensure_t_index_map_ready(Lin)
+        integer(int32), intent(in), optional :: Lin
+        integer(int32) :: Luse
+        integer(int32) :: order, la, lb, ka_, kb_, count
+
+        Luse = merge(Lin, TMAP_L_CONST, present(Lin))
+
+        if (tmap_ready .and. tmap_L == Luse) return
+
+        if (allocated(t_index_map)) deallocate(t_index_map)
+        allocate(t_index_map(Luse, 2*Luse+1, Luse, 2*Luse+1))
+        t_index_map = -1
+
+        count = 1
+        do order = 1, Luse
+            do la = 0, order-1
+                lb = order - la - 1
+                do ka_ = 0, 2*la
+                    do kb_ = 0, 2*lb
+                        t_index_map(la+1, ka_+1, lb+1, kb_+1) = count
+                        count = count + 1
+                    end do
+                end do
+            end do
+        end do
+
+        tmap_L     = Luse
+        tmap_NNZ   = count - 1
+        tmap_ready = .true.
+    end subroutine ensure_t_index_map_ready
+
+    pure integer(int32) function t_index(i1,i2,i3,i4) result(ind)
+        integer(int32), intent(in) :: i1,i2,i3,i4
+        ind = t_index_map(i1,i2,i3,i4)
+    end function t_index
+
+    !========================================================
+    ! Coefficients IO
+    !========================================================
     subroutine initializer(this, filename)
         class(fit_contant), intent(out) :: this
         character(len=*), intent(in) :: filename
@@ -71,6 +136,7 @@ contains
                 return
             end if
 
+            ! Skip header lines as in the original reader
             read(u, *) row
             read(u, *) row
             read(u, *) row
@@ -128,6 +194,9 @@ contains
         end if
     end subroutine read_parameters
 
+    !========================================================
+    ! Public API for coefficients
+    !========================================================
     subroutine find_coeff_set(filename, ind)
         character(*), intent(in) :: filename
         integer(int32), intent(out) :: ind
@@ -200,14 +269,12 @@ contains
     function get_coeff_zero(coeff_index) result(val)
         integer(int32), intent(in) :: coeff_index
         real(real64) :: val
-
         val = coeff(coeff_index)%Zero
     end function get_coeff_zero
 
     function get_coeff_max_t_tensor_order(coeff_index) result(val)
         integer(int32), intent(in) :: coeff_index
         integer(int32) :: val
-
         val = coeff(coeff_index)%max_t_tensor_order
     end function get_coeff_max_t_tensor_order
 

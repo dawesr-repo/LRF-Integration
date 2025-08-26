@@ -1,10 +1,16 @@
 
 !********************************************************
 module Geometry_Constant_v2
+    use, intrinsic :: iso_fortran_env, only: int32, real64
     implicit none
-    real (kind=8), parameter ::  C1=627.5095d0
-    real (kind=8), parameter ::  C2=0.529177249d0
-    real (kind=8), parameter ::  C3=349.755088236337d0
+    private
+    ! ---- kinds & constants
+    integer, parameter :: I4 = int32
+    integer, parameter :: RK = real64
+    real(RK), parameter :: PI = dacos(-1.0_RK)
+    real(RK), parameter :: C1 = 627.5095_RK
+    real(RK), parameter :: C2 = 0.529177249_RK
+    real(RK), parameter :: C3 = 349.755088236337_RK
     integer (kind=4),parameter::L = 15
     real (kind=8) , dimension(3):: ar_v2
     real (kind=8) , dimension(3):: br_v2

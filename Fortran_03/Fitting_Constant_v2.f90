@@ -59,10 +59,10 @@ module Fitting_Constant_v2
     !   fact_nn(la,ka1,lb,kb1) = sqrt( ( (la+ka1)!/(la-ka1)! ) * ( (lb+kb1)!/(lb-kb1)! ) )
     ! Indices are 0-based and valid only when ka1<=la and kb1<=lb; otherwise 0.
     !========================================================
-    integer(int32), save :: fnn_L = 0
-    logical,        save :: fnn_ready = .false.
-    real(real64),   allocatable, save :: fac_tbl(:)                 ! 0..2*L
-    real(real64),   allocatable, save :: fact_nn_map(:,:,:,:)       ! (0:L,0:L,0:L,0:L)
+    integer(int32):: fnn_L = 0
+    logical:: fnn_ready = .false.
+    real(real64),   allocatable:: fac_tbl(:)                 ! 0..2*L
+    real(real64),   allocatable:: fact_nn_map(:,:,:,:)       ! (0:L,0:L,0:L,0:L)
 
     private :: coeff
     public :: find_coeff_set, &

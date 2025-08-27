@@ -97,3 +97,166 @@ subroutine evaluate_LRF(total_energy, xdim, coordinates, coord_format, filename)
   call user_coordinates_to_general_coordinates(general_coordinates_ZXZ, xdim, coord_format, coordinates)
   total_energy = get_total_interaction_energy(coeff_index, general_coordinates_ZXZ)
 end subroutine evaluate_LRF
+
+
+!===========================================================
+! Batch evaluator:
+!  - energies(j) = E( coords(:,j) ) for j=1..n
+!  - MPI_flag, OMP_flag are 0/1 selectors
+!    (0,0)=serial, (1,0)=MPI, (0,1)=OpenMP, (1,1)=hybrid
+!  - MPI combine: ALLGATHERV so EVERY rank ends up with full energies(1:n)
+!  - No MPI calls at all unless MPI_flag==1 (safe for OMP-only runs)
+!===========================================================
+subroutine evaluate_LRF_batch(energies, xdim, coords, n, coord_format, filename, MPI_flag, OMP_flag, ierr)
+  use, intrinsic :: iso_fortran_env, only : int32, real64
+  use Fitting_Constant_v2,  only : get_coeff_index, get_coeff_zero
+  use Geometry_Constant_v2, only : get_total_interaction_energy
+#ifdef USE_MPI
+  use mpi
+#endif
+  implicit none
+  !----------------- arguments -----------------
+  integer(int32),               intent(in)  :: xdim, n
+  real(real64),                 intent(in)  :: coords(xdim, n)     ! each column = one geometry
+  character(*),                 intent(in)  :: coord_format, filename
+  integer,                      intent(in)  :: MPI_flag, OMP_flag  ! 0/1 switches
+  real(real64),                 intent(out) :: energies(n)
+  integer,            optional, intent(out) :: ierr
+  !----------------- locals --------------------
+  integer :: myerr
+  integer(int32) :: j, j1, j2, base, extra
+  integer(int32) :: coeff_index
+  real(real64)   :: e, x1
+  real(real64)   :: gen_zxz(6)
+  logical :: want_mpi, want_omp
+  logical :: we_inited_mpi
+#ifdef USE_MPI
+  logical :: have_mpi
+  integer :: provided, rank, nproc, mpierr
+  integer :: r
+  integer, allocatable :: counts(:), displs(:)
+#else
+  integer, parameter :: rank  = 0
+  integer, parameter :: nproc = 1
+#endif
+  external :: user_coordinates_to_general_coordinates
+
+  !----------------- init ----------------------
+  myerr         = 0
+  energies      = 0.0_real64
+  want_mpi      = (MPI_flag /= 0)
+  want_omp      = (OMP_flag /= 0)
+  we_inited_mpi = .false.
+
+#ifdef USE_MPI
+  if (want_mpi) then
+    call MPI_Initialized(have_mpi, mpierr)
+    if (.not. have_mpi) then
+      call MPI_Init_thread(MPI_THREAD_FUNNELED, provided, mpierr)
+      we_inited_mpi = .true.
+    end if
+    call MPI_Comm_rank(MPI_COMM_WORLD, rank,  mpierr)
+    call MPI_Comm_size(MPI_COMM_WORLD, nproc, mpierr)
+  else
+    ! absolutely NO MPI calls when want_mpi==.false.
+    ! rank/nproc only used for partition math below (not for MPI calls)
+    rank  = 0
+    nproc = 1
+  end if
+#else
+  if (want_mpi) then
+    myerr    = -10          ! requested MPI but not compiled with it
+    want_mpi = .false.      ! fall back to serial/OMP only
+  end if
+#endif
+
+  !----------------- slice partition -----------------------------
+  if (want_mpi) then
+#ifdef USE_MPI
+    base  = n / nproc
+    extra = mod(n, nproc)
+    if (rank < extra) then
+      j1 = rank*(base+1) + 1
+      j2 = j1 + base
+    else
+      j1 = rank*base + extra + 1
+      j2 = j1 + base - 1
+    end if
+#else
+    j1 = 1_int32 ; j2 = 0_int32
+#endif
+  else
+    j1 = 1_int32
+    j2 = n
+  end if
+  if (j2 < j1) then
+    j1 = 1_int32
+    j2 = 0_int32
+  end if
+
+  !----------------- preload coefficients ------------------------
+  coeff_index = get_coeff_index(filename)
+  if (coeff_index < 1) then
+    myerr = -20
+    if (present(ierr)) ierr = myerr
+#ifdef USE_MPI
+    if (want_mpi .and. we_inited_mpi) call MPI_Finalize(mpierr)
+#endif
+    return
+  end if
+
+  !----------------- compute local slice -------------------------
+!$omp parallel do if (want_omp) default(none) &
+!$omp& shared(coords, energies, xdim, j1, j2, coeff_index, coord_format) &
+!$omp& private(j, x1, gen_zxz, e)
+  do j = j1, j2
+    x1 = 0.0_real64
+    if (xdim >= 1) x1 = sum(abs(coords(1:xdim, j)))
+    if (x1 <= 1.0e-10_real64) then
+      e = get_coeff_zero(coeff_index)
+    else
+      call user_coordinates_to_general_coordinates(gen_zxz, xdim, coord_format, coords(:, j))
+!$omp   critical(lrf_energy_kernel)
+      e = get_total_interaction_energy(coeff_index, gen_zxz)
+!$omp   end critical(lrf_energy_kernel)
+    end if
+    energies(j) = e
+  end do
+!$omp end parallel do
+
+  !----------------- MPI combine: ALL ranks get full vector ------
+#ifdef USE_MPI
+  if (want_mpi) then
+    base  = n / nproc
+    extra = mod(n, nproc)
+    allocate(counts(nproc), displs(nproc))
+    do r = 0, nproc-1
+      if (r < extra) then
+        counts(r+1) = base + 1
+        displs(r+1) = r * (base + 1)
+      else
+        counts(r+1) = base
+        displs(r+1) = extra * (base + 1) + (r - extra) * base
+      end if
+    end do
+    ! In-place ALLGATHERV: each rank already has its local block at
+    ! energies(displs(rank)+1 : displs(rank)+counts(rank))
+    call MPI_Allgatherv(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+                        energies, counts, displs, MPI_DOUBLE_PRECISION, &
+                        MPI_COMM_WORLD, mpierr)
+    deallocate(counts, displs)
+  end if
+#endif
+
+  !----------------- finalize ------------------------------------
+#ifdef USE_MPI
+  if (want_mpi .and. we_inited_mpi) call MPI_Finalize(mpierr)
+#endif
+
+  if (present(ierr)) ierr = myerr
+end subroutine evaluate_LRF_batch
+
+
+
+
+

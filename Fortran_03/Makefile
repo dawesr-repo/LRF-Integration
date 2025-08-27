@@ -87,5 +87,5 @@ vec-report: clean $(TARGET)
 	@echo "Vectorization reports emitted (look for *.optrpt)."
 
 clean:
-	$(RM) $(OBJS) $(TARGET) *.optrpt
+	$(RM) $(OBJS) $(TARGET) *.optrpt *.mod *.smod
 	@if [ -d "$(PGODIR)" ]; then find "$(PGODIR)" -type f -delete; fi

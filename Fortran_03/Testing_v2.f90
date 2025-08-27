@@ -1,7 +1,6 @@
 ! Created by albpl on 3/11/2025.
 module Testing_v2
   use iso_fortran_env, only : real64, int32
-  use LRF_API,         only : evaluate_LRF, user_coordinates_to_general_coordinates
 contains
 
   subroutine file_checking(file_name, num)

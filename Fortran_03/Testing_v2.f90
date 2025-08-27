@@ -1,160 +1,209 @@
-! Created by albpl on 3/11/2025.
-module Testing_v2
-  use iso_fortran_env, only : real64, int32
+!===============================================================
+! Testing_v2.f90  — helper routines for the test driver
+! - Prints only once (root rank) even under mpirun
+! - Never calls MPI unless MPI_flag==1 and code was built with USE_MPI
+!===============================================================
+subroutine run_batch_demo(coeff_file_name, coord_format, MPI_flag, OMP_flag, nthreads)
+  use iso_fortran_env, only : int32, real64
+#ifdef _OPENMP
+  use omp_lib
+#endif
+  implicit none
+  character(len=*), intent(in) :: coeff_file_name, coord_format
+  integer,          intent(in) :: MPI_flag, OMP_flag, nthreads
+
+  integer(int32), parameter :: XDIM = 4_int32
+  integer(int32), parameter :: N    = 5_int32
+  real(real64),   parameter :: PI   = dacos(-1.0_real64)
+
+  real(real64) :: energies(N)
+  real(real64) :: coords(XDIM, N)
+  integer      :: j
+
+  logical, external :: am_root_env
+
+  ! ---- explicit interface for batch evaluator (callee has optional ierr) ----
+  interface
+    subroutine evaluate_LRF_batch(energies, xdim, coords, n, coord_format, filename, MPI_flag, OMP_flag, ierr)
+      use iso_fortran_env, only : int32, real64
+      integer(int32),               intent(in)  :: xdim, n
+      real(real64),                 intent(out) :: energies(n)
+      real(real64),                 intent(in)  :: coords(xdim, n)
+      character(*),                 intent(in)  :: coord_format, filename
+      integer,                      intent(in)  :: MPI_flag, OMP_flag
+      integer,            optional, intent(out) :: ierr
+    end subroutine
+  end interface
+
+  ! ---- small batch by varying alpha (deg) ----
+  block
+    real(real64) :: R, beta1, beta2, alpha0
+    R      = 9.224922190454659_real64
+    beta1  = dacos(-0.516833742198944_real64) * 180.0_real64 / PI
+    beta2  = dacos( 0.761164535894394_real64) * 180.0_real64 / PI
+    alpha0 = 0.081548803182827_real64 * 180.0_real64 / PI
+    do j = 1, N
+      coords(:, j) = [ R, beta1, beta2, alpha0 + 30.0_real64*real(j-1, real64) ]
+    end do
+  end block
+
+#ifdef _OPENMP
+  if (OMP_flag /= 0 .and. nthreads > 0) call omp_set_num_threads(nthreads)
+#endif
+
+  call evaluate_LRF_batch( energies, XDIM, coords, N, coord_format, coeff_file_name, &
+                           MPI_flag, OMP_flag )
+
+  if (am_root_env()) then
+    write(*,*) 'Interaction Energy (N=', size(energies), '): ', energies, ' (cm^-1)'
+  end if
+end subroutine run_batch_demo
+
+
+subroutine running_time_performance(coeff_file_name, fileoutput_number)
+  use iso_fortran_env, only : int32, real64
+#ifdef _OPENMP
+  use omp_lib
+#endif
+  implicit none
+  character(len=*), intent(in) :: coeff_file_name
+  integer(int32),   optional   :: fileoutput_number
+
+  character(len=*), parameter :: COORD_FORMAT = "Euler_ZYZ"
+  integer(int32),   parameter :: xdim  = 6_int32
+  integer(int32),   parameter :: ntest = 1000_int32
+  real(real64),     parameter :: coord6(6) = [ 10.27_real64, 30.0_real64, 20.0_real64, &
+                                               120.0_real64, 40.0_real64, 50.0_real64 ]
+
+  real(real64) :: energy, t0, t1, t_serial, t_omp, t_mpi, t_hyb
+  real(real64), allocatable :: coords(:, :), energies(:)
+  integer(int32) :: i
+  logical :: have_omp, have_mpi, iam_root
+  logical, external :: am_root_env
+
+  ! explicit interfaces for evaluators
+  interface
+    subroutine evaluate_LRF(energy, xdim, coords, coord_format, filename)
+      use iso_fortran_env, only : int32, real64
+      real(real64),                 intent(out) :: energy
+      integer(int32),               intent(in)  :: xdim
+      real(real64),                 intent(in)  :: coords(xdim)
+      character(*),                 intent(in)  :: coord_format, filename
+    end subroutine
+    subroutine evaluate_LRF_batch(energies, xdim, coords, n, coord_format, filename, MPI_flag, OMP_flag, ierr)
+      use iso_fortran_env, only : int32, real64
+      integer(int32),               intent(in)  :: xdim, n
+      real(real64),                 intent(out) :: energies(n)
+      real(real64),                 intent(in)  :: coords(xdim, n)
+      character(*),                 intent(in)  :: coord_format, filename
+      integer,                      intent(in)  :: MPI_flag, OMP_flag
+      integer,            optional, intent(out) :: ierr
+    end subroutine
+  end interface
+
+  call wall_time(t0)
+  do i = 1, ntest
+    call evaluate_LRF( energy, xdim, coord6, COORD_FORMAT, coeff_file_name )
+  end do
+  call wall_time(t1)
+  t_serial = t1 - t0
+
+  have_omp = .false.
+#ifdef _OPENMP
+  have_omp = .true.
+#endif
+
+  have_mpi = .false.
+#ifdef USE_MPI
+  have_mpi = .true.
+#endif
+
+  t_omp = -1.0_real64
+  if (have_omp) then
+    allocate(coords(xdim, ntest), energies(ntest))
+    coords = spread(coord6, dim=2, ncopies=ntest)
+    call wall_time(t0)
+    call evaluate_LRF_batch(energies, xdim, coords, ntest, COORD_FORMAT, coeff_file_name, 0, 1)
+    call wall_time(t1)
+    t_omp = t1 - t0
+    deallocate(coords, energies)
+  end if
+
+  t_mpi = -1.0_real64
+  if (have_mpi) then
+    allocate(coords(xdim, ntest), energies(ntest))
+    coords = spread(coord6, dim=2, ncopies=ntest)
+    call wall_time(t0)
+    call evaluate_LRF_batch(energies, xdim, coords, ntest, COORD_FORMAT, coeff_file_name, 1, 0)
+    call wall_time(t1)
+    t_mpi = t1 - t0
+    deallocate(coords, energies)
+  end if
+
+  t_hyb = -1.0_real64
+  if (have_mpi .and. have_omp) then
+    allocate(coords(xdim, ntest), energies(ntest))
+    coords = spread(coord6, dim=2, ncopies=ntest)
+    call wall_time(t0)
+    call evaluate_LRF_batch(energies, xdim, coords, ntest, COORD_FORMAT, coeff_file_name, 1, 1)
+    call wall_time(t1)
+    t_hyb = t1 - t0
+    deallocate(coords, energies)
+  end if
+
+  iam_root = am_root_env()
+  if (iam_root) then
+    write(*,*) "*********************************************************************"
+    write(*,'(A,I0,A,F10.4,A)') "* SERIAL PERFORMANCE for 6D (N=", ntest, "): time = ", t_serial, " s *"
+    write(*,*) "*********************************************************************"
+    if (have_omp) then
+      write(*,'(A,I0,A,F10.4,A)') "* OpenMP PERFORMANCE (N=", ntest, "): time = ", t_omp, " s *"
+    else
+      write(*,*) "* OpenMP PERFORMANCE -- OpenMP not set *"
+    end if
+    write(*,*) "*********************************************************************"
+    if (have_mpi) then
+      write(*,'(A,I0,A,F10.4,A)') "* MPI PERFORMANCE     (N=", ntest, "): time = ", t_mpi, " s *"
+    else
+      write(*,*) "* MPI PERFORMANCE -- MPI not set *"
+    end if
+    write(*,*) "*********************************************************************"
+    if (have_mpi .and. have_omp) then
+      write(*,'(A,I0,A,F10.4,A)') "* HYBRID MPI+OpenMP   (N=", ntest, "): time = ", t_hyb, " s *"
+    else
+      write(*,*) "* HYBRID PERFORMANCE -- MPI and/or OpenMP not set *"
+    end if
+    write(*,*) "*********************************************************************"
+  end if
 contains
-
-  subroutine file_checking(file_name, num)
-    implicit none
-    character(*), intent(in) :: file_name
-    integer(int32), intent(in) :: num
-    logical :: exist
-
-    inquire(file=file_name, exist=exist)
-    if (exist) then
-      open(num, file=file_name, status="old", position="append", action="write")
+  subroutine wall_time(t)
+    use iso_fortran_env, only : real64
+    real(real64), intent(out) :: t
+    integer :: c, r, m
+    call system_clock(count=c, count_rate=r, count_max=m)
+    if (r > 0) then
+      t = real(c, real64) / real(r, real64)
     else
-      open(num, file=file_name, status="new", action="write")
+      t = 0.0_real64
     end if
-  end subroutine file_checking
+  end subroutine wall_time
+end subroutine running_time_performance
 
-  subroutine running_time_performance(coeff_file_name, fileoutput_number)
-    implicit none
-    character(len=*), intent(in) :: coeff_file_name
-    integer(int32), optional     :: fileoutput_number
-    real(real64) :: energy
-    character(len=*), parameter :: COORD_FORMAT = "Euler_ZYZ"
-    integer(int32), parameter :: xdim = 6
-    integer(int32) :: i, ntest
-    real(real64) :: start, finish
-    real(real64), dimension(6) :: coordinates_set_6D
 
-    ntest = 1000_int32
-    coordinates_set_6D = [ 10.27_real64, 30.0_real64, 20.0_real64, 120.0_real64, 40.0_real64, 50.0_real64 ]
-
-    call cpu_time(start)
-    do i = 1, ntest
-      call evaluate_LRF( energy,          &
-                         xdim,            &
-                         coordinates_set_6D, &
-                         COORD_FORMAT,    &
-                         coeff_file_name )
-    end do
-    call cpu_time(finish)
-
-    write(*,*)"*********************************************************************"
-    write(*,*)"* PERFORMANCE for 6D: ", ntest, " /time: ", finish - start, " *"
-    write(*,*)"*********************************************************************"
-  end subroutine running_time_performance
-
-  subroutine t_tensor_test()
-    use Geometry_Constant_v2, only : tensors_initialization_v2, t_tensor_v3
-    use Fitting_Constant_v2,  only : t_index, ensure_t_index_map_ready
-    implicit none
-    integer(int32) :: i, j, ntest, cpn, order, la, lb, ka, kb
-    real(real64) :: general_coordinates_ZXZ(6), r(6), T(9640)
-    real(real64), parameter :: PII = acos(-1.0_real64)
-
-    ntest = 1_int32
-    cpn   = 1_int32
-    call ensure_t_index_map_ready(15_int32)
-
-    do i = 1, ntest
-      call random_number(r)
-      general_coordinates_ZXZ(1) = 10.0_real64 + r(1)*10.0_real64
-      general_coordinates_ZXZ(2) = r(2)*180.0_real64
-      general_coordinates_ZXZ(3) = r(3)*180.0_real64
-      general_coordinates_ZXZ(4) = r(4)*360.0_real64
-      general_coordinates_ZXZ(5) = r(5)*360.0_real64
-      general_coordinates_ZXZ(6) = r(6)*360.0_real64
-
-      call tensors_initialization_v2(15_int32, general_coordinates_ZXZ)
-
-      open(unit=10, file="../testing_datafiles/t_tensors/t_tensors_test.txt", action="write")
-
-      do order = 1, 15
-        do la = 0, order - 1
-          lb = order - la - 1
-          do ka = 0, 2*la
-            do kb = 0, 2*lb
-              T(cpn) = t_tensor_v3(t_index(la+1,ka+1,lb+1,kb+1))
-              cpn = cpn + 1
-            end do
-          end do
-        end do
-      end do
-
-      write(10,*) general_coordinates_ZXZ, T
-      close(10)
-    end do
-  end subroutine t_tensor_test
-
-  subroutine check_energy_MATLAB(system_name, xdim, verbose, fileoutput_number)
-    implicit none
-    character(len=*), intent(in) :: system_name
-    integer(int32),   intent(in) :: xdim, verbose
-    integer(int32),   optional   :: fileoutput_number
-    integer(int32) :: i, ntest
-    real(real64)  :: E0, E1, rmse, Emax, E0_maxval, Erel
-    real(real64)  :: coord_from_file(xdim+2)
-    real(real64), allocatable :: coord(:)
-    real(real64), parameter :: PII = acos(-1.0_real64)
-    character(len=*), parameter :: COORD_FORMAT = "Euler_ZYZ"
-
-    ntest = 1000_int32
-    rmse = 0.0_real64; Emax = 0.0_real64; E0_maxval = 0.0_real64; Erel = 0.0_real64
-
-    open(17, file='../testing_datafiles/datasets/'//system_name//'.txt')
-    allocate(coord(xdim))
-
-    do i = 1, ntest
-      read(17,*) coord_from_file
-      E0 = coord_from_file(xdim+2)
-
-      coord(1) = coord_from_file(2)
-      coord(2) = acos(coord_from_file(3))*180.0_real64/PII
-      if (xdim == 3) then
-        coord(3) = coord_from_file(4)*180.0_real64/PII + 90.0_real64
-      else
-        coord(3) = acos(coord_from_file(4))*180.0_real64/PII
-        coord(4) = coord_from_file(5)*180.0_real64/PII
-        if (xdim >= 5) coord(5) = coord_from_file(6)*180.0_real64/PII + 90.0_real64
-        if (xdim == 6) coord(6) = coord_from_file(7)*180.0_real64/PII + 90.0_real64
-      end if
-
-      call evaluate_LRF( E1, xdim, coord, COORD_FORMAT, '../testing_datafiles/coefficients/'//system_name//'_Coeff.txt' )
-
-      rmse = rmse + abs(E0 - E1)**2
-      Emax = max(Emax, abs(E0 - E1))
-      Erel = Erel + abs(E0 - E1) / abs(E0)
-      E0_maxval = max(E0_maxval, abs(E0))
-    end do
-
-    rmse = sqrt(rmse/real(ntest, real64))
-    Erel = Erel / real(ntest, real64)
-
-    close(17)
-
-    write(*,*)"*********************************************************************"
-    if (verbose == 1) then
-      write(*,*)"* System: ", system_name, ' - ', xdim, " *"
-      if ((rmse + Erel)/2.0_real64 <= 1.0e-7_real64) then
-        write(*,*)"* Test: ", char(27)//"[32m"//"Passed!"//char(27)//"[0m"
-      else
-        write(*,*)"* Test: ", char(27)//"[31m"//"Failure"//char(27)//"[0m"
-      end if
-      write(*,*)"* Emax: ", Emax, " *"
-      write(*,*)"* E0_maxval: ", E0_maxval, " *"
-      write(*,*)"* Erel: ", Erel, " *"
-      write(*,*)"* rmse: ", rmse, " *"
-    else
-      if ((rmse + Erel)/2.0_real64 <= 1.0e-7_real64) then
-        write(*,*)"* System: ", system_name, " - Test: ", char(27)//"[32m"//"Passed!"//char(27)//"[0m"
-      else
-        write(*,*)"* System: ", system_name, " - Test: ", char(27)//"[31m"//"Failure"//char(27)//"[0m"
-      end if
-    end if
-
-    deallocate(coord)
-  end subroutine check_energy_MATLAB
-
-end module Testing_v2
+logical function am_root_env()
+  implicit none
+  character(len=32) :: s
+  integer :: ln, ios, rr
+  am_root_env = .true.
+  call get_environment_variable("OMPI_COMM_WORLD_RANK", s, length=ln, status=ios)
+  if (ios == 0) then
+    read(s(1:ln),*,iostat=ios) rr
+    if (ios == 0) am_root_env = (rr == 0)
+    return
+  end if
+  call get_environment_variable("PMI_RANK", s, length=ln, status=ios)
+  if (ios == 0) then
+    read(s(1:ln),*,iostat=ios) rr
+    if (ios == 0) am_root_env = (rr == 0)
+  end if
+end function am_root_env

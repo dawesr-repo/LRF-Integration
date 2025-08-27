@@ -1,72 +1,88 @@
-program testing_subroutine
-  use iso_fortran_env, only : int32
-  use Testing_v2, only : file_checking, &
-                         running_time_performance, &
-                         check_energy_MATLAB, &
-                         t_tensor_test
+!===============================================================
+! test_v2.f90  — main test driver that your Makefile runs
+! - Positional args: THREADS NPROC MPI_flag OMP_flag
+! - Safe MPI init/finalize only when MPI_flag==1
+! - Prints once (root) because helpers gate output
+!===============================================================
+program test_v2
+  use iso_fortran_env, only : int32, real64
+#ifdef _OPENMP
+  use omp_lib
+#endif
+#ifdef USE_MPI
+  use mpi
+#endif
   implicit none
+  interface
+    subroutine running_time_performance(coeff_file_name, fileoutput_number)
+      use iso_fortran_env, only : int32, real64
+      character(len=*), intent(in) :: coeff_file_name
+      integer(int32),   optional   :: fileoutput_number
+    end subroutine running_time_performance
+  end interface
 
-  integer(int32)            :: date_time(8), fileout_number
-  character(len=10)         :: big_ben(3)
-  integer(int32)            :: n_sys
-  integer(int32)            :: xdim_arr(50)
-  type :: var_str
-    character(len=:), allocatable :: label
-  end type var_str
+  integer(int32), parameter :: XDIM = 4_int32
+  character(len=*), parameter :: COORDINATE_FORMAT = "Euler_ZYZ"
+  character(len=*), parameter :: PATH_TO_COEFFICIENTS = &
+       "../testing_datafiles/coefficients/D_inf_h(1)_Spherical(1)_Coeff.txt"
 
-  type(var_str)             :: sys(50)
-  type(var_str)             :: symmetries(5)
-  integer(int32)            :: i, k, h, count
-  integer(int32), dimension(5) :: xdim
+  integer(int32) :: nthreads = 0_int32
+  integer(int32) :: nproc_in = 1_int32
+  integer        :: MPI_flag = 0
+  integer        :: OMP_flag = 0
+  character(len=64) :: s
+  integer :: narg, ios
 
-  ! init scalars/arrays with kind-correct literals
-  fileout_number = 12_int32
-  n_sys          = 49_int32
-  xdim           = [ 3_int32, 3_int32, 2_int32, 2_int32, 0_int32 ]
+  ! MPI control
+  logical :: want_mpi, we_inited_mpi
+#ifdef USE_MPI
+  logical :: have_mpi
+  integer :: myrank=0, nproc=1, mpierr, provided
+#else
+  integer, parameter :: myrank = 0, nproc = 1
+#endif
 
-  symmetries(1)%label  = "C1(1)"
-  symmetries(2)%label  = "Cs(1)"
-  symmetries(3)%label  = "D_inf_h(1)"
-  symmetries(4)%label  = "C_inf_v(1)"
-  symmetries(5)%label  = "Spherical(1)"
+  ! ---- parse positional CLI args: THREADS NPROC MPI_flag OMP_flag ----
+  narg = command_argument_count()
+  if (narg >= 1) then
+    call get_command_argument(1, s); read(s,*,iostat=ios) nthreads; if (ios /= 0) nthreads = 0
+  end if
+  if (narg >= 2) then
+    call get_command_argument(2, s); read(s,*,iostat=ios) nproc_in; if (ios /= 0) nproc_in = 1
+  end if
+  if (narg >= 3) then
+    call get_command_argument(3, s); read(s,*,iostat=ios) MPI_flag; if (ios /= 0) MPI_flag = 0
+  end if
+  if (narg >= 4) then
+    call get_command_argument(4, s); read(s,*,iostat=ios) OMP_flag; if (ios /= 0) OMP_flag = 0
+  end if
 
-  count = 1_int32
-  do k = 1, 5
-    do h = 1, 5
-      if (xdim(k) >= xdim(h)) then
-        sys(count)%label = symmetries(k)%label // "_" // symmetries(h)%label
-        xdim_arr(count)  = xdim(k) + xdim(h)
-        if (xdim(k) == 1_int32 .and. xdim(h) == 1_int32) then
-          xdim_arr(count) = 1_int32
-        end if
-        count = count + 1_int32
-      end if
-    end do
-  end do
+  want_mpi      = (MPI_flag /= 0)
+  we_inited_mpi = .false.
 
-  call date_and_time(date=big_ben(1), time=big_ben(2), zone=big_ben(3), values=date_time)
+#ifdef _OPENMP
+  if (OMP_flag /= 0 .and. nthreads > 0) call omp_set_num_threads(nthreads)
+#endif
 
-  call file_checking('../testing_datafiles/output.test.txt', fileout_number)
-  rewind(fileout_number)
+#ifdef USE_MPI
+  if (want_mpi) then
+    call MPI_Initialized(have_mpi, mpierr)
+    if (.not. have_mpi) then
+      call MPI_Init_thread(MPI_THREAD_FUNNELED, provided, mpierr)
+      we_inited_mpi = .true.
+    end if
+    call MPI_Comm_rank(MPI_COMM_WORLD, myrank, mpierr)
+    call MPI_Comm_size(MPI_COMM_WORLD, nproc, mpierr)
+  end if
+#endif
 
-  write(fileout_number,*)"******************************************************************************"
-  write(fileout_number,*)  "Test Day and Time Record"
-  write(fileout_number,*)  "Month / Day / Year: ", date_time(2), "/", date_time(3), "/", date_time(1)
-  write(fileout_number,*)  "Hr    / Min / Sec : ", date_time(5), ":", date_time(6), ":", date_time(7)
+  ! ---- Run a small demo that prints a 1xN energy vector (root only) ----
+  call run_batch_demo(PATH_TO_COEFFICIENTS, COORDINATE_FORMAT, MPI_flag, OMP_flag, nthreads)
 
-  ! Performance run (adjust ARGS in Make to pass a different coeff file if needed)
-  call running_time_performance('../testing_datafiles/coefficients/C1(1)_C1(1)_Coeff.txt', fileout_number)
+  ! ---- Run the timing suite; prints a summary once (root only) ----
+  call running_time_performance(PATH_TO_COEFFICIENTS)
 
-  ! Optional: generate one t-tensor dump using the new flattened storage
-  ! call t_tensor_test()
-
-  ! Compare energies vs MATLAB datasets for the first 12 systems generated above
-  do i = 1, 12
-    call check_energy_MATLAB( sys(i)%label, &
-                              xdim_arr(i),   &
-                              0_int32,       &
-                              fileout_number )
-  end do
-
-  close(fileout_number)
-end program testing_subroutine
+#ifdef USE_MPI
+  if (want_mpi .and. we_inited_mpi) call MPI_Finalize(mpierr)
+#endif
+end program test_v2

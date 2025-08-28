@@ -36,7 +36,7 @@ module Geometry_Constant_v2
   real(RK), allocatable :: t_tensor_v3(:)
 
   ! ==== Exports ====
-  public  :: t_tensor_v3
+  public  :: t_tensor_v3,LMAX
   public  :: tensors_initialization_v2
   public  :: multipole_sph_v3, induction_sph_v3, dispersion_sph_v3
   public  :: get_total_interaction_energy
@@ -50,6 +50,8 @@ module Geometry_Constant_v2
   private :: generate_coordenates_v2
   private :: induction_ij_l1l2, get_induction_cpn
   private :: dispersion_l1l2_t1t2, get_dispersion_cpn
+
+  logical, save, public :: omp_enabled = .false.
 
 contains
 
@@ -462,15 +464,15 @@ contains
     real(RK) :: R
     R = cal_coord_v2(1)
     val = 0.0_RK
+    
 
-    !$omp parallel do reduction(+:val) schedule(static)
     do order=1, LMAX
         if ( get_coeff_Fit(ind,order,"I") > 0 ) then
         val = val + (-0.5_RK*(C3*C1*(C2**order)) *  &
                 ( induction_order(order,ind,1) + induction_order(order,ind,0) )) / (R**order)
         end if
     end do
-    !$omp end parallel do
+
   end function induction_sph_v3
 
   function induction_order(order,ind,index) result(io)
@@ -581,13 +583,13 @@ contains
     R = cal_coord_v2(1)
     val = 0.0_RK
 
-    !$omp parallel do reduction(+:val) schedule(static)
+ 
     do order=1, LMAX
         if ( get_coeff_Fit(ind,order,"D") > 0 ) then
         val = val + ( - (C3*C1*(C2**order)) * dispersion_order(ind,order) ) / (R**order)
         end if
     end do
-    !$omp end parallel do
+
   end function dispersion_sph_v3
 
   function dispersion_order(ind,order) result(do_val)

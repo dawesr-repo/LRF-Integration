@@ -2,12 +2,14 @@
 # Makefile — LRF-Integration (Fortran) with `par` modifier
 # ============================================================
 # Usage:
-#   make test                         # build+run SERIAL (no MPI/OpenMP)
-#   make par test                     # build parallel-capable, run serial (flags=0)
+#   make test                         # build+run SERIAL (no MPI, OpenMP runtime forced to 1 thread)
+#   make par test                     # build parallel-capable, run serial (flags=0 → 1 OMP thread)
 #   make par test MPI_flag=1 nproc_in=2
 #   make par test OMP_flag=1 THREADS=8
 #   make par test MPI_flag=1 nproc_in=2 OMP_flag=1 THREADS=8
 #   make clean | make check-mpi
+# Env/overrides:
+#   FFLAGS_EXTRA=...  LDFLAGS_EXTRA=...  LDLIBS_EXTRA=...
 # ============================================================
 
 # ---------- primary executable under test ----------
@@ -15,7 +17,6 @@ TARGET ?= ejec_test.x
 ARGS   ?=
 
 # ---------- detect if user included `par` in goals ----------
-# When `par` is present, we re-invoke make with BUILD_PAR=1 and drop `par` from goals.
 .PHONY: par
 par:
 	@$(MAKE) BUILD_PAR=1 $(filter-out $@,$(MAKECMDGOALS))
@@ -24,7 +25,7 @@ par:
 BUILD_PAR ?= 0
 
 # ---------- map user runtime vars (accept both lower/upper names) ----------
-# CLI positional args expected by your batch example: THREADS NPROC MPI_flag OMP_flag
+# CLI positional args expected by program: THREADS NPROC MPI_flag OMP_flag
 THREADS ?= 0
 ifneq ($(strip $(threads)),)
   THREADS := $(threads)
@@ -53,6 +54,11 @@ FFLAGS   = $(OPTFLAGS) -cpp -std=f2008 -ffree-line-length-none
 LDFLAGS  =
 LDLIBS   =
 
+# Allow easy CLI extension
+FFLAGS  += $(FFLAGS_EXTRA)
+LDFLAGS += $(LDFLAGS_EXTRA)
+LDLIBS  += $(LDLIBS_EXTRA)
+
 # Serial vs Parallel-capable build
 ifeq ($(BUILD_PAR),1)
   # Enable OpenMP & MPI codepaths
@@ -71,10 +77,18 @@ else
 endif
 
 # ---------- sources / objects ----------
-SRC_COMMON   = Fitting_Constant_v2.f90 Geometry_Constant_v2.f90 helper_functions.f90
-OBJ_COMMON   = $(SRC_COMMON:.f90=.o)
+# If a module version exists, use it and drop the legacy Testing_v2.f90
+ifneq ($(wildcard testing_v2_mod.f90),)
+  SRC_COMMON   = Fitting_Constant_v2.f90 Geometry_Constant_v2.f90 helper_functions.f90 testing_v2_mod.f90
+  TEST_SRCS    = test_v2.f90
+  NEEDS_MOD    = 1
+else
+  SRC_COMMON   = Fitting_Constant_v2.f90 Geometry_Constant_v2.f90 helper_functions.f90
+  TEST_SRCS    = Testing_v2.f90 test_v2.f90
+  NEEDS_MOD    = 0
+endif
 
-TEST_SRCS    = Testing_v2.f90 test_v2.f90
+OBJ_COMMON   = $(SRC_COMMON:.f90=.o)
 TEST_OBJS    = $(TEST_SRCS:.f90=.o)
 
 EX_SOURCES   = min_example.f90 min_example_batch.f90
@@ -87,6 +101,9 @@ ALL_BINS     = $(TARGET) $(EX_BINS)
 # ---------- dependencies between modules ----------
 Geometry_Constant_v2.o: Fitting_Constant_v2.o
 helper_functions.o:     Fitting_Constant_v2.o Geometry_Constant_v2.o
+ifeq ($(NEEDS_MOD),1)
+test_v2.o: testing_v2_mod.o
+endif
 
 # ---------- link rules ----------
 $(TARGET): $(OBJ_COMMON) $(TEST_OBJS)
@@ -108,31 +125,43 @@ all: release
 release: $(TARGET)
 
 # Test (build + run)
-# Serial default. If user did `make par test`, binary is parallel-capable
-# but we still run with flags=0 unless user overrides MPI_flag/OMP_flag/etc.
+# Build may be serial or parallel-capable. We always ensure a sane OMP thread count at runtime.
 test: release
 	@echo ">> RUN: par=$(BUILD_PAR)  NPROC=$(NPROC) THREADS=$(THREADS) MPI_flag=$(MPI_FLAG) OMP_flag=$(OMP_FLAG)"
-	@if [ "$(MPI_FLAG)" = "1" ] && [ "$(NPROC)" -gt 1 ]; then \
-	  OMP_NUM_THREADS=$(THREADS) mpirun -np $(NPROC) ./$(TARGET) $(THREADS) $(NPROC) $(MPI_FLAG) $(OMP_FLAG) $(ARGS); \
-	else \
-	  OMP_NUM_THREADS=$(THREADS) ./$(TARGET) $(THREADS) $(NPROC) $(MPI_FLAG) $(OMP_FLAG) $(ARGS); \
-	fi
+	@{ \
+	  t="$(THREADS)"; \
+	  if [ -z "$$t" ] || [ "$$t" -le 0 ]; then t=1; fi; \
+	  export OMP_NUM_THREADS="$$t"; \
+	  export OMP_DYNAMIC=FALSE; export OMP_PROC_BIND=close; export OMP_PLACES=cores; \
+	  if [ "$(MPI_FLAG)" = "1" ] && [ "$(NPROC)" -gt 1 ]; then \
+	    mpirun -np $(NPROC) ./$(TARGET) $$t $(NPROC) $(MPI_FLAG) $(OMP_FLAG) $(ARGS); \
+	  else \
+	    ./$(TARGET) $$t $(NPROC) $(MPI_FLAG) $(OMP_FLAG) $(ARGS); \
+	  fi; \
+	}
 
 # Example batch runner (kept for convenience)
 batch: min_example_batch.x
 	@echo ">> Running batch: par=$(BUILD_PAR)  NPROC=$(NPROC) THREADS=$(THREADS) MPI_flag=$(MPI_FLAG) OMP_flag=$(OMP_FLAG)"
-	@if [ "$(MPI_FLAG)" = "1" ] && [ "$(NPROC)" -gt 1 ]; then \
-	  OMP_NUM_THREADS=$(THREADS) mpirun -np $(NPROC) ./min_example_batch.x $(THREADS) $(NPROC) $(MPI_FLAG) $(OMP_FLAG); \
-	else \
-	  OMP_NUM_THREADS=$(THREADS) ./min_example_batch.x $(THREADS) $(NPROC) $(MPI_FLAG) $(OMP_FLAG); \
-	fi
+	@{ \
+	  t="$(THREADS)"; \
+	  if [ -z "$$t" ] || [ "$$t" -le 0 ]; then t=1; fi; \
+	  export OMP_NUM_THREADS="$$t"; \
+	  export OMP_DYNAMIC=FALSE; export OMP_PROC_BIND=close; export OMP_PLACES=cores; \
+	  if [ "$(MPI_FLAG)" = "1" ] && [ "$(NPROC)" -gt 1 ]; then \
+	    mpirun -np $(NPROC) ./min_example_batch.x $$t $(NPROC) $(MPI_FLAG) $(OMP_FLAG); \
+	  else \
+	    ./min_example_batch.x $$t $(NPROC) $(MPI_FLAG) $(OMP_FLAG); \
+	  fi; \
+	}
 
 help:
-	@echo "make test                   # build serial & run"
+	@echo "make test                   # build serial & run (forces OMP_NUM_THREADS>=1)"
 	@echo "make par test               # build parallel-capable & run serial (flags=0)"
 	@echo "make par test MPI_flag=1 nproc_in=2"
 	@echo "make par test OMP_flag=1 THREADS=8"
 	@echo "make par test MPI_flag=1 nproc_in=2 OMP_flag=1 THREADS=8"
+	@echo "FFLAGS_EXTRA/LDFLAGS_EXTRA/LDLIBS_EXTRA accepted"
 	@echo "make batch ...              # run min_example_batch.x with same flags"
 	@echo "make check-mpi | make clean"
 

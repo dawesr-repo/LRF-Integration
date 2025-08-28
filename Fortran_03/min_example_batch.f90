@@ -60,7 +60,7 @@ call evaluate_LRF_batch(    energies,              &
 
 
 
-write(*,*) "Interaction Energy : ", energies, " (cm^-1)"
+write(*,*) "Interaction Energies by Batch : ", energies, " (cm^-1)"
 
 
 end program min_example_batch

@@ -372,16 +372,17 @@ contains
     end function get_coeff_multipole
 
     function get_coeff_multipole_by_index(coeff_index, molecule_label, i) result(arr)
+        use iso_fortran_env, only : real64, int32
         integer(int32), intent(in) :: coeff_index, i
         character(len=1), intent(in) :: molecule_label
         real(real64), dimension(225) :: arr
-
+        arr = 0.0_real64
         if (molecule_label == "A") then
-            arr = coeff(coeff_index)%A_Mult(i**2 + 1:(i+1)**2)
+            arr(i**2 + 1:(i+1)**2) = coeff(coeff_index)%A_Mult(i**2 + 1:(i+1)**2)
         else
-            arr = coeff(coeff_index)%B_Mult(i**2 + 1:(i+1)**2)
+            arr(i**2 + 1:(i+1)**2) = coeff(coeff_index)%B_Mult(i**2 + 1:(i+1)**2)
         end if
-    end function get_coeff_multipole_by_index
+    end function
 
     function get_coeff_polarizability_by_index(coeff_index, molecule_label, lmin, lmax, nl1l2) result(arr)
         integer(int32), intent(in) :: coeff_index, lmin, lmax, nl1l2
